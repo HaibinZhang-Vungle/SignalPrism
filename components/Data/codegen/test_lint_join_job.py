@@ -18,5 +18,6 @@ def test_join_contract():
     assert "attribution_hit_rate" in s
     assert "reportStatsMetric" in s
     assert "mergeToIcebergTable" in s
+    assert 'mergeKeysAllowNull = Array("imp_id")' in s
     # Two-upstream watermark gating (pattern from notifications_attribution).
     assert "checkoutProgress" in s

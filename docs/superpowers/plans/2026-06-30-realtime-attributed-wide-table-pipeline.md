@@ -1177,9 +1177,11 @@ object SparkMain extends BoilerplateSparkMain {
   // scalastyle:off
   def process(next: DateTime, tempTable: String): Unit = {
     val startMillis = System.currentTimeMillis()
+    // NB: hbn_timestamp comes from the col_map ($projection maps `timestamp` -> `hbn_timestamp`),
+    // so it must NOT be emitted again here, or the output would have a duplicate column.
     val merged = spark.sql(
       s"""
-        SELECT event_id, bidrequest_imp_id AS imp_id, $projection, timestamp AS hbn_timestamp
+        SELECT event_id, bidrequest_imp_id AS imp_id, $projection
         FROM (
           SELECT *,
                  row_number() OVER (
@@ -1264,7 +1266,7 @@ def test_join_contract():
     assert "object SparkMain extends BoilerplateSparkMain" in s
     assert "LEFT JOIN" in s
     assert "j.event_id = h.event_id" in s
-    assert "j.imp_id = h.imp_id" in s
+    assert "j.imp_id <=> h.imp_id" in s   # null-safe equality (lena notifications_attribution idiom)
     # Hit-rate metric per schema §2.3.
     assert "attribution_hit_rate" in s
     assert "reportStatsMetric" in s

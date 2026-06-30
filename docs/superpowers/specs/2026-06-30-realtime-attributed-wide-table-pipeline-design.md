@@ -182,16 +182,11 @@ Verified live against Trino + the lena coba schema YAMLs (2026-06-30):
   Catalog `raw`, schema `coba2`, partitions `dt, hr, mn` (no `az` on the served tables). Both
   fresh (`max(dt)=2026-06-30`). HB volume ≈ 487M rows/minute (~700B/day) → event-id sampling is
   mandatory, not optional.
-- **⚠️ Trino under-declares columns — DO NOT validate against the Trino metastore.** The
-  Trino-registered Hive tables omit columns that genuinely exist in the coba2 parquet (e.g.
-  `edsp_floor`/`direct_floor`/`acc_floor`/`bid_dsp_size`/`vxac_exp_id` on jaeger, and
-  `bidrequest_imp_id` on HB). The authoritative field list is the coba schema YAML that
-  `coba/ingestion2` enforces and that `withCoba2TempViewInRange` reads via schema-on-read:
-  - `/Users/twang/Projects/lena/automation/schemas/ex-jaeger-transaction.yaml`
-  - `/Users/twang/Projects/lena/automation/schemas/hb-transactions.yaml`
-  All schema-md source fields (including `bidrequest_imp_id`, line 63 of the HB YAML, and the 5
-  jaeger floor/misc fields, lines 984–1047 of the jaeger YAML) are present there. The join key
-  `j.imp_id = h.bidrequest_imp_id` (§2.2) is therefore valid as written.
+- **⚠️ The landed coba2 parquet is truth; both Trino and the coba YAMLs are INCOMPLETE declarations.**
+  - Trino omits (but parquet/YAML have): jaeger `edsp_floor`/`direct_floor`/`acc_floor`/`bid_dsp_size`/`vxac_exp_id`, HB `bidrequest_imp_id`.
+  - The coba YAMLs omit (but parquet/Trino have): jaeger `incoming_bid_request_id`, `dup_key`, `double_verify_fraud_reason`, `device.geo.ipservice`, `serve_result.pd_cl`/`pd_cpx`/`ad_podding_multiplier`; HB `bidrequest_time`.
+  - `withCoba2TempViewInRange` reads the parquet via schema-on-read, so the Spark job sees the union of both — every schema-md source field resolves. The join key `j.imp_id = h.bidrequest_imp_id` (§2.2) is valid (HB YAML line 63).
+  - The codegen's `check_against_coba_yaml()` is **advisory** (the YAML's incompleteness yields false positives); the hard gate is `validate()` (artifacts vs schema md). Cross-check any flagged leaf against live coba2 before treating it as a real gap.
 - **Source mechanism confirmed:** `withCoba2TempViewInRange(S3base, topic, …)` reads the full
   nested coba2 payload (confirmed in `edsp/deliveries_ingestion`, same `coba2.ex_jaeger_transaction`).
   `coba/ingestion2` is the upstream lander, out of scope (already running in lena).

@@ -2,7 +2,6 @@ package com.vungle.signalprism.data.realtime_attributed_wide
 
 import com.vungle.lena.{BoilerplateSparkMain, UDFUtil}
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone.UTC
 import org.joda.time.format.DateTimeFormat
 
 /**
@@ -80,9 +79,9 @@ object SparkMain extends BoilerplateSparkMain {
              SUM(CASE WHEN hbn_bidrequest_id IS NOT NULL THEN 1 ELSE 0 END) AS hit,
              COUNT(*) AS total
            FROM _wide""").collect()(0)
-      val total = hr.getLong(1)
+      val total = hr.getAs[Long]("total")
       if (total > 0) {
-        reportStatsMetric(s"$appName.attribution_hit_rate", (hr.getLong(0) * 1000 / total))
+        reportStatsMetric(s"$appName.attribution_hit_rate", (hr.getAs[Long]("hit") * 1000 / total))
       }
 
       mergeToIcebergTable(outputTable, wide, lookbackDays, mergeKeysAllowNull = Array("imp_id"))
