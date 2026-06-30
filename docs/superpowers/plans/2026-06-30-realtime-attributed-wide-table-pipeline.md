@@ -1211,7 +1211,7 @@ object SparkMain extends BoilerplateSparkMain {
     val tillTime = DateTime.parse(tillTimeStr, pattern).toDateTime(UTC)
 
     withCoba2TempViewInRange(S3base, topic, tillTime.minusHours(1), tillTime, "_hb_served") {
-      process(tillTime, "_hb_served")
+      case (tempTable, _) => process(tillTime, tempTable)
     }
     if (isNotBackfill) recordProgressMinute(tillTime)
     reportStatsMetric(s"$appName.success", 1)
