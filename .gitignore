@@ -1,0 +1,13 @@
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Feature Workbench round artifacts (runtime, produced by serve_round.py /
+# seed_feature_set.py). The folder contract lives in its README, which IS tracked.
+components/Data/feature_sets/*
+!components/Data/feature_sets/README.md
+
+# OS noise
+.DS_Store
