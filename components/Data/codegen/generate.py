@@ -36,6 +36,32 @@ def write_columns(out_dir=RES):
                 all_columns(cols))
 
 
+def _col_map(cols, staging, want_names):
+    keys = ("event_id", "imp_id")  # emitted directly by the job, not via col_map
+    m = {}
+    for c in cols:
+        if c.name in want_names and c.name not in keys:
+            m[source_expr(c, staging)] = c.name
+    return m
+
+
+def jaeger_col_map(cols):
+    return _col_map(cols, "jaeger", set(jaeger_columns(cols)))
+
+
+def hb_col_map(cols):
+    return _col_map(cols, "hb", set(hb_columns(cols)))
+
+
+def write_col_maps(out_dir=RES):
+    cols = parse_catalog(MD)
+    _write_json(os.path.join(out_dir, "col_maps", "jaeger_transaction_wide.json"),
+                jaeger_col_map(cols))
+    _write_json(os.path.join(out_dir, "col_maps", "hb_transactions_wide.json"),
+                hb_col_map(cols))
+
+
 if __name__ == "__main__":
     write_columns()
-    print("columns written")
+    write_col_maps()
+    print("columns + col_maps written")
