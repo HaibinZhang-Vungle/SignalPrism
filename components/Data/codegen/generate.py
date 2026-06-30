@@ -37,7 +37,9 @@ def write_columns(out_dir=RES):
 
 
 def _col_map(cols, staging, want_names):
-    keys = ("event_id", "imp_id")  # emitted directly by the job, not via col_map
+    # jgr_winner_account_id shares source expr rtb_conn.account_id with jgr_rtb_account_id;
+    # emitted directly in the jaeger SELECT, not via col_map
+    keys = ("event_id", "imp_id", "jgr_winner_account_id")  # emitted directly by the job, not via col_map
     m = {}
     for c in cols:
         if c.name in want_names and c.name not in keys:
