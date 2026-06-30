@@ -54,3 +54,54 @@ def assign_source(col: Column) -> str:
     if col.name.startswith("hbn_"):
         return "hb"
     return "jaeger"
+
+
+_TYPE_MAP = {
+    "STRING": "string", "DOUBLE": "double", "LONG": "bigint",
+    "INT": "int", "BOOLEAN": "boolean", "TIMESTAMP": "timestamp",
+}
+
+# Staging-aware overrides for join keys / canonical event time.
+_KEY_EXPR = {
+    ("event_id", "jaeger"): "serve_result.ad_event_id",
+    ("event_id", "hb"): "event_id",
+    ("imp_id", "jaeger"): "serve_result.imp_id",
+    ("imp_id", "hb"): "bidrequest_imp_id",
+    ("source_event_time", "jaeger"): "timestamp",
+}
+
+
+def sql_type(physical_type: str) -> str:
+    t = physical_type.strip()
+    if t.upper().startswith("ARRAY<"):
+        inner = t[t.index("<") + 1:t.rindex(">")].strip().upper()
+        return "array<%s>" % _TYPE_MAP.get(inner, inner.lower())
+    return _TYPE_MAP.get(t.upper(), t.lower())
+
+
+def source_expr(col, staging: str) -> str:
+    if (col.name, staging) in _KEY_EXPR:
+        return _KEY_EXPR[(col.name, staging)]
+    # jgr_winner_account_id has source "derived: jaeger winning rtbconnection account_id".
+    if col.name == "jgr_winner_account_id":
+        return "rtb_conn.account_id"
+    # Take the staging-relevant side of a "a ↔ b" source, else the whole thing.
+    raw = col.source
+    if "↔" in raw:
+        parts = [p.strip() for p in raw.split("↔")]
+        raw = next((p for p in parts if p.lower().startswith(staging[:2])), parts[0])
+    raw = raw.strip()
+    # Drop trailing parenthetical annotations like " (winning)".
+    raw = re.sub(r"\s*\([^)]*\)\s*$", "", raw).strip()
+    # Strip leading topic qualifier.
+    for prefix in ("jaeger.", "hb."):
+        if raw.startswith(prefix):
+            raw = raw[len(prefix):]
+            break
+    # Explode-alias rewrites. Order matters: rtbconnections before the generic
+    # placement_serve_results[] rewrite, so the winning RTB element resolves to rtb_conn.
+    raw = raw.replace("placement_serve_results[].rtbconnections[].", "rtb_conn.")
+    raw = raw.replace("placement_serve_results[].", "serve_result.")
+    raw = raw.replace("placements[].", "placement_.")
+    raw = raw.replace("[].", ".")  # any remaining nested array element access
+    return raw
