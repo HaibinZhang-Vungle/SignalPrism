@@ -33,7 +33,7 @@ Enumerated value sources:
 
    Transaction-level Jaeger fields (device, geo, floors, experiment, privacy, timing) are carried down onto every exploded row.
 
-2. **Key HB to the served bid.** `hb-transactions` is keyed on top-level `event_id` + `bidrequest_imp_id`. The wide table keeps the **served / winning** bid row (the bid that maps to Jaeger's `winning_bid`), not every losing bidder. Losing-bidder analysis is out of scope for this table (see §7).
+2. **Key HB to the served bid.** `hb-transactions` is keyed on top-level `event_id` + `bidrequest_imp_id`. The wide table keeps the **served / winning** bid row (the bid that maps to Jaeger's `winning_bid`), not every losing bidder. Losing-bidder analysis is out of scope for this table (see §8).
 
 3. **Join.**
    ```sql
@@ -84,7 +84,7 @@ Each field below is described with:
 - `semantic_type` — one of: `id`, `categorical`, `boolean_flag`, `money_cpm`, `rate`, `count`, `duration_ms`, `epoch_ms`, `epoch_s`, `timestamp`, `dimension`, `geo`, `device_attr`, `consent`, `free_text`, `json_blob`, `version`, `enum_code`.
 - `null` — null semantics: `not_observed` (data absent / not applicable), `zero_is_meaningful`, `always_present`.
 - `feat` — feature suitability for ML: `key` (join/identity, not a feature), `dim` (dimension/grouping key), `feature` (directly usable), `feature_after_encode` (needs bucketing/encoding), `leak_risk` (label-adjacent; usable only with point-in-time care), `exclude` (PII/deprecated/operational).
-- `enum_ref` — link to §8 enum table when applicable.
+- `enum_ref` — link to §9 enum table when applicable.
 
 ---
 
@@ -124,7 +124,7 @@ Domains follow the Capability Map grouping in TRD §7.10.1.
 | `hbn_pub_genre` | ARRAY\<STRING\> | hb.pub_genre[] | categorical | not_observed | feature_after_encode | Publisher genre tags, e.g. `[GAME, QUIZ]`. Use top-N / multi-hot. |
 | `jgr_app_bundle` | STRING | jaeger.app.bundle | id | not_observed | dim | Exchange-independent app bundle (Android package / iOS numeric id). |
 | `jgr_app_name` | STRING | jaeger.app.name | free_text | not_observed | dim | App name. |
-| `jgr_app_cat` | ARRAY\<STRING\> | jaeger.app.cat[] | enum_code | not_observed | feature_after_encode | IAB content categories of the app. → §8 IAB. |
+| `jgr_app_cat` | ARRAY\<STRING\> | jaeger.app.cat[] | enum_code | not_observed | feature_after_encode | IAB content categories of the app. → §9 IAB. |
 | `jgr_app_object_id` | STRING | jaeger.app.ext.object_id | id | not_observed | dim | App object id (Jaeger side). |
 | `jgr_app_hosting_cost` | DOUBLE | jaeger.app.ext.hosting_cost | rate | not_observed | feature | Hosting-cost fraction. |
 | `jgr_app_rev_share` | DOUBLE | jaeger.app.ext.rev_share | rate | not_observed | feature | Effective rev-share fraction. |
@@ -145,11 +145,11 @@ Domains follow the Capability Map grouping in TRD §7.10.1.
 | `jgr_placement_type` | STRING | jaeger.placements[].placement_type | categorical | not_observed | dim | `banner`, `interstitial`, `rewarded`, etc. Core dimension in every family. |
 | `jgr_ad_size` | STRING | jaeger.placements[].ad_size | categorical | not_observed | feature | Impression size: `mrec`/`banner`/`in_line`/`fullscreen`. |
 | `jgr_ad_type` | STRING | jaeger.placements[].ad_type | categorical | not_observed | feature | Ad type. |
-| `jgr_placement_floor` | DOUBLE | jaeger.placements[].floor | money_cpm | not_observed | feature | DAL base floor — raw, pre-adjustment. → §8 Floor Lifecycle. |
+| `jgr_placement_floor` | DOUBLE | jaeger.placements[].floor | money_cpm | not_observed | feature | DAL base floor — raw, pre-adjustment. → §9 Floor Lifecycle. |
 | `jgr_effective_rpm_floor` | DOUBLE | jaeger.placements[].effective_rpm_floor | money_cpm | not_observed | feature | `placement_floor / ((1 - serving_cost) * rev_share)`. |
 | `jgr_flat_cpm` | DOUBLE | jaeger.placements[].flat_cpm | money_cpm | not_observed | feature | Flat CPM price if flat-CPM pricing enabled. |
 | `jgr_is_flat_cpm_enabled` | BOOLEAN | jaeger.placements[].is_flat_cpm_enabled | boolean_flag | not_observed | dim | Whether flat-CPM pricing is on. |
-| `jgr_flat_cpm_model_type` | STRING | jaeger.placements[].flat_cpm_model_type | enum_code | not_observed | dim | `TRS` (Target Rev Share) or `NRG` (Net Revenue Growth). → §8. |
+| `jgr_flat_cpm_model_type` | STRING | jaeger.placements[].flat_cpm_model_type | enum_code | not_observed | dim | `TRS` (Target Rev Share) or `NRG` (Net Revenue Growth). → §9. |
 | `jgr_is_incentivized` | BOOLEAN | jaeger.placements[].is_incentivized | boolean_flag | not_observed | dim | Rewarded placement flag. |
 | `jgr_is_max_profit_enabled` | BOOLEAN | jaeger.placements[].is_max_profit_enabled | boolean_flag | not_observed | dim | Max-profit auction mode flag. |
 | `jgr_publisher_payout_type` | STRING | jaeger.placements[].publisher_payout_type | categorical | not_observed | dim | `REVENUE_SHARE`, `FLAT_CPM`, `CPM`. |
@@ -198,7 +198,7 @@ Authoritative source: Jaeger (post-resolution at ADX). HB device columns are ded
 
 ### 5.5 Privacy / Consent
 
-All consent fields are `exclude` for direct feature use by default (regulatory); retained for filtering/cohorting. TCF purpose codes are enum-backed (§8).
+All consent fields are `exclude` for direct feature use by default (regulatory); retained for filtering/cohorting. TCF purpose codes are enum-backed (§9).
 
 | column | type | source | semantic_type | null | feat | description |
 |---|---|---|---|---|---|---|
@@ -206,17 +206,17 @@ All consent fields are `exclude` for direct feature use by default (regulatory);
 | `jgr_coppa_applied` | BOOLEAN | jaeger.coppa_applied | consent | not_observed | dim | COPPA (children) applies. |
 | `jgr_consent_status` | STRING | jaeger.consent_status | consent | not_observed | dim | Consent status. |
 | `jgr_consent_source` | STRING | jaeger.consent_source | consent | not_observed | dim | Consent source. |
-| `jgr_tcf_result` | INT | jaeger.tcf.tcf_result | enum_code | not_observed | dim | TCF match result. → §8 tcf_result. |
+| `jgr_tcf_result` | INT | jaeger.tcf.tcf_result | enum_code | not_observed | dim | TCF match result. → §9 tcf_result. |
 | `jgr_tcf_cmp_id` | INT | jaeger.tcf.cmp_id | enum_code | not_observed | dim | CMP id. |
 | `jgr_tcf_ver` | STRING | jaeger.tcf.tcf_ver | version | not_observed | dim | TCF version. |
-| `jgr_tcf_invalid_reason` | INT | jaeger.tcf.invalid_reason | enum_code | not_observed | dim | Invalid-TCF reason. → §8. |
+| `jgr_tcf_invalid_reason` | INT | jaeger.tcf.invalid_reason | enum_code | not_observed | dim | Invalid-TCF reason. → §9. |
 | `jgr_is_first_party_data_valid` | BOOLEAN | jaeger.is_first_party_data_valid | boolean_flag | not_observed | feature | First-party data validity. |
 
 > TCF purpose / special-feature / LI / publisher-restriction fields (`tcf.purposes.p1..p11`, `tcf.sf.f1`, `tcf.li_purposes.*`, `tcf.pub_restriction.*`) are retained as a JSON blob `jgr_tcf_detail` (`json_blob`, `exclude`) rather than ~40 individual columns, to keep the wide table manageable. Expand only if a privacy-cohort analysis needs them.
 
 ### 5.6 Floor Lifecycle
 
-Authoritative source: Jaeger (full lifecycle documented in EnumeratedList §"Floor Field Lifecycle"). HB floor copies deduped out. See §8 for the stage diagram.
+Authoritative source: Jaeger (full lifecycle documented in EnumeratedList §"Floor Field Lifecycle"). HB floor copies deduped out. See §9 for the stage diagram.
 
 | column | type | source | semantic_type | null | feat | description |
 |---|---|---|---|---|---|---|
@@ -242,11 +242,11 @@ Authoritative source: Jaeger (full lifecycle documented in EnumeratedList §"Flo
 | `hbn_acc_bid_price` | DOUBLE | hb.acc_bid_price | money_cpm | not_observed | feature | Accelerate DSP bid price (win or lose). |
 | `hbn_max_bid_price` | LONG | hb.max_bid_price | money_cpm | not_observed | feature | PM hard cap on bid price. |
 | `hbn_bidrequest_auction_type` | LONG | hb.bidrequest_auction_type | enum_code | not_observed | dim | 1 = First Price, 2 = Second Price. |
-| `hbn_bid_nsr` | LONG | hb.bid_nsr | enum_code | not_observed | feature | No-serve reason for the HB bid. → §8 loss_reason / no_serv context. |
+| `hbn_bid_nsr` | LONG | hb.bid_nsr | enum_code | not_observed | feature | No-serve reason for the HB bid. → §9 loss_reason / no_serv context. |
 | `jgr_bid_dsp_size` | INT | jaeger.bid_dsp_size | count | not_observed | feature | Number of DSPs that bid successfully in the auction. |
-| `jgr_no_serv_reason` | LONG | jaeger.placement_serve_results[].no_serv_reason | enum_code | always_present | feature | No-serve reason for the serve result. 0 = delivered. → §8 no_serv_reason. **Label-adjacent — see §6.** |
-| `jgr_filter_result` | LONG | jaeger.filter_result | enum_code | not_observed | feature | Pre-auction filter outcome. 0 = passed. → §8 filter_result. |
-| `jgr_is_realtime` | BOOLEAN | jaeger.is_realtime | boolean_flag | always_present | feature | Whether served with an ad in realtime. **Label-adjacent — see §6.** |
+| `jgr_no_serv_reason` | LONG | jaeger.placement_serve_results[].no_serv_reason | enum_code | always_present | feature | No-serve reason for the serve result. 0 = delivered. → §9 no_serv_reason. **Label-adjacent — see §7.** |
+| `jgr_filter_result` | LONG | jaeger.filter_result | enum_code | not_observed | feature | Pre-auction filter outcome. 0 = passed. → §9 filter_result. |
+| `jgr_is_realtime` | BOOLEAN | jaeger.is_realtime | boolean_flag | always_present | feature | Whether served with an ad in realtime. **Label-adjacent — see §7.** |
 | `jgr_min_bid_to_win` | DOUBLE | jaeger.placement_serve_results[].min_bid_to_win | money_cpm | not_observed | feature | First-price auction: minimum bid to win sent to eDSP on auction loss after filter. |
 | `jgr_second_place_price` | DOUBLE | jaeger.placement_serve_results[].second_place_price | money_cpm | not_observed | feature | Second-highest auction bid. |
 | `jgr_third_place_price` | DOUBLE | jaeger.placement_serve_results[].third_place_price | money_cpm | not_observed | feature | Third-highest auction bid. |
@@ -268,14 +268,14 @@ Authoritative source: Jaeger (serve-result level). HB `sr_*` deduped out.
 | column | type | source | semantic_type | null | feat | description |
 |---|---|---|---|---|---|---|
 | `jgr_sr_ocpm` | LONG | jaeger.placement_serve_results[].sr_ocpm | money_cpm | not_observed | feature | Unshaded private value (original CPM) of the shading result. |
-| `jgr_sr_at` | LONG | jaeger.placement_serve_results[].sr_at | enum_code | not_observed | feature | Shading adjustment type. → §8 sr_at. |
+| `jgr_sr_at` | LONG | jaeger.placement_serve_results[].sr_at | enum_code | not_observed | feature | Shading adjustment type. → §9 sr_at. |
 | `jgr_sr_pbtw` | DOUBLE | jaeger.placement_serve_results[].sr_pbtw | rate | not_observed | feature | Predicted bid-to-win rate of the shading result. |
 
 ### 5.9 Settlement & Win
 
 | column | type | source | semantic_type | null | feat | description |
 |---|---|---|---|---|---|---|
-| `jgr_settlement_price` | DOUBLE | jaeger.placement_serve_results[].settlement_price | money_cpm | not_observed | leak_risk | Settlement (clearing) price for the impression. Common **label** for floor/NR models — exclude from features, use as target (§6). |
+| `jgr_settlement_price` | DOUBLE | jaeger.placement_serve_results[].settlement_price | money_cpm | not_observed | leak_risk | Settlement (clearing) price for the impression. Common **label** for floor/NR models — exclude from features, use as target (§7). |
 | `jgr_settlement_status` | LONG | jaeger.placement_serve_results[].settlement_status | enum_code | not_observed | feature | Settlement status code. |
 | `jgr_winner_id` | STRING | jaeger.placement_serve_results[].winner_id | id | not_observed | dim | Winning bidder id. |
 | `jgr_winning_seat` | STRING | jaeger.placement_serve_results[].winning_seat | id | not_observed | dim | Winning seat. |
@@ -283,7 +283,7 @@ Authoritative source: Jaeger (serve-result level). HB `sr_*` deduped out.
 | `jgr_winning_bid_price` | DOUBLE | jaeger.placement_serve_results[].winning_bid.price | money_cpm | not_observed | leak_risk | Winning bid price. Label-adjacent. |
 | `jgr_winning_bid_adomain` | ARRAY\<STRING\> | jaeger.placement_serve_results[].winning_bid.adomain[] | categorical | not_observed | feature_after_encode | Winning advertiser domain(s). Use top-N MAP, not raw (TRD §7.4.2). |
 | `jgr_winning_bid_bundle` | STRING | jaeger.placement_serve_results[].winning_bid.bundle | id | not_observed | dim | Winning bid app bundle. |
-| `jgr_winning_bid_cat` | ARRAY\<STRING\> | jaeger.placement_serve_results[].winning_bid.cat[] | enum_code | not_observed | feature_after_encode | Winning bid IAB categories. → §8 IAB. |
+| `jgr_winning_bid_cat` | ARRAY\<STRING\> | jaeger.placement_serve_results[].winning_bid.cat[] | enum_code | not_observed | feature_after_encode | Winning bid IAB categories. → §9 IAB. |
 | `jgr_winning_bid_crid` | STRING | jaeger.placement_serve_results[].winning_bid.crid | id | not_observed | dim | Winning creative id. |
 | `jgr_winning_bid_cid` | STRING | jaeger.placement_serve_results[].winning_bid.cid | id | not_observed | dim | Winning campaign id. |
 | `jgr_winner_predicted_nr` | DOUBLE | jaeger.winner_predicted_nr | money_cpm | not_observed | leak_risk | Predicted net revenue of the winning bid. Strongly label-adjacent. |
@@ -300,13 +300,13 @@ Authoritative source: Jaeger (serve-result level). HB `sr_*` deduped out.
 
 | column | type | source | semantic_type | null | feat | description |
 |---|---|---|---|---|---|---|
-| `jgr_ec_type` | INT | jaeger.placement_serve_results[].ec_type | enum_code | not_observed | feature | Endcard combination type. → §8 ec_type. |
+| `jgr_ec_type` | INT | jaeger.placement_serve_results[].ec_type | enum_code | not_observed | feature | Endcard combination type. → §9 ec_type. |
 | `jgr_has_endcard` | BOOLEAN | jaeger.placement_serve_results[].has_endcard | boolean_flag | not_observed | feature | Has non-VX end card. |
 | `jgr_has_vungle_endcard` | BOOLEAN | jaeger.placement_serve_results[].has_vungle_endcard | boolean_flag | not_observed | feature | Has VX end card. |
 | `jgr_has_skip_button` | BOOLEAN | jaeger.placement_serve_results[].has_skip_button | boolean_flag | not_observed | feature | Has skip button. |
 | `jgr_is_streaming_video` | BOOLEAN | jaeger.placement_serve_results[].is_streaming_video | boolean_flag | not_observed | feature | Streaming video. |
 | `jgr_freeform_type` | STRING | jaeger.placement_serve_results[].freeform_type | categorical | not_observed | feature | Freeform ad type: modular_ui/split_screen/ad_pod/static. |
-| `jgr_edsp_fs_cr_type` | STRING | jaeger.placement_serve_results[].edsp_fs_cr_type | enum_code | not_observed | feature_after_encode | eDSP full-screen creative type. → §8 edsp_fsc_cr_type. |
+| `jgr_edsp_fs_cr_type` | STRING | jaeger.placement_serve_results[].edsp_fs_cr_type | enum_code | not_observed | feature_after_encode | eDSP full-screen creative type. → §9 edsp_fsc_cr_type. |
 | `jgr_is_creative_interactive` | BOOLEAN | jaeger.placement_serve_results[].winning_bid.is_creative_interactive | boolean_flag | not_observed | feature | Winning creative is interactive. |
 | `jgr_ai_disclosure` | BOOLEAN | jaeger.placement_serve_results[].ai_disclosure | boolean_flag | not_observed | feature | Winning creative disclosed as AI-generated. |
 | `jgr_template_id` | STRING | jaeger.placement_serve_results[].template_id | id | not_observed | dim | Template id. |
@@ -392,7 +392,200 @@ These are pre-computed device/campaign history counters — directly useful for 
 
 ---
 
-## 6. Label / Leakage Guidance
+## 6. Dimension Table Contracts
+
+The wide table remains the event-grain source of truth. The two dimension tables below are reviewed materializations used by the Capability Map and aggregation builder so users do not create arbitrary, expensive, or unsafe dimension combinations.
+
+### 6.1 Common dimension rules
+
+- Source only from columns in §5 unless a derivation is explicitly listed.
+- Normalize nulls to `__unknown__` before hashing dimension keys; keep the original nullable source column available only when the downstream engine needs null-rate profiling.
+- Do not store raw PII (`jgr_dev_ifa`, `jgr_dev_ip`, `jgr_dev_ua`) in either dimension table.
+- Bucket high-cardinality text before use: app name, city, device model, carrier, template name, datasci tags, and advertiser/domain-style fields.
+- Use `source_event_time` for first-seen / last-seen timestamps and for point-in-time joins. Dimension snapshots must not be joined as future knowledge into older impressions.
+- Mark post-auction dimensions as `post_auction_only`; they are valid for diagnostics and historical aggregates, but not for pre-auction model features unless the formula validator explicitly allows that stage.
+
+### 6.2 `device_level_v1`
+
+Logical table: `device_level_v1`  
+Recommended physical name: `ml_shadow_feature.dim_device_level_v1`  
+Purpose: a reusable device profile and device-cohort key set. This table contains the device id plus device-related dimensions only; publisher, placement, RTB, campaign, creative, and auction-outcome dimensions belong in `non_device_context_v1`.
+
+Grain:
+- One row per normalized `lo_id_or_device_id`.
+- The primary identity source is `jgr_lo_id`; do not fall back to raw `ifa`, IP, or UA.
+- Attribute values are Type-1 latest observed values with `first_seen_event_time` and `last_seen_event_time` retained for auditing. Feature aggregates that need history are built from the event table, not from this dimension snapshot.
+
+| dimension_column | source / derivation | type | role | notes |
+|---|---|---|---|---|
+| `lo_id_or_device_id` | `jgr_lo_id` | STRING | primary_key | Hashed, non-reversible device id. Drop rows where this is null unless a separate anonymous-device policy is approved. |
+| `device_dim_id` | `sha256(lo_id_or_device_id)` | STRING | primary_key | Stable surrogate key for joins and export. |
+| `dev_id_source` | `jgr_dev_id_source` | STRING | device_dim | Device-id source. |
+| `dev_platform` | normalized `jgr_dev_os` | STRING | device_dim | Lowercase canonical platform, e.g. `ios`, `android`. |
+| `os_version_major` | parse major from `jgr_dev_osv` | STRING | device_dim | Use major version only by default; keep raw `jgr_dev_osv` out of aggregation keys. |
+| `os_version_bucket` | bucketed `jgr_dev_osv` | STRING | device_dim | Optional finer OS cohort such as `ios_17`, `android_14`, `unknown`. |
+| `dev_make_bucket` | top-N bucket from `jgr_dev_make` | STRING | device_dim | Normalize capitalization and bucket long tail to `other`. |
+| `dev_model_bucket` | top-N bucket from `jgr_dev_model` | STRING | device_dim | Required bucketing; raw model is too high-cardinality. |
+| `dev_type` | `jgr_dev_devicetype` | LONG | device_dim | OpenRTB-style device type code. |
+| `screen_width_bucket` | bucketed `jgr_dev_w` | STRING | device_dim | Example buckets: `lt_720`, `720_1079`, `1080_1439`, `1440_plus`. |
+| `screen_height_bucket` | bucketed `jgr_dev_h` | STRING | device_dim | Pair with width only when cardinality budget allows. |
+| `screen_size_bucket` | derive from `jgr_dev_w`, `jgr_dev_h` | STRING | device_dim | Coarse portrait / landscape / small / tablet-style cohort. |
+| `dev_connection` | `jgr_dev_connectiontype` | LONG | device_dim | Connection type code. |
+| `dev_connection_detail` | bucketed `jgr_dev_connection_type_detail` | STRING | device_dim | Detailed connection label when present. |
+| `dev_carrier_bucket` | top-N bucket from `jgr_dev_carrier` | STRING | device_dim | Normalize carrier names and bucket long tail. |
+| `dev_language` | `jgr_dev_language` | STRING | device_dim | Normalize to lowercase BCP-47-style prefix where possible. |
+| `device_country_iso2` | `jgr_dev_country_iso2` | STRING | device_geo_dim | Device country from resolved device extension. |
+| `store_country_iso2` | `jgr_dev_store_country_iso2` | STRING | device_geo_dim | App-store country. |
+| `geo_country` | `jgr_geo_country` | STRING | device_geo_dim | Resolved geo country; prefer ISO-2 normalization for joins. |
+| `geo_region` | `jgr_geo_region` | STRING | device_geo_dim | Region / state. |
+| `geo_city_bucket` | top-N bucket from `jgr_geo_city` | STRING | device_geo_dim | City is high-cardinality; bucket before use. |
+| `geo_type` | `jgr_geo_type` | LONG | device_geo_dim | Geo source type. |
+| `geo_ipservice` | `jgr_geo_ipservice` | LONG | device_geo_dim | IP-service provider code. |
+| `dnt_flag` | `jgr_dev_dnt` | LONG | privacy_dim | Do-not-track flag. |
+| `lmt_flag` | `jgr_dev_lmt` | LONG | privacy_dim | Limit-ad-tracking flag. |
+| `ccpa_opt_out` | `jgr_ccpa_opt_out` | BOOLEAN | privacy_dim | Retained for filtering / cohorting. |
+| `coppa_applied` | `jgr_coppa_applied` | BOOLEAN | privacy_dim | Retained for filtering / cohorting. |
+| `consent_status` | `jgr_consent_status` | STRING | privacy_dim | Consent status. |
+| `consent_source` | `jgr_consent_source` | STRING | privacy_dim | Consent source. |
+| `tcf_result` | `jgr_tcf_result` | INT | privacy_dim | TCF match result. |
+| `tcf_cmp_id` | `jgr_tcf_cmp_id` | INT | privacy_dim | CMP id. |
+| `tcf_version` | `jgr_tcf_ver` | STRING | privacy_dim | TCF version. |
+| `tcf_invalid_reason` | `jgr_tcf_invalid_reason` | INT | privacy_dim | Invalid-TCF reason. |
+| `first_party_data_valid` | `jgr_is_first_party_data_valid` | BOOLEAN | privacy_dim | First-party data validity. |
+| `is_anonymous_vpn` | `jgr_dev_is_anonymous_vpn` | BOOLEAN | risk_dim | Device/IP risk cohort. |
+| `is_suspicious_ip` | `jgr_dev_is_suspicious_ip` | BOOLEAN | risk_dim | Device/IP risk cohort. |
+| `battery_level_bucket` | bucketed `jgr_dev_battery_level` | STRING | device_state_dim | Optional; use coarse buckets only. |
+| `volume_bucket` | bucketed `jgr_dev_volume` | STRING | device_state_dim | Optional; use coarse buckets only. |
+| `first_seen_event_time` | `min(source_event_time)` by device | TIMESTAMP | audit | First observed event for this device in the retained window. |
+| `last_seen_event_time` | `max(source_event_time)` by device | TIMESTAMP | audit | Last observed event for this device in the retained window. |
+
+Excluded from `device_level_v1`: raw advertiser id (`jgr_dev_ifa`), IP, UA, publisher/app/placement ids, RTB ids, campaign/creative ids, price/floor measures, and auction outcomes.
+
+### 6.3 `non_device_context_v1`
+
+Logical table: `non_device_context_v1`  
+Recommended physical name: `ml_shadow_feature.dim_non_device_context_v1`  
+Purpose: the broad non-device context plane. It contains as many reviewed dimensions as practical outside the device profile: supply, inventory, placement, geo, privacy/cohort flags, experiment, RTB, demand, creative, and operational lineage.
+
+Grain:
+- One row per normalized non-device context combination.
+- Primary key: `context_dim_id = sha256(concat_ws('|', normalized dimension values in the table order below))`.
+- Exclude device identity and raw device attributes: `jgr_lo_id`, `jgr_dev_ifa`, `jgr_dev_ip`, `jgr_dev_ua`, `jgr_dev_make`, `jgr_dev_model`, `jgr_dev_os`, `jgr_dev_osv`, `jgr_dev_w`, `jgr_dev_h`, `jgr_dev_carrier`, `jgr_dev_connectiontype`, `jgr_dev_devicetype`, `jgr_dev_language`, `jgr_dev_id_source`, `jgr_dev_battery_level`, and `jgr_dev_volume`.
+- Geo is retained as delivery/request context, not as device identity. If a run needs a strict no-geo context, drop the geo rows before computing `context_dim_id`.
+
+| dimension_column | source / derivation | type | stage | notes |
+|---|---|---|---|---|
+| `context_dim_id` | hash of normalized non-device dimensions | STRING | pre_auction | Stable surrogate key. |
+| `source_has_hb` | `hbn_bidrequest_id IS NOT NULL` | BOOLEAN | pre_auction | Separates HB/S2S from SDK-direct traffic. |
+| `supply_traffic_source` | `jgr_supply_traffic_source` | STRING | pre_auction | `sdk`, `hb`, `s2s`. |
+| `supply_name` | `hbn_supply_name` | STRING | pre_auction | Supply partner name. |
+| `supply_fee_bucket` | bucketed `hbn_supply_fee` | STRING | pre_auction | Optional coarse rev-share bucket; do not use raw rate as a key. |
+| `pub_account_id` | `hbn_pub_account_id` | STRING | pre_auction | Publisher account id. |
+| `pub_app_object_id` | `hbn_pub_app_object_id` | STRING | pre_auction | Primary publisher app dimension. |
+| `pub_app_id` | `hbn_pub_app_id` | STRING | pre_auction | Publisher app store id. |
+| `pub_app_bundle_id` | `hbn_pub_app_bundle_id` | STRING | pre_auction | Publisher app bundle / package. |
+| `pub_genre_bucket` | top-N / tier bucket from `hbn_pub_genre` | STRING | pre_auction | Multi-value field; use normalized sorted bucket or MAP primitive. |
+| `app_bundle` | `jgr_app_bundle` | STRING | pre_auction | Exchange-independent app bundle. |
+| `app_name_bucket` | top-N bucket from `jgr_app_name` | STRING | pre_auction | Raw app name is high-cardinality/free text. |
+| `app_iab_tier1` | tier-1 rollup from `jgr_app_cat` | STRING | pre_auction | Multi-value IAB category rollup. |
+| `app_object_id` | `jgr_app_object_id` | STRING | pre_auction | Jaeger app object id. |
+| `app_hb_partner` | `jgr_app_hb_partner` | STRING | pre_auction | Third-party HB partner. |
+| `app_version_major` | parse major from `jgr_app_ver` | STRING | pre_auction | Keep raw versions out of default keys. |
+| `is_header_bidding` | `jgr_is_header_bidding` | BOOLEAN | pre_auction | Header-bidding flag. |
+| `is_gam` | `jgr_is_gam` | BOOLEAN | pre_auction | Google Ad Manager flag. |
+| `session_depth_mediation_bucket` | bucketed `hbn_session_depth_mediation` | STRING | pre_auction | Optional; use coarse ordinal buckets. |
+| `ordinal_view_bucket` | bucketed `hbn_n_ordinal_view` | STRING | pre_auction | Optional; use coarse ordinal buckets. |
+| `placement_id` | `jgr_placement_id` | STRING | pre_auction | Placement id. |
+| `placement_reference_id` | `jgr_placement_reference_id` | STRING | pre_auction | Placement reference id. |
+| `placement_type` | `jgr_placement_type` | STRING | pre_auction | Banner / interstitial / rewarded, etc. |
+| `ad_size` | `jgr_ad_size` | STRING | pre_auction | MREC / banner / fullscreen, etc. |
+| `ad_type` | `jgr_ad_type` | STRING | pre_auction | Ad type. |
+| `is_flat_cpm_enabled` | `jgr_is_flat_cpm_enabled` | BOOLEAN | pre_auction | Flat-CPM pricing flag. |
+| `flat_cpm_model_type` | `jgr_flat_cpm_model_type` | STRING | pre_auction | TRS / NRG. |
+| `is_incentivized` | `jgr_is_incentivized` | BOOLEAN | pre_auction | Rewarded placement flag. |
+| `is_max_profit_enabled` | `jgr_is_max_profit_enabled` | BOOLEAN | pre_auction | Max-profit mode flag. |
+| `publisher_payout_type` | `jgr_publisher_payout_type` | STRING | pre_auction | Revenue-share / flat-CPM / CPM. |
+| `ad_unit_id` | `jgr_ad_unit_id` | STRING | pre_auction | Mediation partner ad-unit id. |
+| `geoip_country_code` | prefer `jgr_dev_country_iso2`, fallback `jgr_geo_country` | STRING | pre_auction | Canonical country dimension. |
+| `geo_region` | `jgr_geo_region` | STRING | pre_auction | Region / state. |
+| `geo_city_bucket` | top-N bucket from `jgr_geo_city` | STRING | pre_auction | City must be bucketed. |
+| `geo_type` | `jgr_geo_type` | LONG | pre_auction | Geo source type. |
+| `geo_ipservice` | `jgr_geo_ipservice` | LONG | pre_auction | IP-service provider code. |
+| `ccpa_opt_out` | `jgr_ccpa_opt_out` | BOOLEAN | pre_auction | Compliance cohort. |
+| `coppa_applied` | `jgr_coppa_applied` | BOOLEAN | pre_auction | Compliance cohort. |
+| `consent_status` | `jgr_consent_status` | STRING | pre_auction | Consent status. |
+| `consent_source` | `jgr_consent_source` | STRING | pre_auction | Consent source. |
+| `tcf_result` | `jgr_tcf_result` | INT | pre_auction | TCF result. |
+| `tcf_cmp_id` | `jgr_tcf_cmp_id` | INT | pre_auction | CMP id. |
+| `tcf_version` | `jgr_tcf_ver` | STRING | pre_auction | TCF version. |
+| `tcf_invalid_reason` | `jgr_tcf_invalid_reason` | INT | pre_auction | Invalid-TCF reason. |
+| `first_party_data_valid` | `jgr_is_first_party_data_valid` | BOOLEAN | pre_auction | First-party data validity. |
+| `auction_type` | `hbn_bidrequest_auction_type` | LONG | pre_auction | First-price / second-price. |
+| `request_phase` | `jgr_request_phase` | STRING | pre_auction | Bid / postbid / priority-access. |
+| `filter_result` | `jgr_filter_result` | LONG | pre_auction | Pre-auction filter result. |
+| `bid_nsr` | `hbn_bid_nsr` | LONG | auction_context | HB no-serve / loss-reason-style code. |
+| `no_serv_reason` | `jgr_no_serv_reason` | LONG | post_auction_only | Label-adjacent; diagnostic dimensions only. |
+| `is_realtime` | `jgr_is_realtime` | BOOLEAN | post_auction_only | Label-adjacent; diagnostic dimensions only. |
+| `settlement_status` | `jgr_settlement_status` | LONG | post_auction_only | Settlement outcome status. |
+| `winner_id` | `jgr_winner_id` | STRING | post_auction_only | Winning bidder id. |
+| `winning_seat` | `jgr_winning_seat` | STRING | post_auction_only | Winning seat. |
+| `winner_account_id` | `jgr_winner_account_id` | STRING | post_auction_only | Winning account id. |
+| `winning_bid_bundle` | `jgr_winning_bid_bundle` | STRING | post_auction_only | Winning bid app bundle. |
+| `winning_bid_cat_tier1` | tier-1 rollup from `jgr_winning_bid_cat` | STRING | post_auction_only | Multi-value IAB category rollup. |
+| `winning_bid_crid` | `jgr_winning_bid_crid` | STRING | post_auction_only | Winning creative id. |
+| `winning_bid_cid` | `jgr_winning_bid_cid` | STRING | post_auction_only | Winning campaign id. |
+| `adv_is_internal` | `hbn_adv_is_internal` | BOOLEAN | auction_context | Internal vs external advertiser. |
+| `adv_campaign_id` | `hbn_adv_campaign_id` | STRING | auction_context | Advertiser campaign id. |
+| `adv_creative_id` | `hbn_adv_creative_id` | STRING | auction_context | Advertiser creative id. |
+| `adv_app_bundle_id` | `hbn_adv_app_bundle_id` | STRING | auction_context | Advertiser app bundle. |
+| `adv_genre_bucket` | top-N / tier bucket from `hbn_adv_genre` | STRING | auction_context | Multi-value advertiser genre bucket. |
+| `ec_type` | `jgr_ec_type` | INT | auction_context | Endcard combination type. |
+| `has_endcard` | `jgr_has_endcard` | BOOLEAN | auction_context | Non-VX endcard flag. |
+| `has_vungle_endcard` | `jgr_has_vungle_endcard` | BOOLEAN | auction_context | VX endcard flag. |
+| `has_skip_button` | `jgr_has_skip_button` | BOOLEAN | auction_context | Skip-button flag. |
+| `is_streaming_video` | `jgr_is_streaming_video` | BOOLEAN | auction_context | Streaming-video flag. |
+| `freeform_type` | `jgr_freeform_type` | STRING | auction_context | Freeform ad type. |
+| `edsp_fs_cr_type` | `jgr_edsp_fs_cr_type` | STRING | auction_context | eDSP full-screen creative type. |
+| `is_creative_interactive` | `jgr_is_creative_interactive` | BOOLEAN | post_auction_only | Winning creative property. |
+| `ai_disclosure` | `jgr_ai_disclosure` | BOOLEAN | post_auction_only | Winning creative disclosed as AI-generated. |
+| `template_id` | `jgr_template_id` | STRING | auction_context | Template id. |
+| `template_name_bucket` | top-N bucket from `jgr_template_name` | STRING | auction_context | Raw template name can drift. |
+| `full_screen_creative_type` | `hbn_full_screen_creative_type` | STRING | auction_context | HB full-screen creative type. |
+| `jaeger_experiment_id` | normalized keys from `jgr_exp_to_bucket` | STRING | pre_auction | Store stable experiment key or hash; do not explode arbitrary JSON in the UI. |
+| `dte_experiment_group` | `jgr_dte_experiment_group` | STRING | pre_auction | DTE experiment group. |
+| `ssp_exp_num` | `jgr_ssp_exp_num` | LONG | pre_auction | SSP experiment number. |
+| `vxac_exp_id` | `jgr_vxac_exp_id` | STRING | pre_auction | VXAC experiment id. |
+| `ml_experiment_id` | `hbn_experiment_id` | LONG | pre_auction | HBP datasci experiment id. |
+| `recommender_tag` | `hbn_recommender_tag` | STRING | pre_auction | Datasci strategy tag. |
+| `qps_type` | `jgr_qps_type` | STRING | pre_auction | QPS experiment type. |
+| `qps_exp_name` | `jgr_qps_exp_name` | STRING | pre_auction | QPS experiment name. |
+| `winner_qps_index` | `jgr_winner_qps_index` | INT | post_auction_only | Winner request index. |
+| `winner_qps_round` | `jgr_winner_qps_round` | INT | post_auction_only | Winner QPS round. |
+| `winner_rtb_dup_strategy` | `jgr_winner_rtb_dup_strategy` | STRING | post_auction_only | Winning RTB duplicate strategy. |
+| `winner_is_using_albatross_model` | `jgr_winner_is_using_albatross_model` | BOOLEAN | post_auction_only | Winning RTB used Albatross model. |
+| `is_ad_podding` | `jgr_is_ad_podding` | BOOLEAN | pre_auction | Ad podding flag. |
+| `ad_podding_multiplier_bucket` | bucketed `jgr_ad_podding_multiplier` | STRING | pre_auction | Use coarse buckets only. |
+| `rtb_connection_id` | `jgr_rtb_connection_id` | STRING | auction_context | Winning RTB connection id. |
+| `rtb_account_id` | `jgr_rtb_account_id` | STRING | auction_context | Winning RTB account id. |
+| `rtb_adm_type` | `jgr_rtb_adm_type` | STRING | auction_context | Winning RTB AdMarkup type. |
+| `rtb_is_internal` | `jgr_rtb_is_internal` | BOOLEAN | auction_context | Winning RTB internal flag. |
+| `rtb_fanout_source` | `jgr_rtb_fanout_source` | LONG | auction_context | Winning RTB fanout source. |
+| `bidder_id` | `hbn_bidder_id` | STRING | auction_context | HB-side bidder id. |
+| `hb_rtb_account_id` | `hbn_rtb_account_id` | STRING | auction_context | HB-side RTB account id. |
+| `traffic_quality_action` | `jgr_traffic_quality_action` | STRING | pre_auction | Optional traffic-quality action. |
+| `traffic_quality_strategy` | `jgr_traffic_quality_strategy` | STRING | pre_auction | Traffic-quality strategy. |
+| `double_verify_fraud_reason` | `jgr_double_verify_fraud_reason` | STRING | pre_auction | Fraud reason, if present. |
+| `datasci_tags_hash` | normalized hash from `hbn_datasci_tags` | STRING | pre_auction | Use hash or approved tag extraction, not arbitrary JSON as a key. |
+| `jaeger_version` | `jgr_jaeger_version` | STRING | lineage | Producer version. |
+| `hbp_version` | `hbn_hbp_version` | STRING | lineage | Producer version. |
+| `first_seen_event_time` | `min(source_event_time)` by context | TIMESTAMP | audit | First observed event for this context in the retained window. |
+| `last_seen_event_time` | `max(source_event_time)` by context | TIMESTAMP | audit | Last observed event for this context in the retained window. |
+
+Excluded from `non_device_context_v1`: device identity, raw device attributes, raw IP/IFA/UA, raw JSON blobs, unbucketed free text, raw price/floor/bid/settlement measures, and unrestricted advertiser domains. Use measures or top-N MAP primitives for those instead of adding them as dimensions.
+
+---
+
+## 7. Label / Leakage Guidance
 
 For the offline simulation (TRD §7.9.4), the following fields are **outcomes**, not inputs. They must be used as targets or excluded from feature formulas; using them as trailing-window features for their own impression is leakage (TRD §7.6 validation rule "Formula cannot reference future labels").
 
@@ -409,7 +602,7 @@ Aggregated/trailing-window versions of these (e.g. `avg_settlement_price_7d` ove
 
 ---
 
-## 7. Out of Scope
+## 8. Out of Scope
 
 - The Spark/Trino join job that materializes this table (sub-project B / TRD §7.7 Step 4).
 - The `feature_capabilities` catalog table itself (sub-project A / TRD §7.3.1) — this doc is its *input*.
@@ -419,11 +612,11 @@ Aggregated/trailing-window versions of these (e.g. `avg_settlement_price_7d` ove
 
 ---
 
-## 8. Enumerated Value Appendix
+## 9. Enumerated Value Appendix
 
 Referenced by `enum_ref` in the catalog. Source files cited per table.
 
-### 8.1 `jgr_no_serv_reason` (jaeger EnumeratedList)
+### 9.1 `jgr_no_serv_reason` (jaeger EnumeratedList)
 
 | Value | Description | Triggers auction |
 |---|---|---|
@@ -474,11 +667,11 @@ Referenced by `enum_ref` in the catalog. Source files cited per table.
 | 1002 | time cost exceeds mediation TTL (headerbidding only) | yes |
 | 1015 | rejected by filter (headerbidding only) | no |
 
-### 8.2 `jgr_filter_result` (jaeger EnumeratedList)
+### 9.2 `jgr_filter_result` (jaeger EnumeratedList)
 
 Key codes (full list in source): `-1` ResultUnspecified (do not use), `0` ResultOk (passed; only auctioned when this), `1` ResultInvalidContext, `2` ResultCompletedContext, `3` ResultInternalError, `4` RejectAdmobHBPrecache, `10000` PublisherNotFound, `10001` PublisherConnectionMismatch, `10002` PublisherOSMismatch, `10003` NoEligibleRTBConnections, `10008` NoEligiblePlacements, `10009` AccountBlocked, `10014` RequestThrottled, `10017` FraudIP, `10019`–`10022` DoubleVerify fraud (App/ADID/HIP/HUA), `20000` IncompatibleSDKWithOSVersion, `30001` DeliveryLimitExceeded, `30002` PauseWaterfall, `30003` PauseHeaderBidding.
 
-### 8.3 `jgr_sr_at` — bid-shading adjustment type (jaeger EnumeratedList)
+### 9.3 `jgr_sr_at` — bid-shading adjustment type (jaeger EnumeratedList)
 
 | Value | Description |
 |---|---|
@@ -491,7 +684,7 @@ Key codes (full list in source): `-1` ResultUnspecified (do not use), `0` Result
 | 6 | Set to remaining revenue when price exceeded it |
 | 7 | Set to MPM distribution-exploration price cap when exceeded |
 
-### 8.4 `jgr_ec_type` — endcard type (jaeger EnumeratedList)
+### 9.4 `jgr_ec_type` — endcard type (jaeger EnumeratedList)
 
 | Value | Description |
 |---|---|
@@ -509,41 +702,41 @@ Key codes (full list in source): `-1` ResultUnspecified (do not use), `0` Result
 | 11 | Video + DSP HTML Static EC + DSP Static EC |
 | 12 | Video + DSP Static EC + DSP Static EC |
 
-### 8.5 `jgr_flat_cpm_model_type` (jaeger EnumeratedList)
+### 9.5 `jgr_flat_cpm_model_type` (jaeger EnumeratedList)
 
 | Value | Description |
 |---|---|
 | TRS | Target Rev Share |
 | NRG | Net Revenue Growth |
 
-### 8.6 `jgr_edsp_fs_cr_type` — eDSP full-screen creative type (jaeger EnumeratedList)
+### 9.6 `jgr_edsp_fs_cr_type` — eDSP full-screen creative type (jaeger EnumeratedList)
 
 `MRAID Playable`, `MRAID Static`, `VAST Static EC`, `VAST HTML Interactive EC`, `VAST HTML Static EC`, `VAST No EC`, and combinations (`VAST HTML Interactive EC And Static EC`, etc.). See source for the full 11-value list.
 
-### 8.7 `jgr_app_cat` / `jgr_winning_bid_cat` — IAB content categories
+### 9.7 `jgr_app_cat` / `jgr_winning_bid_cat` — IAB content categories
 
 IAB tier-1/tier-2 codes per OpenRTB 2.5 List 5.1 (`IAB1`…`IAB26` with sub-codes). Full mapping in jaeger `EnumeratedList.md` §`winning_bid.cat`. Treat as `feature_after_encode` (tier-1 rollup recommended).
 
-### 8.8 `jgr_tcf_result` (jaeger EnumeratedList)
+### 9.8 `jgr_tcf_result` (jaeger EnumeratedList)
 
 `0` tcf_consent, `1` reject_by_pub_res, `2` reject_by_purposes, `3` reject_by_sf, `4` reject_by_parse_issue, `5` reject_by_li_purposes, `6` reject_by_miss_vendor, `7` reject_by_miss_li_vendor, `8` reject_by_miss_disclosed_vendors.
 
-### 8.9 `hbn_bidrequest_auction_type` (hb schema)
+### 9.9 `hbn_bidrequest_auction_type` (hb schema)
 
 | Value | Description |
 |---|---|
 | 1 | First Price |
 | 2 | Second Price |
 
-### 8.10 `hbn_bid_nsr` context — `loss_reason` (hb-notifications EnumeratedList)
+### 9.10 `hbn_bid_nsr` context — `loss_reason` (hb-notifications EnumeratedList)
 
 `0` Bid Won, `1` Internal Error, `2` Impression Opportunity Expired, `3` Invalid Bid Response, `100` Below Auction Floor, `101` Below Deal Floor, `102` Lost to Higher Bid, `103` Lost to PMP Deal, `104` Buyer Seat Blocked, `200`–`213` Creative Filtered (various), `≥1000` exchange-specific. (`bid_nsr` semantics align with this loss-reason space.)
 
-### 8.11 `notification_type` (hb-notifications EnumeratedList)
+### 9.11 `notification_type` (hb-notifications EnumeratedList)
 
 `0` Loss, `1` Win, `2` Bill, `3` Bill_Ext. (Referenced for downstream notification joins; not a column in this table.)
 
-### 8.12 Floor Field Lifecycle (jaeger EnumeratedList)
+### 9.12 Floor Field Lifecycle (jaeger EnumeratedList)
 
 ```
 placements[].floor (DAL config)            → jgr_placement_floor
@@ -558,6 +751,6 @@ Final auction floor → placement_serve_results[].bid_floor → jgr_bid_floor
 
 ---
 
-## 9. Summary
+## 10. Summary
 
 This wide table flattens two upstream topics into one impression-grain row with ~150 source-tagged, metadata-rich columns spanning supply, device, geo, privacy, floor lifecycle, auction economics, bid shading, settlement, creative, TPAT, experiment/QPS, and device history. Every column carries the metadata needed for the capability scanner to register it as a `feature_capability` and for the Capability Map UI to render it grouped by domain. Labels and label-adjacent fields are flagged so the formula validator can enforce point-in-time correctness during offline simulation.
