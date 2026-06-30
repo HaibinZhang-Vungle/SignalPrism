@@ -63,7 +63,42 @@ def write_col_maps(out_dir=RES):
                 hb_col_map(cols))
 
 
+def ddl_template(cols, names, partition_col="source_event_time"):
+    by_name = {c.name: c for c in cols}
+    lines = []
+    for n in names:
+        lines.append("    %s %s" % (n, sql_type(by_name[n].type)))
+    body = ",\n".join(lines)
+    return (
+        "CREATE TABLE IF NOT EXISTS ?table? (\n"
+        + body + "\n)\n"
+        "USING iceberg\n"
+        "PARTITIONED BY (hours(%s))\n" % partition_col
+        + 'LOCATION "?location?"\n'
+        "TBLPROPERTIES (\n"
+        "  'sort-order' = '%s ASC NULLS FIRST, event_id ASC NULLS FIRST'\n" % partition_col
+        + ")\n"
+    )
+
+
+def write_ddl(out_dir=RES):
+    cols = parse_catalog(MD)
+    specs = [
+        ("jaeger_transaction_wide_staging.template", jaeger_columns(cols)),
+        ("hb_transactions_wide_staging.template", hb_columns(cols)),
+        ("realtime_attributed_event_wide.template", all_columns(cols)),
+    ]
+    for fname, names in specs:
+        path = os.path.join(out_dir, "sql", fname)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        # hb staging has no source_event_time; partition on a present time col.
+        pcol = "source_event_time" if "source_event_time" in names else "hbn_timestamp"
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(ddl_template(cols, names, pcol))
+
+
 if __name__ == "__main__":
     write_columns()
     write_col_maps()
-    print("columns + col_maps written")
+    write_ddl()
+    print("columns + col_maps + ddl written")
