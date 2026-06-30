@@ -1,0 +1,30 @@
+{
+  "trial_id": "001",
+  "search_id": "2026-07-01-dcnv2-r2-artifacts",
+  "created_at": "2026-06-30T00:00:00Z",
+  "status": "pending",
+  "kind": "experiment",
+  "parent_trial_id": "000",
+  "rationale": "Full-data retrain of T004 (same 23 features, same HP) with no MAX_ROWS cap. Trial 000 used 5M-row cap for artifact generation; this run uses the full 3-day window to produce production-quality model.pt + label_encoders.pkl.",
+  "hp_config": {
+    "num_cross_layers": 3,
+    "hidden_dim1": 512,
+    "hidden_dim2": 256,
+    "hidden_dim3": 128,
+    "embedding_dim": 16,
+    "dropout_rate": 0.2,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0001,
+    "gradient_clipping": null,
+    "epochs": 15,
+    "batch_size": 1024,
+    "num_workers": 4,
+    "val_split": 0.0,
+    "track_grad_norms": true
+  },
+  "training": null,
+  "metrics": null,
+  "evaluation": null,
+  "score": null,
+  "error": null
+}
