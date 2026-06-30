@@ -8,6 +8,9 @@ metric catalog is based on the existing modulo table definition:
 `hive_prod.modulo.modulo_dvc_mrg_hly` from
 https://github.com/Vungle/schemas/blob/master/datalake/modulo/modulo_dvc_mrg_hly.sql.
 
+GMinor prediction logs consume these aggregates through the join contract in
+`gminor_log_schema.md`.
+
 ---
 
 ## 1. Aggregation Tables
@@ -18,7 +21,7 @@ columns in §5, but use different dimension columns.
 | table | dimension_family | purpose | primary dimension key |
 |---|---|---|---|
 | `ml_shadow_feature.realtime_attributed_device_level_hly` | `device_level_v1` | Device / user history features and KVRocks export candidates. | `device_id` |
-| `ml_shadow_feature.realtime_attributed_non_device_context_hly` | `non_device_context_v1` | Supply, inventory, auction, creative, experiment, and demand context without device identity. | `context_dim_id` |
+| `ml_shadow_feature.realtime_attributed_non_device_context_hly` | `non_device_context_v1` | Supply, inventory, geo, privacy/cohort, and experiment context without device identity. | `context_dim_id` |
 
 Both tables are hourly:
 
@@ -50,9 +53,9 @@ Recommended storage follows the modulo precedent: Iceberg/Parquet, partitioned b
 
 ## 3. `device_level_v1` Dimensions
 
-This table contains the device id and device-related dimensions. Placement,
-publisher, app, campaign, creative, RTB, and auction-outcome context belongs in
-`non_device_context_v1`.
+This table contains the device id and device-related dimensions. Supply,
+publisher, app, placement, geo, privacy/cohort, and experiment context belongs
+in `non_device_context_v1`.
 
 Grain:
 - One row per `(event_time, ingest_time, hashid, device_id, device dimensions...)`.
@@ -273,3 +276,19 @@ If exact backwards compatibility is required, a compatibility view can join or
 project from the two new tables only for offline analysis. It should not become
 the default feature-serving shape because it mixes device identity with
 high-cardinality inventory context.
+
+---
+
+## 7. GMinor Join Contract
+
+GMinor logs are event-grain samples. They should not join directly to aggregate
+features using event ids or bid ids as dimensions.
+
+Use the contract in `gminor_log_schema.md`:
+
+- Parse GMinor `timestamp` into `source_event_time`.
+- Prefer joining GMinor to `ml_shadow.realtime_attributed_event_wide` by
+  `event_id` to recover reviewed aggregation dimensions.
+- Join `device_level_v1` aggregates by `lo_id` / normalized device key.
+- Join `non_device_context_v1` aggregates by `context_dim_id`.
+- Require point-in-time safety: `aggregate.event_time < gminor.source_event_time`.
