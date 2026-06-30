@@ -1015,8 +1015,7 @@ object SparkMain extends BoilerplateSparkMain {
         SELECT event_id,
                imp_id,
                rtb_conn.account_id AS jgr_winner_account_id,
-               $colTransSpec,
-               CAST('${toMinutelyTimeStr(next)}' AS timestamp) AS ingest_time
+               $colTransSpec
           FROM served_winner
          WHERE event_id IS NOT NULL
       """
