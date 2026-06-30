@@ -1,0 +1,43 @@
+{
+  "trial_id": "008",
+  "search_id": "2026-06-27-dcnv2-hp-initial",
+  "created_at": "2026-06-29T04:30:00Z",
+  "status": "success",
+  "kind": "experiment",
+  "parent_trial_id": "004",
+  "rationale": "ADAPTIVE: embedding_dim=32. Trial 007 confirmed epochs=20 is necessary (12ep gives -2.7% vs -5.9% for best 20ep trial). All 8 trials so far use embedding_dim=16 — this is the most unexplored dimension. Doubling categorical embedding capacity from 16 to 32 dims per feature (total input_dim: 16 + 7*32=240 instead of 128). Best arch 512-256-128 and LR=0.0003 fixed. Cross=3 as best value from prior sweep.",
+  "hp_config": {
+    "num_cross_layers": 3,
+    "hidden_dim1": 512,
+    "hidden_dim2": 256,
+    "hidden_dim3": 128,
+    "embedding_dim": 32,
+    "dropout_rate": 0.2,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0001,
+    "gradient_clipping": null,
+    "epochs": 20,
+    "batch_size": 1024,
+    "num_workers": 4,
+    "val_split": 0.1,
+    "track_grad_norms": true
+  },
+  "training": {
+    "started_at": "2026-06-29T05:44:58Z",
+    "finished_at": "2026-06-29T06:54:39Z",
+    "duration_s": 4180,
+    "databricks_run_id": 1042448879676683,
+    "result_s3_uri": "s3://vungle2-ssp-dev/gminor/hp_sweep/floor_optimization/dcnv2/2026-06-27-dcnv2-hp-initial/trial_008/result.json"
+  },
+  "metrics": {
+    "final_train_loss": 1.563231589186731e-05,
+    "final_val_loss": 1.1573435251918021e-05,
+    "total_training_time_s": 681.0654497146606,
+    "device": "cuda",
+    "num_rows": 4999606,
+    "epochs_run": 20
+  },
+  "evaluation": null,
+  "score": null,
+  "error": null
+}

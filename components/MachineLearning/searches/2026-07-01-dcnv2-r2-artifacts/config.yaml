@@ -1,0 +1,57 @@
+# Floor optimization DCN v2 Round 2 — artifact generation run
+# Branch: incandescent-mimosa
+# Goal: retrain T004 (same 23 features, same HP) with temporal val split
+#        to produce model.pt + val_predictions.parquet for Phase 1 analysis.
+# Train data: pipeline 102 event-level, 7-day window ending 2026-06-29
+search_id: 2026-07-01-dcnv2-r2-artifacts
+project: floor_optimization
+
+# Data
+input_data_path: s3://vungle2-ssp/gminor/data/floor_optimization/102
+train_end_date: 2026-06-27
+train_n_days: 3
+
+# Model artifact output
+model_output:
+  bucket: vungle2-ssp-dev
+  key_prefix: gminor/hp_sweep/floor_optimization/dcnv2
+
+# Control: T004 from Round 1 (best trial, -5.9% vs baseline)
+control:
+  label: dcnv2_t004_r1_best
+  result_s3_uri: "s3://vungle2-ssp-dev/gminor/hp_sweep/floor_optimization/dcnv2/2026-06-27-dcnv2-hp-initial/trial_004/result.json"
+  hp_config:
+    num_cross_layers: 3
+    hidden_dim1: 512
+    hidden_dim2: 256
+    hidden_dim3: 128
+    embedding_dim: 16
+    dropout_rate: 0.2
+    learning_rate: 0.0003
+    weight_decay: 0.0001
+    gradient_clipping: null
+    epochs: 20
+    batch_size: 1024
+    num_workers: 4
+    val_split: 0.0
+    track_grad_norms: true
+
+# Metric
+metric:
+  type: weighted_pct_improvement
+  scopes: [val_loss]
+  weights:
+    val_loss: 1.0
+  direction: minimize
+  display_label: val_loss
+
+# Single trial run — no HP search needed
+stopping:
+  max_trials: 1
+
+# Git source
+git_branch: incandescent-mimosa
+git_url: https://github.com/Vungle/gminor
+
+# GPU cluster
+new_cluster_spec: {}
