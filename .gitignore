@@ -11,4 +11,4 @@ components/Data/feature_sets/*
 
 # OS noise
 .DS_Store
-.idea
+.idea/
