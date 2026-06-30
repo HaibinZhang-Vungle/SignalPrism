@@ -86,7 +86,14 @@ def _yaml_field_names(paths):
 
 
 def check_against_coba_yaml():
-    """Assert each col_map source's LEAF field exists somewhere in the coba YAMLs.
+    """Advisory check: report col_map source leaves absent from the coba schema YAMLs.
+
+    The coba YAMLs (automation/schemas/*.yaml) are an INCOMPLETE declaration of the
+    actual coba2 parquet topic schema — some real fields that exist in live coba2/Trino
+    are simply absent from the YAML files.  A flagged leaf therefore means
+    "not found in the YAML — cross-check against live coba2 (Trino) before assuming a
+    real gap"; it does NOT mean the field is missing from the actual data.
+
     Returns [] if YAMLs are absent (skipped) or all leaves resolve."""
     names = _yaml_field_names(COBA_YAMLS)
     if names is None:
@@ -103,8 +110,16 @@ def check_against_coba_yaml():
 
 
 if __name__ == "__main__":
-    probs = validate() + check_against_coba_yaml()
-    if probs:
-        print("\n".join(probs))
+    problems = validate()
+    advisories = check_against_coba_yaml()
+    if advisories:
+        print("ADVISORY: %d col_map source leaf(es) not found in the coba schema YAMLs." % len(advisories))
+        print("The YAMLs are an INCOMPLETE declaration of the coba2 topic schema, so this is a")
+        print("heads-up, not a failure — cross-check each against live coba2 (Trino) before")
+        print("treating it as a real gap:")
+        for a in advisories:
+            print("  - " + a)
+    if problems:
+        print("\n".join(problems))
         sys.exit(1)
     print("OK: all artifacts consistent with schema md")
