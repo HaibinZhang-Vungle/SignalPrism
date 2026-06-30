@@ -16,14 +16,13 @@
 - **Dedup decisions (schema §3.1):** HB copies of floors/device/geo/shading/`supply_traffic_source`/`req_no`/`exp_to_bucket` are dropped — they are simply never listed; jaeger wins. `datasci_tags` keeps the HB copy (`hbn_datasci_tags`).
 - **Sampling:** both ingestion jobs gate on `in_user_sample(sha1(event_id), <sample_rate>)`, identical rate, so both sides cover the same event-id cohort (schema §2.3, TRD §7.8). Default rate `0.0001`.
 - **Source = coba2 raw landing tables, NOT Kafka.** `coba/ingestion2` is the existing upstream Kafka→S3 lander (out of scope) that produces `coba2.ex_jaeger_transaction` and `coba2.hb_transactions` with the full nested payload. Our ingestion jobs consume that coba2 output via `withCoba2TempViewInRange(S3base, topic, start, till, tempView, storeS3IngestTime = true)`. Do NOT write a Kafka consumer (`saveKafkaTopic`) and do NOT read the slim domain tables (e.g. `edsp_deliveries`). Verified live (2026-06-30): catalog `raw`, schema `coba2`, partitions `dt,hr,mn` (no `az`), both fresh; HB ≈ 487M rows/min (~700B/day) → sampling mandatory.
-- **Field-existence authority = the coba schema YAMLs, NOT Trino.** The Trino-registered Hive tables for `raw.coba2.*` UNDER-DECLARE columns that genuinely exist in the parquet (e.g. jaeger `edsp_floor`/`direct_floor`/`acc_floor`/`bid_dsp_size`/`vxac_exp_id`; HB `bidrequest_imp_id`). The Spark job reads the parquet via schema-on-read, so it sees the full set. When checking whether a schema-md `source` field exists, validate against:
-  - `/Users/twang/Projects/lena/automation/schemas/ex-jaeger-transaction.yaml`
-  - `/Users/twang/Projects/lena/automation/schemas/hb-transactions.yaml`
-  Do NOT "fix" a col_map by deleting a field that is absent from Trino — confirm against these YAMLs first. The schema-md join key `h.bidrequest_imp_id` is valid (HB YAML line 63).
+- **Field existence: the landed coba2 parquet is truth; BOTH the coba YAMLs and the Trino metastore are INCOMPLETE declarations of it.** Verified examples: the Trino Hive tables omit `edsp_floor`/`direct_floor`/`acc_floor`/`bid_dsp_size`/`vxac_exp_id` (jaeger) and `bidrequest_imp_id` (HB) that ARE in the YAML + parquet; conversely the coba YAMLs omit `incoming_bid_request_id`, `dup_key`, `double_verify_fraud_reason`, `device.geo.ipservice`, `serve_result.pd_cl`/`pd_cpx`/`ad_podding_multiplier` (jaeger) and `bidrequest_time` (HB) that ARE in Trino + parquet. The Spark job reads parquet via schema-on-read, so it sees the union. Therefore: do NOT delete a col_map field just because it's missing from Trino OR from the YAML — cross-check both, and ultimately the live coba2 parquet. The schema-md join key `h.bidrequest_imp_id` is valid (HB YAML line 63).
+  - `check_against_coba_yaml()` (Task 6) is therefore **advisory only** (prints a heads-up, exit 0) — the YAML being incomplete means it produces false positives. The hard gate is `validate()` (artifacts vs schema md).
 - **Confirmed boilerplate helper:** `getColsMapInJson("col_maps/<file>.json")` returns an ordered map of `source-expr -> target`; build the SELECT via `.map{ case (k,v) => s"$k AS $v" }.mkString(",\n")`. (Confirmed in `edsp/deliveries_ingestion`.) Column-name-only lists use `getColsInJson(...)`.
 - **Transforms via `UDFUtil` only.** No ad-hoc UDFs. Reference: `/Users/twang/Projects/lena/src/main/scala/com/vungle/lena/UDFUtil.scala`.
 - **lena reference files** (read before writing Scala): **`edsp/deliveries_ingestion/SparkMain.scala` (THE template for Job 1 — reads `coba2.ex_jaeger_transaction`, multi-stage explode of serve_result/placements/rtbconnections, winning-RTB filter, `getColsMapInJson`)**, `hbp/auctions_served_ingestion/SparkMain.scala` (Job 2 template — reads `coba2.hb_transactions`, `row_number` dedup, merge), `auction/notifications_attribution/SparkMain.scala` (Job 3 template — two-upstream watermark + LEFT JOIN), `src/main/resources/lena/col_maps/edsp_deliveries.json` (col_map format), `src/main/resources/lena/sql/auction/auction_notifications_enriched.template` (DDL format).
 - **Winning-RTB selection (Job 1):** after `explode(serve_result.rtbconnections) AS rtb_conn`, filter `serve_result.winner_id = rtb_conn.id`. `jgr_rtb_*` and `jgr_winner_account_id` map from `rtb_conn.*`. Do NOT add edsp's `rtb_conn.is_internal = FALSE` filter — `jgr_rtb_is_internal` is a wanted column.
+- **`jgr_winner_account_id` special-case:** it shares the source expression `rtb_conn.account_id` with `jgr_rtb_account_id`. Because the col_map is a `{source_expr: target}` dict (one value per key), `jgr_winner_account_id` is EXCLUDED from the col_map (like `event_id`/`imp_id`) and emitted directly in the jaeger SELECT as `rtb_conn.account_id AS jgr_winner_account_id`. The Task 6 validator counts it as produced-directly. This is the only such collision (verified).
 - **Build decoupling:** `components/Data/` is NOT part of an SBT build in this repo. There is no `sbt compile`/`sbt test`. Verification = the Python catalog validator + structural-lint checks defined in each task. These files are designed to drop into lena later (then real compilation applies).
 - **Package base:** `com.vungle.signalprism.data` (placeholder). **Arg namespace:** `spark.app.signalprism.data.<job>.*`.
 - **Staging tables:** `ml_shadow.jaeger_transaction_wide_staging`, `ml_shadow.hb_transactions_wide_staging`. **Output:** `ml_shadow.realtime_attributed_event_wide`.
@@ -734,9 +733,12 @@ def validate():
         if got != expected:
             problems.append("columns mismatch in %s" % rel)
 
-    # 2. every non-key target in the wide table is produced by exactly one col_map.
+    # 2. every non-key target in the wide table is produced by a col_map or emitted directly.
+    #    event_id/imp_id are emitted directly by the jobs; jgr_winner_account_id is special-cased
+    #    (shares source expr rtb_conn.account_id with jgr_rtb_account_id) and emitted directly in
+    #    the jaeger SELECT, so it is not in the col_map.
     jm, hm = jaeger_col_map(cols), hb_col_map(cols)
-    produced = set(jm.values()) | set(hm.values()) | {"event_id", "imp_id"}
+    produced = set(jm.values()) | set(hm.values()) | {"event_id", "imp_id", "jgr_winner_account_id"}
     for name in all_columns(cols):
         if name not in produced:
             problems.append("wide column not produced by any col_map: %s" % name)
@@ -888,6 +890,9 @@ def test_extends_boilerplate_and_uses_required_machinery():
     assert "serve_result.winner_id = rtb_conn.id" in s
     assert "getColsMapInJson" in s
     assert "col_maps/jaeger_transaction_wide.json" in s
+    # jgr_winner_account_id is special-cased (shares source expr with jgr_rtb_account_id),
+    # emitted directly rather than via the col_map.
+    assert "rtb_conn.account_id AS jgr_winner_account_id" in s
     assert "mergeToIcebergTable" in s
 
 def test_no_adhoc_udf_registration():
@@ -968,7 +973,9 @@ object SparkMain extends BoilerplateSparkMain {
     val startMillis = System.currentTimeMillis()
 
     // source-expr -> target, e.g. "serve_result.bid_floor" -> "jgr_bid_floor",
-    // "rtb_conn.account_id" -> "jgr_winner_account_id", "device.make" -> "jgr_dev_make".
+    // "rtb_conn.account_id" -> "jgr_rtb_account_id", "device.make" -> "jgr_dev_make".
+    // NB: jgr_winner_account_id is NOT in this map (it shares source expr rtb_conn.account_id
+    // with jgr_rtb_account_id); it is emitted directly in the SELECT below.
     val columnMap = getColsMapInJson("col_maps/jaeger_transaction_wide.json")
     val colTransSpec = columnMap.map { case (k, v) => s"$k AS $v" }.mkString(",\n")
 
@@ -978,8 +985,6 @@ object SparkMain extends BoilerplateSparkMain {
             SELECT *,
                    explode(placement_serve_results) AS serve_result
               FROM $tempTable
-             WHERE in_user_sample(sha1(placement_serve_results.ad_event_id[0]), $SAMPLE_RATE)
-                OR in_user_sample(sha1(id), $SAMPLE_RATE)
         ),
         served_sampled AS (
             SELECT *
@@ -991,13 +996,13 @@ object SparkMain extends BoilerplateSparkMain {
             SELECT *,
                    explode(placements) AS placement_
               FROM served_sampled
-             WHERE serve_result.placement_reference_id = placement_.reference_id
         ),
         served_rtb AS (
             SELECT *,
                    explode(serve_result.rtbconnections) AS rtb_conn
               FROM served_placement
              WHERE serve_result.winner_id IS NOT NULL
+               AND serve_result.placement_reference_id = placement_.reference_id
         ),
         served_winner AS (
             SELECT *,
@@ -1009,6 +1014,7 @@ object SparkMain extends BoilerplateSparkMain {
         )
         SELECT event_id,
                imp_id,
+               rtb_conn.account_id AS jgr_winner_account_id,
                $colTransSpec,
                CAST('${toMinutelyTimeStr(next)}' AS timestamp) AS ingest_time
           FROM served_winner
@@ -1055,7 +1061,7 @@ object SparkMain extends BoilerplateSparkMain {
 }
 ```
 
-> The `served` CTE's `WHERE in_user_sample(...)` is a coarse pre-explode prune; the authoritative gate is the per-serve-result `in_user_sample(sha1(serve_result.ad_event_id), ...)` in `served_sampled`. If the pre-explode prune expression doesn't typecheck against the real schema (the array-access form depends on the topic struct), delete the `served` `WHERE` clause entirely and keep only the `served_sampled` gate — correctness is unaffected, only a minor read-volume optimization. Confirm `getColsMapInJson`, `withCoba2TempViewInRange`, `getTillTime`, `toMinutelyTimeStr`, and `recordProgressMinute` signatures against `edsp/deliveries_ingestion/SparkMain.scala` (they are used verbatim there).
+> The authoritative sample gate is the per-serve-result `in_user_sample(sha1(serve_result.ad_event_id), ...)` in `served_sampled` (no coarse pre-explode prune — dropped as schema-fragile). The placement-reference predicate `serve_result.placement_reference_id = placement_.reference_id` lives in `served_rtb`, NOT `served_placement`: `placement_` is an explode alias only in scope in the *next* CTE — Spark cannot resolve a project-list alias in the same block's `WHERE`. This matches lena's `edsp/deliveries_ingestion` `edsp_served_rtb`. Confirm `getColsMapInJson`, `withCoba2TempViewInRange`, `getTillTime`, `toMinutelyTimeStr`, and `recordProgressMinute` signatures against `edsp/deliveries_ingestion/SparkMain.scala` (they are used verbatim there).
 
 - [ ] **Step 4: Run lint test**
 

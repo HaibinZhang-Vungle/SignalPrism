@@ -61,7 +61,9 @@ object SparkMain extends BoilerplateSparkMain {
     val startMillis = System.currentTimeMillis()
 
     // source-expr -> target, e.g. "serve_result.bid_floor" -> "jgr_bid_floor",
-    // "rtb_conn.account_id" -> "jgr_winner_account_id", "device.make" -> "jgr_dev_make".
+    // "rtb_conn.account_id" -> "jgr_rtb_account_id", "device.make" -> "jgr_dev_make".
+    // NB: jgr_winner_account_id is NOT in this map (it shares source expr rtb_conn.account_id
+    // with jgr_rtb_account_id); it is emitted directly in the SELECT below.
     val columnMap = getColsMapInJson("col_maps/jaeger_transaction_wide.json")
     val colTransSpec = columnMap.map { case (k, v) => s"$k AS $v" }.mkString(",\n")
 
