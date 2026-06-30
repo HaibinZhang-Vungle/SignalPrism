@@ -71,8 +71,6 @@ object SparkMain extends BoilerplateSparkMain {
             SELECT *,
                    explode(placement_serve_results) AS serve_result
               FROM $tempTable
-             WHERE in_user_sample(sha1(placement_serve_results.ad_event_id[0]), $SAMPLE_RATE)
-                OR in_user_sample(sha1(id), $SAMPLE_RATE)
         ),
         served_sampled AS (
             SELECT *
@@ -84,13 +82,13 @@ object SparkMain extends BoilerplateSparkMain {
             SELECT *,
                    explode(placements) AS placement_
               FROM served_sampled
-             WHERE serve_result.placement_reference_id = placement_.reference_id
         ),
         served_rtb AS (
             SELECT *,
                    explode(serve_result.rtbconnections) AS rtb_conn
               FROM served_placement
              WHERE serve_result.winner_id IS NOT NULL
+               AND serve_result.placement_reference_id = placement_.reference_id
         ),
         served_winner AS (
             SELECT *,
