@@ -816,20 +816,8 @@ object SparkMain extends BoilerplateSparkMain {
     val keyArgs    = dims.map(keyConcatArg).mkString(", ")
     val dropClause = if (dropNullSrc != null) s"AND $dropNullSrc IS NOT NULL" else ""
 
-    // inner: normalized dims + hour bucket + metric base columns for the sampled hour
-    val innerSql =
-      s"""
-        SELECT
-          $dimStored,
-          date_trunc('HOUR', source_event_time) AS event_time,
-          source_event_time
-        FROM $inputTable
-        WHERE source_event_time >= '$s' AND source_event_time < '$t'
-          AND in_user_sample(sha1(event_id), $sampleRate)
-          $dropClause
-      """
-    // NOTE: metric base columns are referenced directly from $inputTable in the outer agg,
-    // so re-read the source once via a temp view to keep dims + metrics in one scan.
+    // Single scan: normalized dims + hour bucket alongside the raw metric base columns (`*`),
+    // so dims and metric sources coexist for the outer GROUP BY.
     spark.sql(
       s"""
         SELECT
@@ -906,8 +894,6 @@ object SparkMain extends BoilerplateSparkMain {
   }
 }
 ```
-
-> Implementation note: the `innerSql` string is retained only for readability of the projection; the executed path builds `_agg_src` in a single scan (dims + `*`) so metric base columns and normalized dims coexist. If review prefers, delete the unused `innerSql` val — it is not referenced.
 
 - [ ] **Step 4: Run the lint test**
 
