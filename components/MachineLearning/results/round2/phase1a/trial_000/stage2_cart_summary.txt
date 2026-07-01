@@ -1,0 +1,38 @@
+=== Stage 2 CART (avg_hbedsp_highest_price_7d > 20.0) ===
+Subset: 10,309 rows | subset MAE: 0.008361 (23.2x global)
+
+--- Leaf Stats ---
+               mae      mdae     n   std_err  mae_vs_subset  mae_vs_global  err_contrib_pct
+leaf_id2                                                                                   
+13        0.032997  0.021225   245  0.054426       3.946775      91.608471         2.172923
+14        0.032129  0.001815   347  0.065585       3.842882      89.197011         2.996556
+11        0.019271  0.011399   374  0.026410       2.305015      53.501627         1.937230
+12        0.010321  0.005168   999  0.017100       1.234483      28.653545         2.771318
+5         0.010282  0.004496  2270  0.019117       1.229858      28.546186         6.273595
+4         0.005435  0.000086  3868  0.019322       0.650082      15.089036         5.650547
+8         0.004537  0.000097   631  0.009072       0.542680      12.596136         0.769501
+7         0.001404  0.000067  1575  0.006281       0.167943       3.898129         0.594401
+
+--- Rules ---
+|--- avg_hbedsp_market_price1d <= 110.44
+|   |--- hbedsp_net_rev_7d <= 0.23
+|   |   |--- count_hb_of_requests1d <= 355.50
+|   |   |   |--- hbedsp_net_rev_7d <= 0.01
+|   |   |   |   |--- value: [0.01]
+|   |   |   |--- hbedsp_net_rev_7d >  0.01
+|   |   |   |   |--- value: [0.01]
+|   |   |--- count_hb_of_requests1d >  355.50
+|   |   |   |--- hbedsp_net_rev_7d <= 0.04
+|   |   |   |   |--- value: [0.00]
+|   |   |   |--- hbedsp_net_rev_7d >  0.04
+|   |   |   |   |--- value: [0.00]
+|   |--- hbedsp_net_rev_7d >  0.23
+|   |   |--- avg_hbedsp_market_price1d <= 49.78
+|   |   |   |--- floor_to_hb_avg_ratio <= 0.23
+|   |   |   |   |--- value: [0.02]
+|   |   |   |--- floor_to_hb_avg_ratio >  0.23
+|   |   |   |   |--- value: [0.01]
+|   |   |--- avg_hbedsp_market_price1d >  49.78
+|   |   |   |--- value: [0.03]
+|--- avg_hbedsp_market_price1d >  110.44
+|   |--- value: [0.03]

@@ -1,0 +1,191 @@
+{
+  "global_mae": 0.0003602008719182385,
+  "config": {
+    "min_n": 200,
+    "threshold_x": 2.0,
+    "top_k": 2,
+    "max_depth": 4
+  },
+  "segments": [
+    {
+      "depth": 0,
+      "path": "supply_name=rovio",
+      "dim": "supply_name",
+      "val": "rovio",
+      "n": 234,
+      "mae": 0.00348739302932771,
+      "mae_vs_global": 9.68
+    },
+    {
+      "depth": 1,
+      "path": "supply_name=rovio \u2192 sdk_supply_name=others",
+      "dim": "sdk_supply_name",
+      "val": "others",
+      "n": 234,
+      "mae": 0.00348739302932771,
+      "mae_vs_global": 9.68
+    },
+    {
+      "depth": 2,
+      "path": "supply_name=rovio \u2192 sdk_supply_name=others \u2192 ad_type=video",
+      "dim": "ad_type",
+      "val": "video",
+      "n": 234,
+      "mae": 0.00348739302932771,
+      "mae_vs_global": 9.68
+    },
+    {
+      "depth": 1,
+      "path": "supply_name=rovio \u2192 ad_type=video",
+      "dim": "ad_type",
+      "val": "video",
+      "n": 234,
+      "mae": 0.00348739302932771,
+      "mae_vs_global": 9.68
+    },
+    {
+      "depth": 2,
+      "path": "supply_name=rovio \u2192 ad_type=video \u2192 sdk_supply_name=others",
+      "dim": "sdk_supply_name",
+      "val": "others",
+      "n": 234,
+      "mae": 0.00348739302932771,
+      "mae_vs_global": 9.68
+    },
+    {
+      "depth": 0,
+      "path": "placement_type=appopen",
+      "dim": "placement_type",
+      "val": "appopen",
+      "n": 16170,
+      "mae": 0.0016020862057032398,
+      "mae_vs_global": 4.45
+    },
+    {
+      "depth": 1,
+      "path": "placement_type=appopen \u2192 country=US",
+      "dim": "country",
+      "val": "US",
+      "n": 683,
+      "mae": 0.010165915880591167,
+      "mae_vs_global": 28.22
+    },
+    {
+      "depth": 2,
+      "path": "placement_type=appopen \u2192 country=US \u2192 supply_name=admob",
+      "dim": "supply_name",
+      "val": "admob",
+      "n": 395,
+      "mae": 0.010468551524361205,
+      "mae_vs_global": 29.06
+    },
+    {
+      "depth": 3,
+      "path": "placement_type=appopen \u2192 country=US \u2192 supply_name=admob \u2192 device_os=android",
+      "dim": "device_os",
+      "val": "android",
+      "n": 203,
+      "mae": 0.012180019790635502,
+      "mae_vs_global": 33.81
+    },
+    {
+      "depth": 3,
+      "path": "placement_type=appopen \u2192 country=US \u2192 supply_name=admob \u2192 ad_type=video",
+      "dim": "ad_type",
+      "val": "video",
+      "n": 395,
+      "mae": 0.010468551524361205,
+      "mae_vs_global": 29.06
+    },
+    {
+      "depth": 2,
+      "path": "placement_type=appopen \u2192 country=US \u2192 device_os=android",
+      "dim": "device_os",
+      "val": "android",
+      "n": 365,
+      "mae": 0.010243231923269895,
+      "mae_vs_global": 28.44
+    },
+    {
+      "depth": 3,
+      "path": "placement_type=appopen \u2192 country=US \u2192 device_os=android \u2192 supply_name=admob",
+      "dim": "supply_name",
+      "val": "admob",
+      "n": 203,
+      "mae": 0.012180019790635502,
+      "mae_vs_global": 33.81
+    },
+    {
+      "depth": 3,
+      "path": "placement_type=appopen \u2192 country=US \u2192 device_os=android \u2192 ad_type=video",
+      "dim": "ad_type",
+      "val": "video",
+      "n": 365,
+      "mae": 0.010243231923269895,
+      "mae_vs_global": 28.44
+    },
+    {
+      "depth": 1,
+      "path": "placement_type=appopen \u2192 supply_name=max",
+      "dim": "supply_name",
+      "val": "max",
+      "n": 1956,
+      "mae": 0.0028287542467355623,
+      "mae_vs_global": 7.85
+    },
+    {
+      "depth": 2,
+      "path": "placement_type=appopen \u2192 supply_name=max \u2192 device_os=iOS",
+      "dim": "device_os",
+      "val": "iOS",
+      "n": 367,
+      "mae": 0.005641417350424934,
+      "mae_vs_global": 15.66
+    },
+    {
+      "depth": 3,
+      "path": "placement_type=appopen \u2192 supply_name=max \u2192 device_os=iOS \u2192 sdk_supply_name=max",
+      "dim": "sdk_supply_name",
+      "val": "max",
+      "n": 333,
+      "mae": 0.005766672354407303,
+      "mae_vs_global": 16.01
+    },
+    {
+      "depth": 3,
+      "path": "placement_type=appopen \u2192 supply_name=max \u2192 device_os=iOS \u2192 ad_type=video",
+      "dim": "ad_type",
+      "val": "video",
+      "n": 367,
+      "mae": 0.005641417350424934,
+      "mae_vs_global": 15.66
+    },
+    {
+      "depth": 2,
+      "path": "placement_type=appopen \u2192 supply_name=max \u2192 sdk_supply_name=max",
+      "dim": "sdk_supply_name",
+      "val": "max",
+      "n": 1280,
+      "mae": 0.003056821695723706,
+      "mae_vs_global": 8.49
+    },
+    {
+      "depth": 3,
+      "path": "placement_type=appopen \u2192 supply_name=max \u2192 sdk_supply_name=max \u2192 device_os=iOS",
+      "dim": "device_os",
+      "val": "iOS",
+      "n": 333,
+      "mae": 0.005766672354407303,
+      "mae_vs_global": 16.01
+    },
+    {
+      "depth": 3,
+      "path": "placement_type=appopen \u2192 supply_name=max \u2192 sdk_supply_name=max \u2192 ad_type=video",
+      "dim": "ad_type",
+      "val": "video",
+      "n": 1280,
+      "mae": 0.003056821695723706,
+      "mae_vs_global": 8.49
+    }
+  ]
+}
