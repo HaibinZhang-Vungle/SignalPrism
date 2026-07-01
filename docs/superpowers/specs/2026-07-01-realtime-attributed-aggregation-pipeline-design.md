@@ -18,8 +18,8 @@ real, unsampled data).
 
 | output table | dimension_family | grain key |
 |---|---|---|
-| `ml_shadow_feature.realtime_attributed_device_level_hly` | `device_level_v1` | `device_id` (`jgr_lo_id`) |
-| `ml_shadow_feature.realtime_attributed_non_device_context_hly` | `non_device_context_v1` | `context_dim_id` |
+| `ml_shadow.realtime_attributed_device_level_hly` | `device_level_v1` | `device_id` (`jgr_lo_id`) |
+| `ml_shadow.realtime_attributed_non_device_context_hly` | `non_device_context_v1` | `context_dim_id` |
 
 Both are **hourly** grain, sharing one metric catalog (§5 of the contract). This realizes
 MLOps TRD §7.5/§7.7 and demo-plan **Week 2** ("config compiler + first aggregations;
@@ -55,8 +55,8 @@ contract in `gminor_log_schema.md`.
         v
   com.vungle.signalprism.data.realtime_attributed_aggregation.SparkMain
         |
-        +--> ml_shadow_feature.realtime_attributed_device_level_hly
-        +--> ml_shadow_feature.realtime_attributed_non_device_context_hly
+        +--> ml_shadow.realtime_attributed_device_level_hly
+        +--> ml_shadow.realtime_attributed_non_device_context_hly
         |
         |  data-cd backfill YAMLs (2 invocations)
         v

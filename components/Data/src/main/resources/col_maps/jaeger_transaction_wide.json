@@ -32,6 +32,7 @@
   "placement_.publisher_payout_type": "jgr_publisher_payout_type",
   "placement_.ad_unit_id": "jgr_ad_unit_id",
   "lo_id": "jgr_lo_id",
+  "device.ext.normalized_id": "jgr_dev_normalized_id",
   "device.make": "jgr_dev_make",
   "device.model": "jgr_dev_model",
   "device.os": "jgr_dev_os",

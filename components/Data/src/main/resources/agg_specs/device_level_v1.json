@@ -5,14 +5,14 @@
     "recipe": "sha256_concat"
   },
   "hashid_from": "device_dim_id",
-  "drop_null_source": "jgr_lo_id",
+  "drop_null_source": "normalize_device_id(jgr_dev_normalized_id)",
   "dimensions": [
     {
       "name": "device_id",
       "type": "string",
-      "source_col": "jgr_lo_id",
+      "source_col": "normalize_device_id(jgr_dev_normalized_id)",
       "fallback_col": null,
-      "norm": "passthrough"
+      "norm": "expr"
     },
     {
       "name": "dev_id_source",

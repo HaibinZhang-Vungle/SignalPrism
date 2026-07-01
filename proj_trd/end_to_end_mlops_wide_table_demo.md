@@ -124,7 +124,7 @@ aggregation_spec:
   event_filter: source_event_type in ('hbn', 'delivery')
   dimension_family: non_device_context_v1
   windows: [1h, 1d, 7d]
-  output_namespace: ml_shadow_feature
+  output_namespace: ml_shadow
   measures:
     - capability_id: hbn_settlement_price
       strategy: numeric_distribution
@@ -434,7 +434,7 @@ measures:
   - capability_id: tpat_event_start_count
     strategy: numeric_sum_count
 output:
-  table_prefix: ml_shadow_feature.demo_tpat_hbn_context
+  table_prefix: ml_shadow.demo_tpat_hbn_context
 ```
 
 ### Step 3: Compiler produces plan
@@ -452,9 +452,9 @@ Compiler outputs:
 Example output:
 
 ```
-ml_shadow_feature.demo_tpat_hbn_context_non_device_daily
-ml_shadow_feature.demo_tpat_hbn_context_non_device_7d
-ml_shadow_feature.demo_tpat_hbn_context_non_device_features
+ml_shadow.demo_tpat_hbn_context_non_device_daily
+ml_shadow.demo_tpat_hbn_context_non_device_7d
+ml_shadow.demo_tpat_hbn_context_non_device_features
 ```
 
 ### Step 4: Materialize primitives
@@ -931,9 +931,9 @@ ml_shadow.simulation_metrics
 Materialized outputs:
 
 ```
-ml_shadow_feature.<agg_id>_<dimension_family>_daily
-ml_shadow_feature.<agg_id>_<dimension_family>_7d
-ml_shadow_feature.<agg_id>_<dimension_family>_features
+ml_shadow.<agg_id>_<dimension_family>_daily
+ml_shadow.<agg_id>_<dimension_family>_7d
+ml_shadow.<agg_id>_<dimension_family>_features
 ml_shadow_simulation.dataset_<dataset_id>
 ml_shadow_simulation.predictions_<run_id>
 ```

@@ -5,8 +5,8 @@ YAMLS = {
     "non_device_context_v1": os.path.join(CD, "stage-signal-prism-agg-non-device-context-backfill.yaml"),
 }
 OUT = {
-    "device_level_v1": "hive_stg.ml_shadow_feature.realtime_attributed_device_level_hly",
-    "non_device_context_v1": "hive_stg.ml_shadow_feature.realtime_attributed_non_device_context_hly",
+    "device_level_v1": "hive_stg.ml_shadow.realtime_attributed_device_level_hly",
+    "non_device_context_v1": "hive_stg.ml_shadow.realtime_attributed_non_device_context_hly",
 }
 
 def test_yamls_target_the_one_job_and_correct_family():

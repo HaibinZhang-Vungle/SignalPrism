@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS hive_stg.ml_shadow_feature.realtime_attributed_non_device_context_hly (
+CREATE TABLE IF NOT EXISTS hive_stg.ml_shadow.realtime_attributed_non_device_context_hly (
     event_time timestamp,
     ingest_time string,
     hashid string,
@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS hive_stg.ml_shadow_feature.realtime_attributed_non_de
 )
 USING iceberg
 PARTITIONED BY (hours(event_time), ingest_time, hashid)
-LOCATION "s3a://vungle2-dataeng/ml_shadow_feature/realtime_attributed_non_device_context_hly"
+LOCATION "s3a://vungle2-dataeng/ml_shadow/realtime_attributed_non_device_context_hly"
 TBLPROPERTIES (
   'sort-order' = 'event_time ASC NULLS FIRST, hashid ASC NULLS FIRST'
 )

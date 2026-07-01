@@ -81,7 +81,7 @@ SELECT
   g.*,
   a.*
 FROM gminor_enriched g
-LEFT JOIN ml_shadow_feature.realtime_attributed_device_level_hly a
+LEFT JOIN ml_shadow.realtime_attributed_device_level_hly a
   ON a.device_id = g.effective_device_id
  AND a.event_time < g.source_event_time
 QUALIFY row_number() OVER (
@@ -103,7 +103,7 @@ SELECT
   g.*,
   a.*
 FROM gminor_enriched g
-LEFT JOIN ml_shadow_feature.realtime_attributed_non_device_context_hly a
+LEFT JOIN ml_shadow.realtime_attributed_non_device_context_hly a
   ON a.context_dim_id = g.context_dim_id
  AND a.event_time < g.source_event_time
 QUALIFY row_number() OVER (

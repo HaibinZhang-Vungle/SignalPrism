@@ -31,7 +31,12 @@ PREDICATE_DEPENDENT = {
 _COUNT_PREDICATE = {"delivery_count": "jgr_no_serv_reason = 0"}
 
 # Dimensions with no single source column: a reviewed derived expression (emitted verbatim).
-_DERIVED_DIM_EXPR = {"source_has_hb": "hbn_bidrequest_id IS NOT NULL"}
+# device_id is keyed on the SDK normalized id (jgr_lo_id is empty upstream), normalized the
+# same way lena's device-feature pipelines do (normalize_device_id: trim/lowercase, nil-UUID->null).
+_DERIVED_DIM_EXPR = {
+    "source_has_hb": "hbn_bidrequest_id IS NOT NULL",
+    "device_id": "normalize_device_id(jgr_dev_normalized_id)",
+}
 
 _DIST_SUFFIXES = [("sum", "double"), ("count", "bigint"), ("min", "double"),
                   ("max", "double"), ("squaresum", "double")]

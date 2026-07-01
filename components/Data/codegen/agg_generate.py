@@ -11,12 +11,12 @@ FAMILIES = ["device_level_v1", "non_device_context_v1"]
 
 TABLE_LOCATION = {
     "device_level_v1": (
-        "hive_stg.ml_shadow_feature.realtime_attributed_device_level_hly",
-        "s3a://vungle2-dataeng/ml_shadow_feature/realtime_attributed_device_level_hly",
+        "hive_stg.ml_shadow.realtime_attributed_device_level_hly",
+        "s3a://vungle2-dataeng/ml_shadow/realtime_attributed_device_level_hly",
     ),
     "non_device_context_v1": (
-        "hive_stg.ml_shadow_feature.realtime_attributed_non_device_context_hly",
-        "s3a://vungle2-dataeng/ml_shadow_feature/realtime_attributed_non_device_context_hly",
+        "hive_stg.ml_shadow.realtime_attributed_non_device_context_hly",
+        "s3a://vungle2-dataeng/ml_shadow/realtime_attributed_non_device_context_hly",
     ),
 }
 _TEMPLATE_NAME = {
@@ -24,7 +24,17 @@ _TEMPLATE_NAME = {
     "non_device_context_v1": "realtime_attributed_non_device_context_hly",
 }
 _PRIMARY_KEY = {"device_level_v1": "device_dim_id", "non_device_context_v1": "context_dim_id"}
-_DROP_NULL = {"device_level_v1": "jgr_lo_id", "non_device_context_v1": None}
+# device_id keys on the SDK normalized id (agg_schema_catalog._DERIVED_DIM_EXPR); drop rows
+# whose normalized device id is null, matching lena's device-feature `WHERE dev_id IS NOT NULL`.
+# jgr_lo_id is empty upstream, so it is not used.
+_DROP_NULL = {
+    "device_level_v1": "normalize_device_id(jgr_dev_normalized_id)",
+    "non_device_context_v1": None,
+}
+
+# Dimensions kept in the CONTRACT/DDL but deferred from the RUNTIME dimension set. Empty now
+# that device_id keys on a populated source; kept as a hook for any future deferral.
+_DEFERRED_DIMS = {"device_level_v1": set(), "non_device_context_v1": set()}
 
 
 def family_ddl_columns(family):
@@ -59,7 +69,9 @@ def agg_ddl_template(family):
 
 
 def family_spec(family):
-    dims = [d for d in parse_dims(family) if d.role != "surrogate_key"]
+    deferred = _DEFERRED_DIMS.get(family, set())
+    dims = [d for d in parse_dims(family)
+            if d.role != "surrogate_key" and d.name not in deferred]
     return {
         "dimension_family": family,
         "primary_key": {"name": _PRIMARY_KEY[family], "recipe": "sha256_concat"},

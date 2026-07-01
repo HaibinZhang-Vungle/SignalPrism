@@ -12,7 +12,7 @@
 
 - **Authoritative contract:** `schemas/realtime_attributed_aggregation_table_schema.md` — never hand-edit generated artifacts; regenerate from the md.
 - **Reference codebase for lena APIs:** `/Users/twang/Projects/lena` (`BoilerplateSparkMain`, `appendToIcebergTable`, `getColsInJson`, `in_user_sample`).
-- **Two output tables (hourly):** `ml_shadow_feature.realtime_attributed_device_level_hly` (family `device_level_v1`, key `device_id` = `jgr_lo_id`) and `ml_shadow_feature.realtime_attributed_non_device_context_hly` (family `non_device_context_v1`, key `context_dim_id`).
+- **Two output tables (hourly):** `ml_shadow.realtime_attributed_device_level_hly` (family `device_level_v1`, key `device_id` = `jgr_lo_id`) and `ml_shadow.realtime_attributed_non_device_context_hly` (family `non_device_context_v1`, key `context_dim_id`).
 - **Full contract + null-fill:** DDL carries every metric-catalog column; the job emits only `computed` metrics; `appendToIcebergTable` null-fills the rest.
 - **No raw PII:** `jgr_dev_ifa`, `jgr_dev_ip`, `jgr_dev_ua` never appear as dimensions.
 - **Null-dimension normalization:** `__unknown__` in the surrogate-key concat (`context_dim_id`/`device_dim_id`); stored typed dim columns may remain null.
@@ -409,12 +409,12 @@ FAMILIES = ["device_level_v1", "non_device_context_v1"]
 
 TABLE_LOCATION = {
     "device_level_v1": (
-        "hive_stg.ml_shadow_feature.realtime_attributed_device_level_hly",
-        "s3a://vungle2-dataeng/ml_shadow_feature/realtime_attributed_device_level_hly",
+        "hive_stg.ml_shadow.realtime_attributed_device_level_hly",
+        "s3a://vungle2-dataeng/ml_shadow/realtime_attributed_device_level_hly",
     ),
     "non_device_context_v1": (
-        "hive_stg.ml_shadow_feature.realtime_attributed_non_device_context_hly",
-        "s3a://vungle2-dataeng/ml_shadow_feature/realtime_attributed_non_device_context_hly",
+        "hive_stg.ml_shadow.realtime_attributed_non_device_context_hly",
+        "s3a://vungle2-dataeng/ml_shadow/realtime_attributed_non_device_context_hly",
     ),
 }
 _TEMPLATE_NAME = {
@@ -953,8 +953,8 @@ YAMLS = {
     "non_device_context_v1": os.path.join(CD, "stage-signal-prism-agg-non-device-context-backfill.yaml"),
 }
 OUT = {
-    "device_level_v1": "hive_stg.ml_shadow_feature.realtime_attributed_device_level_hly",
-    "non_device_context_v1": "hive_stg.ml_shadow_feature.realtime_attributed_non_device_context_hly",
+    "device_level_v1": "hive_stg.ml_shadow.realtime_attributed_device_level_hly",
+    "non_device_context_v1": "hive_stg.ml_shadow.realtime_attributed_non_device_context_hly",
 }
 
 def test_yamls_target_the_one_job_and_correct_family():
@@ -1026,8 +1026,8 @@ spec:
       spark.app.batch_jobs.db.url: "jdbc:postgresql://stage-postgres-de.rds.vungle.io:5432/airflow_stage?user=airflow_stage&password=__PASSWORD__"
       spark.app.signalprism.data.realtime_attributed_aggregation.dimension_family: "device_level_v1"
       spark.app.signalprism.data.realtime_attributed_aggregation.input.tableName: "hive_stg.ml_shadow.realtime_attributed_event_wide"
-      spark.app.signalprism.data.realtime_attributed_aggregation.output.tableName: "hive_stg.ml_shadow_feature.realtime_attributed_device_level_hly"
-      spark.app.signalprism.data.realtime_attributed_aggregation.output.s3Dir: "s3a://vungle2-dataeng/ml_shadow_feature/realtime_attributed_device_level_hly"
+      spark.app.signalprism.data.realtime_attributed_aggregation.output.tableName: "hive_stg.ml_shadow.realtime_attributed_device_level_hly"
+      spark.app.signalprism.data.realtime_attributed_aggregation.output.s3Dir: "s3a://vungle2-dataeng/ml_shadow/realtime_attributed_device_level_hly"
       spark.app.signalprism.data.realtime_attributed_aggregation.test.create.table: "false"
       spark.app.signalprism.data.realtime_attributed_aggregation.sample_rate: "1.0"
       spark.app.signalprism.data.realtime_attributed_aggregation.aggregation_version: "v1_computed_only"
@@ -1054,7 +1054,7 @@ spec:
 
 - [ ] **Step 4: Create the non-device-context YAML**
 
-Same file, with these substitutions: `metadata.name` → `stage-signal-prism-agg-non-device-context-bf`; `podNamePrefix` → `sp-agg-nondev-bf`; `file.upload.path` → `.../sp-agg-nondev-bf/`; `dimension_family` → `non_device_context_v1`; `output.tableName` → `hive_stg.ml_shadow_feature.realtime_attributed_non_device_context_hly`; `output.s3Dir` → `s3a://vungle2-dataeng/ml_shadow_feature/realtime_attributed_non_device_context_hly`. Everything else identical.
+Same file, with these substitutions: `metadata.name` → `stage-signal-prism-agg-non-device-context-bf`; `podNamePrefix` → `sp-agg-nondev-bf`; `file.upload.path` → `.../sp-agg-nondev-bf/`; `dimension_family` → `non_device_context_v1`; `output.tableName` → `hive_stg.ml_shadow.realtime_attributed_non_device_context_hly`; `output.s3Dir` → `s3a://vungle2-dataeng/ml_shadow/realtime_attributed_non_device_context_hly`. Everything else identical.
 
 - [ ] **Step 5: Run the structural test**
 

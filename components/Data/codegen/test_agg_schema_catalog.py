@@ -26,7 +26,9 @@ def test_non_device_dims_present_and_no_pii_no_ids():
 
 def test_device_dims_and_bucket_norm():
     dims = {d.name: d for d in parse_dims("device_level_v1")}
-    assert dims["device_id"].source_col == "jgr_lo_id"
+    # device_id keys on the SDK normalized id (jgr_lo_id is empty upstream), normalized like lena
+    assert dims["device_id"].source_col == "normalize_device_id(jgr_dev_normalized_id)"
+    assert dims["device_id"].norm == "expr"
     assert dims["device_dim_id"].role == "surrogate_key"
     assert dims["dev_model_bucket"].norm == "bucket"
     assert dims["dev_platform"].norm == "normalize"
