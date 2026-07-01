@@ -6,8 +6,11 @@ __pycache__/
 
 # Feature Workbench round artifacts (runtime, produced by serve_round.py /
 # seed_feature_set.py). The folder contract lives in its README, which IS tracked.
-components/Data/feature_sets/*
-!components/Data/feature_sets/README.md
+# global_schemas.json is the deterministic materialized catalog and IS tracked
+# (so a CI staleness check can diff it against the schemas — feature_generate_spec.md).
+components/Dashboard/feature_sets/*
+!components/Dashboard/feature_sets/README.md
+!components/Dashboard/feature_sets/global_schemas.json
 
 # OS noise
 .DS_Store

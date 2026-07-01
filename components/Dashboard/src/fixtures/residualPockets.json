@@ -1,0 +1,29 @@
+[
+  {
+    "pocketId": "pocket_in_rewarded_ios",
+    "label": "geo=IN · rewarded · iOS",
+    "description": "Floor model residuals spike for rewarded iOS inventory in India — the current model under-predicts settlement here.",
+    "residualRmse": 0.48,
+    "baselineRmse": 0.31,
+    "share": 0.06,
+    "proposedFamilies": ["price_shape", "floor_lifecycle", "supply_economics"]
+  },
+  {
+    "pocketId": "pocket_banner_admob_android",
+    "label": "banner · admob · android",
+    "description": "High error on admob banner Android traffic; device and ad-unit shape look under-used.",
+    "residualRmse": 0.41,
+    "baselineRmse": 0.33,
+    "share": 0.11,
+    "proposedFamilies": ["device", "ad_unit", "timeout"]
+  },
+  {
+    "pocketId": "pocket_high_tmax_s2s",
+    "label": "high-tmax · s2s",
+    "description": "Long-timeout S2S auctions show residual structure the model misses.",
+    "residualRmse": 0.39,
+    "baselineRmse": 0.34,
+    "share": 0.04,
+    "proposedFamilies": ["timeout", "price_shape"]
+  }
+]

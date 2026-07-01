@@ -44,7 +44,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_dashboard  # noqa: E402
 
 REPO_ROOT = build_dashboard.REPO_ROOT
-DEFAULT_SHARED = REPO_ROOT / "components" / "Data" / "feature_sets"
+DEFAULT_SHARED = REPO_ROOT / "components" / "Dashboard" / "feature_sets"
 DEFAULT_SCHEMAS = build_dashboard.DEFAULT_SCHEMAS
 
 CURRENT_FILE = "current_feature_set.json"

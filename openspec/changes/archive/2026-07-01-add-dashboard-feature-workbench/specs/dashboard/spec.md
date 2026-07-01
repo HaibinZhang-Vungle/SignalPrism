@@ -1,0 +1,76 @@
+## ADDED Requirements
+
+### Requirement: Capability Map surfaces available wide-table columns
+
+The dashboard SHALL present a Capability Map that lists the wide-table columns registered as `available` feature capabilities, grouped by domain, showing for each capability its profiling status, coverage, freshness, allowed aggregation strategies, and allowed dimension families. The metadata displayed SHALL be sourced from the wide-table schema (`semantic_type`, `feat`, `null`, `enum_ref`) without a second manual pass.
+
+#### Scenario: Operator browses capabilities by domain
+
+- **WHEN** the operator opens the Capability Map
+- **THEN** the dashboard shows capability cards grouped by domain (e.g. price, floor, settlement, TPAT, device, privacy, creative, experiment)
+- **AND** each card shows coverage, null rate, freshness, allowed aggregation strategies, and allowed dimension families
+
+#### Scenario: PII and excluded columns are not offered
+
+- **WHEN** a wide-table column is marked `feat = exclude` (e.g. raw IFA/IP/UA)
+- **THEN** the dashboard does not present it as a selectable capability
+
+#### Scenario: Column has not passed profiling
+
+- **WHEN** a column has not passed basic profiling
+- **THEN** the dashboard does not list it as an `available` capability
+
+### Requirement: Aggregation Builder configures aggregations without code
+
+The dashboard SHALL let operators configure an aggregation by selecting a dimension family, one or more windows, capabilities, an aggregation strategy per capability, and a sample rate, and SHALL preview the generated output table names and an estimated cost before any materialization runs. It SHALL NOT require the operator to write pipeline or SQL code.
+
+#### Scenario: Operator composes and previews an aggregation
+
+- **WHEN** the operator selects a dimension family, windows, capabilities, per-capability strategies, and a sample rate
+- **THEN** the dashboard displays the generated output table names and an estimated cost (rows/day, bytes/day) before materialization
+
+#### Scenario: Costly selection warns before running
+
+- **WHEN** a selected capability or dimension exceeds a configured cost/cardinality threshold (e.g. raw high-cardinality `dev_model`)
+- **THEN** the dashboard shows a warning and names the safer alternative (e.g. bucketed field or a lighter dimension family) before allowing the run
+
+### Requirement: Aggregation and dimension choices are restricted to reviewed families
+
+The dashboard SHALL offer only the reviewed fixed dimension families (per TRD §7.4) and SHALL NOT allow arbitrary dimension combinations or arbitrary free-text dimensions.
+
+#### Scenario: Arbitrary dimension is rejected
+
+- **WHEN** the operator attempts to aggregate on a dimension outside the reviewed dimension families
+- **THEN** the dashboard blocks the selection and directs the operator to the closest supported dimension family
+
+### Requirement: Formula Studio composes validated derived features
+
+The dashboard SHALL provide a Formula Studio for composing derived features from materialized primitives, and SHALL validate each formula for type correctness, point-in-time safety, division safety, and source-primitive availability, showing a coverage estimate and a sample output distribution. It SHALL reject formulas that reference future labels or label-adjacent (`leak_risk`) fields as inputs.
+
+#### Scenario: Valid formula passes validation
+
+- **WHEN** the operator composes a formula referencing existing primitives for the same dimension family and window using safe operators
+- **THEN** the validation panel reports type check, point-in-time, and division-safety as passing and shows a coverage estimate
+
+#### Scenario: Formula references a label field
+
+- **WHEN** a formula references a field flagged as label / `leak_risk` (e.g. `jgr_settlement_price`) as an input rather than as a trailing-window aggregate ending before the current event
+- **THEN** the dashboard fails validation with a point-in-time / leakage error
+
+### Requirement: Simulation Lab compares baseline and treatment runs
+
+The dashboard SHALL let operators assemble a feature set and launch an offline simulation, then present baseline-vs-treatment results including model-quality metrics, lift, SHAP-style feature importance, and cohort diagnostics.
+
+#### Scenario: Operator launches and reviews a simulation
+
+- **WHEN** the operator selects a baseline feature set, candidate features, date range, sample rate, target label, and simulation mode, and launches the run
+- **THEN** the dashboard reports baseline-vs-treatment metrics, a lift curve, SHAP-style importance, and a cohort breakdown when the run completes
+
+### Requirement: Dashboard surfaces end-to-end lineage
+
+The dashboard SHALL surface lineage tracing each artifact from wide-table column to primitive to derived feature to feature set to simulation run.
+
+#### Scenario: Operator traces a feature's lineage
+
+- **WHEN** the operator inspects a derived feature
+- **THEN** the dashboard shows the chain: wide-table column → primitive → derived feature → feature set → simulation run

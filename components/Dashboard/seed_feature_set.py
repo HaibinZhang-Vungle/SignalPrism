@@ -112,7 +112,7 @@ def main(argv: list[str]) -> int:
         by_schema[f["schema"]] = by_schema.get(f["schema"], 0) + 1
     for sname, n in sorted(by_schema.items()):
         print(f"    {sname}: {n}")
-    print("Next: python3 .claude/skills/feature-dashboard/serve_round.py")
+    print("Next: python3 components/Dashboard/serve_round.py")
     return 0
 
 
