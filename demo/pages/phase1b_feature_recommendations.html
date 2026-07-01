@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Aggregate Pipeline Feature Needs</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #faf9f6; color: #2c2c2a; padding: 28px; }
+h1 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.sub { font-size: 12px; color: #898781; margin-bottom: 24px; }
+.section { margin-bottom: 28px; }
+.section-title { font-size: 13px; font-weight: 700; color: #2c2c2a; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #e1e0d9; }
+.priority-table { width: 100%; border-collapse: collapse; font-size: 11px; background: #fff; border: 0.5px solid #d3d1c7; }
+.priority-table th { background: #f1efe8; font-weight: 600; padding: 7px 10px; border-bottom: 1px solid #d3d1c7; text-align: left; color: #52514e; }
+.priority-table td { padding: 7px 10px; border-bottom: 0.5px solid #e9e8e2; vertical-align: top; }
+.priority-table tr:hover td { background: #faf9f6; }
+.p1 { color: #0f6e56; font-weight: 700; }
+.p2 { color: #185fa5; font-weight: 700; }
+.p3 { color: #185fa5; font-weight: 600; }
+.p4, .p5 { color: #52514e; }
+code { font-family: "SF Mono", "Fira Code", ui-monospace, monospace; font-size: 10.5px; color: #185fa5; }
+.note { font-size: 11px; color: #898781; margin-top: 10px; line-height: 1.45; }
+.warn { font-size: 11px; color: #e34948; margin-top: 8px; line-height: 1.45; }
+.divider { height: 1px; background: #e1e0d9; margin: 24px 0; }
+.evidence-map { display: grid; grid-template-columns: 1fr 34px 1fr 34px 1fr; gap: 10px; margin: 0 0 24px; align-items: stretch; }
+.map-box { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 10px; padding: 14px; min-height: 118px; }
+.map-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #898781; margin-bottom: 8px; }
+.map-box strong { display: block; font-size: 14px; line-height: 1.2; color: #2c2c2a; margin-bottom: 8px; }
+.map-box span { display: block; font-size: 11px; line-height: 1.4; color: #52514e; }
+.map-arrow { display: grid; place-items: center; color: #898781; font-size: 16px; font-weight: 700; }
+.map-box.evidence { border-left: 4px solid #eda100; }
+.map-box.gap { border-left: 4px solid #2a78d6; }
+.map-box.need { border-left: 4px solid #0f6e56; }
+.map-lanes { display: grid; gap: 12px; }
+@media (max-width: 760px) {
+  .evidence-map { grid-template-columns: 1fr; }
+  .map-arrow { min-height: 22px; }
+}
+</style>
+</head>
+<body>
+
+<h1>Aggregate Pipeline Feature Needs</h1>
+<p class="sub">Data-backed feature requests from the appopen / US / admob / android high-error pocket.</p>
+
+<div class="map-lanes">
+  <div class="evidence-map" aria-label="Price shape evidence to aggregate need">
+    <div class="map-box evidence">
+      <div class="label">distribution evidence</div>
+      <strong>High-price target is right-skewed</strong>
+      <span>std=66.0; IQR is 2.7x wider than iOS control.</span>
+    </div>
+    <div class="map-arrow">-></div>
+    <div class="map-box gap">
+      <div class="label">missing signal</div>
+      <strong>Average price smooths over tail risk</strong>
+      <span>One 7d average cannot describe low-end and high-end impressions in the same pocket.</span>
+    </div>
+    <div class="map-arrow">-></div>
+    <div class="map-box need">
+      <div class="label">aggregate need</div>
+      <strong>Price shape aggregates</strong>
+      <span>var/std plus p25, p75, p90 to represent volatility and quantile anchors.</span>
+    </div>
+  </div>
+
+  <div class="evidence-map" aria-label="Device tier evidence to aggregate need">
+    <div class="map-box evidence">
+      <div class="label">distribution evidence</div>
+      <strong>Device tier separates high tail</strong>
+      <span>Flagship vs budget p90 gap is 1.47x; mean gap is 1.41x.</span>
+    </div>
+    <div class="map-arrow">-></div>
+    <div class="map-box gap">
+      <div class="label">missing signal</div>
+      <strong>Device context changes price level</strong>
+      <span>The gap is stable across models and appears where the high-CPM error is worst.</span>
+    </div>
+    <div class="map-arrow">-></div>
+    <div class="map-box need">
+      <div class="label">aggregate need</div>
+      <strong>Device-tier price aggregates</strong>
+      <span>Use existing device-level axis, then roll up to device make or tier.</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Feature Recommendations for Round 2</div>
+  <table class="priority-table">
+    <tr>
+      <th>Priority</th>
+      <th>Feature</th>
+      <th>Validation source</th>
+      <th>Gap filled</th>
+    </tr>
+    <tr>
+      <td class="p1">P1</td>
+      <td><code>var_hbedsp_highest_price_{placement_type}7d</code></td>
+      <td>Q1: target std=66 vs controls 44.0 / 50.6; IQR-range 2.7x wider than ctrl_non_android</td>
+      <td>Price distribution shape / volatility</td>
+    </tr>
+    <tr>
+      <td class="p2">P2</td>
+      <td><code>avg_hbedsp_highest_price_by_device_make_7d</code></td>
+      <td>Q2: 1.41x mean gap flagship vs budget; gap stable across all tier models</td>
+      <td>Device-tier price level, continuous aggregate</td>
+    </tr>
+    <tr>
+      <td class="p3">P3</td>
+      <td><code>device_make</code> categorical</td>
+      <td>Q2: Samsung vs Motorola gap is consistent across models within tier</td>
+      <td>Device-tier embedding</td>
+    </tr>
+    <tr>
+      <td class="p4">P4</td>
+      <td><code>android_osv_major</code></td>
+      <td>Q2: implied by tier structure; newer OS is a proxy for premium device cohorts</td>
+      <td>Device recency proxy</td>
+    </tr>
+    <tr>
+      <td class="p5">P5</td>
+      <td><code>p75_hbedsp_highest_price_7d</code></td>
+      <td>Q1: IQR ratio=2.16, strong right skew; quantile anchor for floor setting</td>
+      <td>Quantile floor anchor</td>
+    </tr>
+  </table>
+  <p class="note">These are aggregate pipeline needs, not direct raw-field additions. The point is to convert distribution evidence into richer, model-usable aggregate features.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-title">Candidate Rank List — Within appopen/US/admob/android (203 rows)</div>
+  <table class="priority-table">
+    <tr>
+      <th>Rank</th>
+      <th>Candidate</th>
+      <th>Test metric</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>device model bucket</td>
+      <td>JS divergence by bucket, high-error rate lift</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>appopen ad unit / placement identity</td>
+      <td>high-error concentration, entropy, lift over peer control</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>auction / mediation timeout</td>
+      <td>KS/Wasserstein, p90 high vs low error</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>floor lifecycle position</td>
+      <td>JS/KS on floor ratios, overwrite flag lift</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>price / auction shape</td>
+      <td>KS, p90 ratio, high-error lift by spread bucket</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>supply economics</td>
+      <td>effect size, bucket lift</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>connection / device runtime</td>
+      <td>JS/KS, interaction with device model</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>creative / render context</td>
+      <td>high-error lift by encoded category</td>
+    </tr>
+  </table>
+  <p class="warn">Leakage guard: settlement_price, winning_bid_price, settlement_status, is_realtime — trailing aggregates only, not direct features.</p>
+</div>
+
+</body>
+</html>
