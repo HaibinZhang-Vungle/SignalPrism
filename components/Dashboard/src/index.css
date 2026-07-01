@@ -107,8 +107,20 @@ textarea { font-family: ui-monospace, monospace; min-height: 70px; resize: verti
 .pass { color: var(--good); }
 .fail { color: var(--bad); }
 .pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
-.pill.pass { background: rgba(63,191,127,0.15); }
-.pill.fail { background: rgba(229,103,95,0.15); }
+.pill.pass { background: rgba(63,191,127,0.15); color: var(--good); }
+.pill.warn { background: rgba(230,179,74,0.15); color: var(--warn); }
+.pill.fail { background: rgba(229,103,95,0.15); color: var(--bad); }
+
+.nav button .step { float: right; font-size: 9px; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 0 5px; }
+.nav button.active .step { color: #fff; border-color: rgba(255,255,255,0.4); }
+.promoted-count { margin-top: 18px; padding: 8px 10px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
+
+.card.pocket.selected { border-color: var(--accent); }
+
+.statbar { height: 5px; background: var(--panel-2); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+.statbar-fill { height: 100%; border-radius: 3px; }
+.screen-tbl code { font-size: 11px; }
+.screen-tbl td { vertical-align: middle; }
 
 .warn-box { background: rgba(230,179,74,0.1); border: 1px solid var(--warn); color: var(--warn); border-radius: 6px; padding: 10px; font-size: 12px; margin-top: 10px; }
 .err-box { background: rgba(229,103,95,0.1); border: 1px solid var(--bad); color: var(--bad); border-radius: 6px; padding: 10px; font-size: 12px; margin-top: 10px; }

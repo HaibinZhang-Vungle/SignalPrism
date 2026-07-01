@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { WorkbenchDataSource } from '../data/WorkbenchDataSource'
-import type { SurfaceId } from '../App'
 import { useAsync } from '../hooks/useAsync'
 import type { LineageNode } from '../data/types'
 
@@ -37,7 +36,7 @@ export function Lineage({
               <div className="node" title={`Owned by ${SURFACE_LABEL[n.surface]}`}>
                 <div className="kind">{n.kind.replace(/_/g, ' ')}</div>
                 <div className="lbl">{n.label}</div>
-                <div className="col" style={{ marginTop: 4 }}>{SURFACE_LABEL[n.surface as Exclude<SurfaceId, 'lineage'>]}</div>
+                <div className="col" style={{ marginTop: 4 }}>{SURFACE_LABEL[n.surface]}</div>
               </div>
             </span>
           ))}

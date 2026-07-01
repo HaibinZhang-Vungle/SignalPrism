@@ -72,6 +72,15 @@ export type AggregationStrategy =
 /** Profiling status; only `available` capabilities are selectable (TRD §7.7 Step 1). */
 export type ProfilingStatus = 'available' | 'profiling' | 'failed' | 'not_profiled'
 
+/** Wide-table field families the scanner proposes for feature search (fast-screen step 2). */
+export type FieldFamily =
+  | 'device'
+  | 'ad_unit'
+  | 'timeout'
+  | 'price_shape'
+  | 'floor_lifecycle'
+  | 'supply_economics'
+
 export type WindowSpec = '1h' | '1d' | '7d' | '30d'
 
 /** Fixed dimension family names (TRD §7.4). */
@@ -108,6 +117,46 @@ export interface FeatureCapability {
   freshnessMinutes: number
   distinctCount?: number
   sampleValues?: string[]
+  // Fast-screen distribution profiling (fast-screen step 3, design D1).
+  family: FieldFamily
+  bucketConcentration: number // top-bucket share [0,1]; high = near-constant / low info
+  psi: number // population stability index vs a prior window
+  klDivergence: number // KL vs the global distribution
+  baseSeparation: number // [0,1] intrinsic discriminative power before pocket weighting
+}
+
+/** A high-error residual pocket to search for features (fast-screen step 1). */
+export interface ResidualPocket {
+  pocketId: string
+  label: string
+  description: string
+  residualRmse: number
+  baselineRmse: number
+  share: number // fraction of traffic [0,1]
+  proposedFamilies: FieldFamily[]
+}
+
+/** Distribution evidence for one field against a pocket (fast-screen step 3). */
+export interface DistributionStats {
+  coverage: number
+  missingness: number
+  bucketConcentration: number
+  klDivergence: number
+  psi: number
+  subgroupSeparation: number // [0,1] pocket-relative; high = discriminates the pocket
+}
+
+/** Screen verdict; only `strong` fields may be promoted (fast-screen step 4). */
+export type ScreenVerdict = 'strong' | 'weak' | 'blocked'
+
+/** A field after screening against a pocket. */
+export interface ScreenedField {
+  capabilityId: string
+  family: FieldFamily
+  stats: DistributionStats
+  verdict: ScreenVerdict
+  drifting: boolean
+  reasons: string[]
 }
 
 /** A fixed, reviewed dimension family (TRD §7.4). Arbitrary dimensions are disallowed. */

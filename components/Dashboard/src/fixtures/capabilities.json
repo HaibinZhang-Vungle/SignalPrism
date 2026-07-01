@@ -18,7 +18,12 @@
     "nullRate": 0.29,
     "freshnessMinutes": 14,
     "distinctCount": 84213,
-    "sampleValues": ["0.13", "0.22", "0.09"]
+    "sampleValues": ["0.13", "0.22", "0.09"],
+    "family": "price_shape",
+    "bucketConcentration": 0.55,
+    "psi": 0.12,
+    "klDivergence": 0.30,
+    "baseSeparation": 0.72
   },
   {
     "capabilityId": "hbn_bid_price",
@@ -39,7 +44,12 @@
     "nullRate": 0.31,
     "freshnessMinutes": 12,
     "distinctCount": 91002,
-    "sampleValues": ["0.15", "0.31", "0.08"]
+    "sampleValues": ["0.15", "0.31", "0.08"],
+    "family": "price_shape",
+    "bucketConcentration": 0.50,
+    "psi": 0.10,
+    "klDivergence": 0.28,
+    "baseSeparation": 0.68
   },
   {
     "capabilityId": "delivery_count",
@@ -63,7 +73,12 @@
     "owner": "supply_ai",
     "coverage": 1.0,
     "nullRate": 0.0,
-    "freshnessMinutes": 8
+    "freshnessMinutes": 8,
+    "family": "supply_economics",
+    "bucketConcentration": 0.20,
+    "psi": 0.05,
+    "klDivergence": 0.10,
+    "baseSeparation": 0.30
   },
   {
     "capabilityId": "tpat_event_start_count",
@@ -82,7 +97,12 @@
     "owner": "supply_ai",
     "coverage": 0.44,
     "nullRate": 0.56,
-    "freshnessMinutes": 21
+    "freshnessMinutes": 21,
+    "family": "supply_economics",
+    "bucketConcentration": 0.60,
+    "psi": 0.15,
+    "klDivergence": 0.20,
+    "baseSeparation": 0.55
   },
   {
     "capabilityId": "mediation_floor",
@@ -101,7 +121,12 @@
     "owner": "supply_ai",
     "coverage": 0.62,
     "nullRate": 0.38,
-    "freshnessMinutes": 10
+    "freshnessMinutes": 10,
+    "family": "floor_lifecycle",
+    "bucketConcentration": 0.45,
+    "psi": 0.24,
+    "klDivergence": 0.35,
+    "baseSeparation": 0.66
   },
   {
     "capabilityId": "sr_pbtw",
@@ -120,7 +145,12 @@
     "owner": "supply_ai",
     "coverage": 0.58,
     "nullRate": 0.42,
-    "freshnessMinutes": 11
+    "freshnessMinutes": 11,
+    "family": "price_shape",
+    "bucketConcentration": 0.40,
+    "psi": 0.18,
+    "klDivergence": 0.25,
+    "baseSeparation": 0.60
   },
   {
     "capabilityId": "winner_predicted_nr",
@@ -139,7 +169,12 @@
     "owner": "supply_ai",
     "coverage": 0.55,
     "nullRate": 0.45,
-    "freshnessMinutes": 15
+    "freshnessMinutes": 15,
+    "family": "price_shape",
+    "bucketConcentration": 0.50,
+    "psi": 0.14,
+    "klDivergence": 0.30,
+    "baseSeparation": 0.50
   },
   {
     "capabilityId": "dev_model",
@@ -159,7 +194,12 @@
     "coverage": 0.97,
     "nullRate": 0.03,
     "distinctCount": 41277,
-    "sampleValues": ["iPhone14,3", "SM-G991B", "Pixel 7"]
+    "sampleValues": ["iPhone14,3", "SM-G991B", "Pixel 7"],
+    "family": "device",
+    "bucketConcentration": 0.30,
+    "psi": 0.08,
+    "klDivergence": 0.40,
+    "baseSeparation": 0.42
   },
   {
     "capabilityId": "supply_name",
@@ -183,7 +223,12 @@
     "coverage": 0.7,
     "nullRate": 0.3,
     "distinctCount": 38,
-    "sampleValues": ["mopub", "admob", "applovin"]
+    "sampleValues": ["mopub", "admob", "applovin"],
+    "family": "supply_economics",
+    "bucketConcentration": 0.60,
+    "psi": 0.10,
+    "klDivergence": 0.20,
+    "baseSeparation": 0.30
   },
   {
     "capabilityId": "no_serv_reason",
@@ -203,7 +248,12 @@
     "owner": "supply_ai",
     "coverage": 1.0,
     "nullRate": 0.0,
-    "sampleValues": ["0", "5", "7"]
+    "sampleValues": ["0", "5", "7"],
+    "family": "supply_economics",
+    "bucketConcentration": 0.93,
+    "psi": 0.10,
+    "klDivergence": 0.20,
+    "baseSeparation": 0.45
   },
   {
     "capabilityId": "dev_ifa",
@@ -221,7 +271,12 @@
     "defaultWindows": [],
     "owner": "supply_ai",
     "coverage": 0.93,
-    "nullRate": 0.07
+    "nullRate": 0.07,
+    "family": "device",
+    "bucketConcentration": 0.0,
+    "psi": 0.0,
+    "klDivergence": 0.0,
+    "baseSeparation": 0.0
   },
   {
     "capabilityId": "dev_ip",
@@ -239,7 +294,12 @@
     "defaultWindows": [],
     "owner": "supply_ai",
     "coverage": 0.99,
-    "nullRate": 0.01
+    "nullRate": 0.01,
+    "family": "device",
+    "bucketConcentration": 0.0,
+    "psi": 0.0,
+    "klDivergence": 0.0,
+    "baseSeparation": 0.0
   },
   {
     "capabilityId": "predicted_user_value",
@@ -258,7 +318,12 @@
     "owner": "supply_ai",
     "coverage": 0.4,
     "nullRate": 0.6,
-    "freshnessMinutes": 33
+    "freshnessMinutes": 33,
+    "family": "price_shape",
+    "bucketConcentration": 0.50,
+    "psi": 0.30,
+    "klDivergence": 0.30,
+    "baseSeparation": 0.50
   },
   {
     "capabilityId": "adv_erpm",
@@ -277,6 +342,11 @@
     "owner": "supply_ai",
     "coverage": 0.0,
     "nullRate": 0.0,
-    "freshnessMinutes": 0
+    "freshnessMinutes": 0,
+    "family": "supply_economics",
+    "bucketConcentration": 0.0,
+    "psi": 0.0,
+    "klDivergence": 0.0,
+    "baseSeparation": 0.0
   }
 ]

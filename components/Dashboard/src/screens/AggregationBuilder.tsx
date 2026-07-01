@@ -14,7 +14,14 @@ import { ALLOWED_DIMENSION_KEYS, familiesSupportingKey } from '../config/dimensi
 const ALL_WINDOWS: WindowSpec[] = ['1h', '1d', '7d', '30d']
 const SAMPLE_RATES = ['0.01pct', '0.1pct', '1pct']
 
-export function AggregationBuilder({ ds }: { ds: WorkbenchDataSource }) {
+export function AggregationBuilder({
+  ds,
+  promoted,
+}: {
+  ds: WorkbenchDataSource
+  /** Only fields promoted from the Distribution Screen are available here (gate). */
+  promoted: Set<string>
+}) {
   const capabilities = useAsync(() => ds.listCapabilities(), [ds])
   const families = useAsync(() => ds.listDimensionFamilies(), [ds])
 
@@ -26,12 +33,13 @@ export function AggregationBuilder({ ds }: { ds: WorkbenchDataSource }) {
   const [dimError, setDimError] = useState<string | null>(null)
   const [preview, setPreview] = useState<AggregationPreview | null>(null)
 
-  const selectable = useMemo(
-    () => (capabilities ?? []).filter(isSelectable),
-    [capabilities],
+  // Gate: only promoted (screened-strong) capabilities are candidates here.
+  const promotedCaps = useMemo(
+    () => (capabilities ?? []).filter(isSelectable).filter((c) => promoted.has(c.capabilityId)),
+    [capabilities, promoted],
   )
   // Only capabilities allowed in the chosen family can be measured there.
-  const eligible = selectable.filter((c) => c.allowedDimensionFamilies.includes(family))
+  const eligible = promotedCaps.filter((c) => c.allowedDimensionFamilies.includes(family))
 
   const toggleMeasure = (capId: string, strategy: AggregationStrategy) => {
     setMeasures((prev) => {
@@ -147,7 +155,13 @@ export function AggregationBuilder({ ds }: { ds: WorkbenchDataSource }) {
           </label>
 
           <div className="field">
-            Capabilities & strategy ({eligible.length} eligible in this family)
+            Capabilities & strategy ({eligible.length} promoted &amp; eligible in this family)
+            {promoted.size === 0 && (
+              <div className="warn-box" role="alert" data-testid="no-promoted">
+                No fields promoted yet. Screen and promote fields in the <b>Distribution Screen</b>{' '}
+                first — nothing reaches aggregation (or training) until it passes the screen.
+              </div>
+            )}
             <div className="multi">
               {eligible.map((c) => {
                 const on = !!measures[c.capabilityId]

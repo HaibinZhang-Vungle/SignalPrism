@@ -8,14 +8,26 @@ import type {
   AggregationPreview,
   DimensionFamily,
   FeatureCapability,
+  FieldFamily,
   LineageChain,
   Primitive,
+  ResidualPocket,
+  ScreenedField,
   SimulationRun,
 } from './types'
 
 export interface WorkbenchDataSource {
   /** Capabilities registered by the scanner. Only `available` ones should be shown selectable. */
   listCapabilities(): Promise<FeatureCapability[]>
+
+  /** High-error residual pockets that drive feature search (fast-screen step 1). */
+  listResidualPockets(): Promise<ResidualPocket[]>
+
+  /** Wide-table field families the scanner proposes (fast-screen step 2). */
+  listFieldFamilies(): Promise<FieldFamily[]>
+
+  /** Screen candidate raw fields against a pocket, ranked by evidence (fast-screen steps 3-4). */
+  screenFields(pocketId?: string): Promise<ScreenedField[]>
 
   /** The four reviewed dimension families (TRD §7.4). */
   listDimensionFamilies(): Promise<DimensionFamily[]>

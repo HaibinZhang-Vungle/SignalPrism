@@ -7,19 +7,34 @@ import type {
   AggregationPreview,
   DimensionFamily,
   FeatureCapability,
+  FieldFamily,
   LineageChain,
   LineageNode,
   Primitive,
+  ResidualPocket,
+  ScreenedField,
   SimulationRun,
 } from './types'
 import { DIMENSION_FAMILIES } from '../config/dimensionFamilies'
+import { screenAndRank } from '../screen/screen'
 import capabilitiesFixture from '../fixtures/capabilities.json'
 import primitivesFixture from '../fixtures/primitives.json'
 import simulationRunsFixture from '../fixtures/simulationRuns.json'
+import residualPocketsFixture from '../fixtures/residualPockets.json'
 
 const capabilities = capabilitiesFixture as FeatureCapability[]
 const primitives = primitivesFixture as Primitive[]
 const simulationRuns = simulationRunsFixture as SimulationRun[]
+const residualPockets = residualPocketsFixture as ResidualPocket[]
+
+/** Feature candidates worth screening: available, not PII, and can become features. */
+function screenCandidates(): FeatureCapability[] {
+  return capabilities.filter(
+    (c) =>
+      c.profilingStatus === 'available' &&
+      (c.feat === 'feature' || c.feat === 'feature_after_encode' || c.feat === 'leak_risk'),
+  )
+}
 
 /** Hard gate from TRD §7.8: block demo materialization above this row estimate. */
 const DEMO_ROW_GATE = 500_000_000
@@ -41,6 +56,19 @@ function sampleFraction(rate: string): number {
 export class FixtureWorkbenchDataSource implements WorkbenchDataSource {
   async listCapabilities(): Promise<FeatureCapability[]> {
     return capabilities
+  }
+
+  async listResidualPockets(): Promise<ResidualPocket[]> {
+    return residualPockets
+  }
+
+  async listFieldFamilies(): Promise<FieldFamily[]> {
+    return [...new Set(capabilities.map((c) => c.family))]
+  }
+
+  async screenFields(pocketId?: string): Promise<ScreenedField[]> {
+    const pocket = residualPockets.find((p) => p.pocketId === pocketId)
+    return screenAndRank(screenCandidates(), pocket)
   }
 
   async listDimensionFamilies(): Promise<DimensionFamily[]> {

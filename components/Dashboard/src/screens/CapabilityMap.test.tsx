@@ -12,7 +12,8 @@ const cap = (over: Partial<FeatureCapability>): FeatureCapability => ({
   semanticType: 'money_cpm', sourceEventType: 'hbn', domain: 'auction', feat: 'feature',
   nullSemantics: 'not_observed', profilingStatus: 'available', allowedAggregationStrategies: [],
   allowedDimensionFamilies: [], defaultWindows: [], owner: 'o', coverage: 1, nullRate: 0,
-  freshnessMinutes: 1, ...over,
+  freshnessMinutes: 1, family: 'price_shape', bucketConcentration: 0.4, psi: 0.1,
+  klDivergence: 0.2, baseSeparation: 0.7, ...over,
 })
 
 describe('isSelectable', () => {
