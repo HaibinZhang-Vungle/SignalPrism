@@ -104,4 +104,8 @@ def source_expr(col, staging: str) -> str:
     raw = raw.replace("placement_serve_results[].", "serve_result.")
     raw = raw.replace("placements[].", "placement_.")
     raw = raw.replace("[].", ".")  # any remaining nested array element access
+    # Strip trailing/leftover array-type notation: the schema md marks array-valued leaf
+    # columns as `name[]` (e.g. hb.pub_genre[], winning_bid.adomain[]), but the Spark column
+    # IS the array — reference it by plain name (matches lena col_map convention).
+    raw = raw.replace("[]", "")
     return raw

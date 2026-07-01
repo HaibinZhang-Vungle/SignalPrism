@@ -17,7 +17,7 @@ def test_hb_job_contract():
     assert "in_user_sample(sha1(event_id)" in s
     # Keep only the served/winning bid via row_number dedup.
     assert "row_number() OVER" in s
-    assert "PARTITION BY event_id, bidrequest_imp_id" in s
+    assert "PARTITION BY event_id" in s  # hb has no impression-id column; dedup per event_id
     assert "getColsMapInJson" in s
     assert "col_maps/hb_transactions_wide.json" in s
     assert "mergeToIcebergTable" in s or "appendToIcebergTable" in s
