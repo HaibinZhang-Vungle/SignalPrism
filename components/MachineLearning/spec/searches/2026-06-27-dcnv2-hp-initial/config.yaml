@@ -1,0 +1,62 @@
+# Floor optimization DCN v2 HP search — initial sweep
+# Branch: incandescent-mimosa  (task_75 + HP sweep notebooks)
+# Train data: pipeline 102 event-level, 7-day window ending 2026-06-27
+# Val metric: final val_loss from 10% holdout during training (minimize)
+search_id: 2026-06-27-dcnv2-hp-initial
+project: floor_optimization
+
+# Data
+input_data_path: s3://vungle2-ssp/gminor/data/floor_optimization/102
+train_end_date: 2026-06-27
+train_n_days: 7
+max_rows: 5000000
+
+# Model artifact output (trial_result.json written by train notebook)
+model_output:
+  bucket: vungle2-ssp-dev
+  key_prefix: gminor/hp_sweep/floor_optimization/dcnv2
+
+# Control: DCN v2 baseline (all defaults)
+# result_s3_uri will be populated after the control trial (000) is run.
+control:
+  label: dcnv2_v001_baseline
+  result_s3_uri: ""   # populated by init step (run trial 000 first)
+  hp_config:
+    num_cross_layers: 3
+    hidden_dim1: 256
+    hidden_dim2: 128
+    hidden_dim3: 64
+    embedding_dim: 16
+    dropout_rate: 0.2
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    gradient_clipping: null
+    epochs: 50
+    batch_size: 1024
+    num_workers: 4
+    val_split: 0.1
+    track_grad_norms: true
+
+# Metric: val_loss (lower = better)
+metric:
+  type: weighted_pct_improvement
+  scopes: [val_loss]
+  weights:
+    val_loss: 1.0
+  direction: minimize
+  display_label: val_loss
+
+# Stopping conditions
+stopping:
+  max_trials: 20
+  plateau_k: 8
+
+# Git source (notebooks loaded from branch, no Repos sync required)
+git_branch: incandescent-mimosa
+git_url: https://github.com/Vungle/gminor
+
+# Job compute: use existing GPU cluster 0628-085936-cs87thcg (floor-opt-nn-gpu).
+# Cluster: g4dn.xlarge (T4 16 GB), 15.4.x-gpu-ml-scala2.12, Single User, auto-term 60 min.
+# Leave new_cluster_spec empty so run_trial.py picks up CLUSTER_ID from env.
+# To spin up a fresh cluster per trial instead, populate new_cluster_spec below.
+new_cluster_spec: {}

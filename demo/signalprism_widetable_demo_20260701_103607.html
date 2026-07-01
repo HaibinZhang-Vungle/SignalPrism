@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SignalPrism - An Automatic Feature Detector - Demo - 20260701</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface-2: #f0f4f7;
+      --ink: #18202b;
+      --muted: #657181;
+      --line: #d9e0e8;
+      --blue: #2864cc;
+      --teal: #0f8f7b;
+      --amber: #a76600;
+      --red: #b33142;
+      --green-bg: #e7f6f0;
+      --blue-bg: #e9f0ff;
+      --amber-bg: #fff4df;
+      --red-bg: #fdecef;
+      --code-bg: #eef2f6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .page {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+
+    .topbar-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      min-width: 260px;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .nav a {
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .nav a:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 26px 24px 48px;
+    }
+
+    section {
+      margin: 0 0 22px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    p {
+      margin: 0 0 10px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .summary h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      line-height: 1.14;
+      letter-spacing: 0;
+    }
+
+    .summary-text {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 820px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--muted);
+      padding: 2px 9px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pill strong {
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      padding: 12px;
+      min-height: 92px;
+    }
+
+    .metric .value {
+      display: block;
+      font-size: 24px;
+      line-height: 1.1;
+      font-weight: 750;
+      color: var(--blue);
+      margin-bottom: 4px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .architecture {
+      overflow: hidden;
+    }
+
+    .diagram {
+      width: 100%;
+      min-height: 420px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+
+    .workflow-notes {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .workflow-note {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      padding: 12px;
+    }
+
+    .workflow-note p {
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .module {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 238px;
+    }
+
+    .module-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .module-index {
+      width: 30px;
+      height: 30px;
+      flex: 0 0 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 750;
+      background: var(--blue);
+    }
+
+    .module:nth-child(2) .module-index {
+      background: var(--teal);
+    }
+
+    .module:nth-child(3) .module-index {
+      background: var(--amber);
+    }
+
+    .module:nth-child(4) .module-index {
+      background: var(--red);
+    }
+
+    .module p {
+      color: var(--muted);
+      margin-bottom: 0;
+    }
+
+    .module ul,
+    .plain-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .module li,
+    .plain-list li {
+      margin: 4px 0;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+      gap: 18px;
+    }
+
+    .schema-flow {
+      display: grid;
+      gap: 8px;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+    }
+
+    .flow-step span {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--teal);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 750;
+    }
+
+    .flow-step p {
+      color: var(--muted);
+      margin: 2px 0 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface-2);
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    td strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: #2d4058;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .status-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--surface);
+    }
+
+    .status-card.done {
+      background: var(--green-bg);
+    }
+
+    .status-card.active {
+      background: var(--blue-bg);
+    }
+
+    .status-card.pending {
+      background: var(--amber-bg);
+    }
+
+    .status-card.risk {
+      background: var(--red-bg);
+    }
+
+    .status-label {
+      display: inline-block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      margin: 12px 0 0;
+    }
+
+    .bar > i {
+      display: block;
+      height: 100%;
+      background: var(--teal);
+    }
+
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .pain {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: var(--surface);
+    }
+
+    .pain b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--red);
+    }
+
+    .pain p {
+      color: var(--muted);
+      margin-bottom: 0;
+    }
+
+    .footer {
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .module-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .pain-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .workflow-notes {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav {
+        margin-left: 0;
+      }
+
+      main {
+        padding: 18px 14px 36px;
+      }
+
+      .summary h1 {
+        font-size: 24px;
+      }
+
+      .module-grid,
+      .status-grid,
+      .pain-grid,
+      .metric-grid,
+      .workflow-notes {
+        grid-template-columns: 1fr;
+      }
+
+      th,
+      td {
+        padding: 9px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <h1 class="brand-title">SignalPrism - An Automatic Feature Detector - Demo</h1>
+          <div class="brand-subtitle">Generated 2026-07-01 10:36:07 Asia/Shanghai</div>
+        </div>
+        <nav class="nav" aria-label="Page sections">
+          <a href="#idea">Idea</a>
+          <a href="#modules">Modules</a>
+          <a href="#schema">Schema Split</a>
+          <a href="#progress">Progress</a>
+          <a href="#pain">Pain Points</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section id="idea" class="hero">
+        <div class="panel summary">
+          <h1>用 realtime attributed wide table 把 serving log、归因、feature 和 offline simulation 串成闭环</h1>
+          <p class="summary-text">
+            项目目标是把下游昂贵且脆弱的长窗口 event join 前移到 serving/logging 层：
+            Jaeger 在 delivery/transaction 时写入可归因上下文，Scrat 在 HB notification 到达时补齐上下文并输出 shadow wide event。
+            这张事件级宽表再驱动 capability catalog、配置化聚合、derived feature、GMinor log join 和离线模型验证。
+          </p>
+          <div class="meta-row">
+            <span class="pill"><strong>核心表</strong> <code>ml_shadow.realtime_attributed_event_wide</code></span>
+            <span class="pill"><strong>粒度</strong> one row per attributed source event</span>
+            <span class="pill"><strong>POC topic</strong> <code>hb-notification-wide-202600630</code></span>
+            <span class="pill"><strong>KVDB TTL</strong> 3 hours for current HB POC</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="metric-grid">
+            <div class="metric">
+              <span class="value">4</span>
+              <span class="label">components: WideTable, Data, MachineLearning, Dashboard</span>
+            </div>
+            <div class="metric">
+              <span class="value">200</span>
+              <span class="label">generated columns in realtime attributed wide resource</span>
+            </div>
+            <div class="metric">
+              <span class="value">-5.9%</span>
+              <span class="label">Round 1 best validation loss vs control baseline</span>
+            </div>
+            <div class="metric">
+              <span class="value">9</span>
+              <span class="label">Data codegen parser/generator/lint test files present</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel architecture" aria-label="Architecture">
+        <h2>End-to-End Demo Flow</h2>
+        <svg class="diagram" viewBox="0 0 1320 430" role="img" aria-label="Realtime wide table, MLE iteration, and dashboard flow diagram">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L8,3 z" fill="#657181"></path>
+            </marker>
+          </defs>
+
+          <text x="24" y="26" fill="#657181" font-size="12" font-weight="700">Realtime attribution source</text>
+          <rect x="24" y="42" width="132" height="58" rx="8" fill="#e9f0ff" stroke="#b8c8e6"></rect>
+          <text x="42" y="68" fill="#18202b" font-size="15" font-weight="700">Jaeger</text>
+          <text x="42" y="88" fill="#657181" font-size="12">delivery txn</text>
+
+          <rect x="24" y="142" width="132" height="58" rx="8" fill="#e7f6f0" stroke="#b6d9ce"></rect>
+          <text x="42" y="168" fill="#18202b" font-size="15" font-weight="700">Scrat</text>
+          <text x="42" y="188" fill="#657181" font-size="12">HB notify</text>
+
+          <rect x="190" y="78" width="140" height="86" rx="8" fill="#fff4df" stroke="#e1c58e"></rect>
+          <text x="210" y="108" fill="#18202b" font-size="15" font-weight="700">KV Store</text>
+          <text x="210" y="130" fill="#657181" font-size="12">event + imp</text>
+          <text x="210" y="150" fill="#657181" font-size="12">TTL + dedupe</text>
+
+          <rect x="372" y="78" width="168" height="86" rx="8" fill="#ffffff" stroke="#d9e0e8"></rect>
+          <text x="392" y="106" fill="#18202b" font-size="15" font-weight="700">Wide Event Table</text>
+          <text x="392" y="128" fill="#657181" font-size="12">all attributed facts</text>
+          <text x="392" y="148" fill="#657181" font-size="12">schema-first columns</text>
+
+          <text x="596" y="26" fill="#657181" font-size="12" font-weight="700">MLE automatic feature discovery loop</text>
+          <rect x="596" y="42" width="176" height="66" rx="8" fill="#fdecef" stroke="#e8bcc4"></rect>
+          <text x="616" y="68" fill="#18202b" font-size="15" font-weight="700">Analyze Model</text>
+          <text x="616" y="88" fill="#657181" font-size="12">performance, cohorts</text>
+
+          <rect x="812" y="42" width="176" height="66" rx="8" fill="#e7f6f0" stroke="#b6d9ce"></rect>
+          <text x="832" y="68" fill="#18202b" font-size="15" font-weight="700">Find Columns</text>
+          <text x="832" y="88" fill="#657181" font-size="12">schema + user goal</text>
+
+          <rect x="1028" y="42" width="238" height="86" rx="8" fill="#e9f0ff" stroke="#b8c8e6"></rect>
+          <text x="1048" y="70" fill="#18202b" font-size="15" font-weight="700">Profile Candidate Data</text>
+          <text x="1048" y="92" fill="#657181" font-size="12">distribution, coverage, nulls</text>
+          <text x="1048" y="112" fill="#657181" font-size="12">cardinality, freshness, leakage risk</text>
+
+          <rect x="1028" y="174" width="238" height="88" rx="8" fill="#fff4df" stroke="#e1c58e"></rect>
+          <text x="1048" y="202" fill="#18202b" font-size="15" font-weight="700">Issue Aggregation Command</text>
+          <text x="1048" y="224" fill="#657181" font-size="12">formula: columnA - columnB > 100</text>
+          <text x="1048" y="244" fill="#657181" font-size="12">ops: avg, min, max, sum, sumofsquare</text>
+
+          <rect x="812" y="184" width="176" height="68" rx="8" fill="#e9f0ff" stroke="#b8c8e6"></rect>
+          <text x="832" y="210" fill="#18202b" font-size="15" font-weight="700">Aggregation Pipeline</text>
+          <text x="832" y="230" fill="#657181" font-size="12">read wide table, materialize</text>
+
+          <rect x="596" y="184" width="176" height="68" rx="8" fill="#ffffff" stroke="#d9e0e8"></rect>
+          <text x="616" y="210" fill="#18202b" font-size="15" font-weight="700">Join GMinor Log</text>
+          <text x="616" y="230" fill="#657181" font-size="12">new data into ML analysis</text>
+
+          <text x="596" y="314" fill="#657181" font-size="12" font-weight="700">Dashboard UI</text>
+          <rect x="596" y="330" width="670" height="66" rx="8" fill="#ffffff" stroke="#d9e0e8"></rect>
+          <text x="616" y="356" fill="#18202b" font-size="15" font-weight="700">Feature Workbench</text>
+          <text x="616" y="378" fill="#657181" font-size="12">wide table browser, aggregation registry, candidate feature trace, profiling, commands, run history</text>
+
+          <line x1="156" y1="71" x2="190" y2="104" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="156" y1="171" x2="190" y2="138" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="330" y1="121" x2="372" y2="121" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="540" y1="121" x2="596" y2="75" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="772" y1="75" x2="812" y2="75" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="988" y1="75" x2="1028" y2="85" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="1147" y1="128" x2="1147" y2="174" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="1028" y1="218" x2="988" y2="218" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="812" y1="218" x2="772" y2="218" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <path d="M596,218 C548,218 548,114 596,75" fill="none" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></path>
+          <line x1="456" y1="164" x2="456" y2="362" stroke="#657181" stroke-width="2"></line>
+          <line x1="456" y1="362" x2="596" y2="362" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="900" y1="252" x2="900" y2="330" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="1147" y1="262" x2="1147" y2="330" stroke="#657181" stroke-width="2" marker-end="url(#arrow)"></line>
+        </svg>
+        <div class="workflow-notes">
+          <div class="workflow-note">
+            <h3>MLE 自动触发 feature 分析检测</h3>
+            <p>从某个模型的 performance、残差、segment loss 和业务目标出发，结合宽表 schema 找潜在有价值的列，再对候选列做 profile。</p>
+            <ul class="plain-list">
+              <li>分布特性：p25/p50/p75/p90/p99、std、variance、skew、outlier rate。</li>
+              <li>数据质量：coverage、null rate、zero rate、freshness、sample stability。</li>
+              <li>建模价值：label correlation、mutual information、segment lift、SHAP/feature importance proxy。</li>
+              <li>可生产性：cardinality、dimension family cost、point-in-time leakage risk、join rate。</li>
+            </ul>
+          </div>
+          <div class="workflow-note">
+            <h3>Dashboard UI 需要呈现完整迭代过程</h3>
+            <p>UI 不只是字段浏览器，还需要展示宽表内容、aggregation registry、候选 feature 的公式、下发命令、pipeline 运行、GMinor join 和 ML 复测结果。</p>
+            <ul class="plain-list">
+              <li>宽表全量字段、source 前缀、schema version、profiling status。</li>
+              <li>aggregation 内容：dimension family、window、measure、公式和数学运算。</li>
+              <li>迭代细节：发现原因、候选列、profile 证据、命令状态、训练结果和下一轮建议。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="modules">
+        <h2>四个模块的大概内容</h2>
+        <div class="module-grid">
+          <article class="module">
+            <div class="module-head">
+              <span class="module-index">1</span>
+              <div>
+                <h3>WideTable</h3>
+                <p>定义实时归因宽表契约，并把 Jaeger / Scrat shadow path 落到可编码 spec。</p>
+              </div>
+            </div>
+            <ul>
+              <li>事件级 source of truth，不提前聚合。</li>
+              <li>保留 <code>event_id</code>、<code>imp_id</code>、transaction ids。</li>
+              <li>HB POC: Jaeger 写 KVDB，Scrat lookup 后写 wide topic。</li>
+              <li>强调 async、bounded、best-effort，不能影响 serving latency。</li>
+            </ul>
+          </article>
+
+          <article class="module">
+            <div class="module-head">
+              <span class="module-index">2</span>
+              <div>
+                <h3>Data</h3>
+                <p>先用离线 batch join 生产 golden wide dataset，作为实时 POC 的评估基线。</p>
+              </div>
+            </div>
+            <ul>
+              <li>读取 <code>coba2.ex_jaeger_transaction</code> 和 <code>coba2.hb_transactions</code>。</li>
+              <li>三个 Spark jobs: Jaeger staging、HB staging、wide join。</li>
+              <li>schema 驱动生成 DDL、columns、col maps 和 SQL templates。</li>
+              <li>默认按 event-id hash sample 控制成本。</li>
+            </ul>
+          </article>
+
+          <article class="module">
+            <div class="module-head">
+              <span class="module-index">3</span>
+              <div>
+                <h3>MachineLearning</h3>
+                <p>把 wide-table-derived features 接入离线训练、误差分析和候选 feature 验证。</p>
+              </div>
+            </div>
+            <ul>
+              <li>构建 point-in-time training / eval dataset。</li>
+              <li>比较 GMinor baseline prediction 与 treatment model。</li>
+              <li>Round 1 DCNv2 HP search 已证明当前瓶颈更像 feature gap。</li>
+              <li>Round 2 聚焦 price volatility 和 format-specific signals。</li>
+            </ul>
+          </article>
+
+          <article class="module">
+            <div class="module-head">
+              <span class="module-index">4</span>
+              <div>
+                <h3>Dashboard</h3>
+                <p>Feature Workbench，把 schema、能力、聚合配置、公式和 simulation 结果可视化。</p>
+              </div>
+            </div>
+            <ul>
+              <li>Capability Map 展示字段覆盖、freshness、null rate。</li>
+              <li>Aggregation Builder 限制 dimension family 和成本。</li>
+              <li>Formula Studio 做类型检查和 leakage 检查。</li>
+              <li>Simulation Lab 对比 baseline / treatment、lift 和 cohort diagnostics。</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="schema" class="split">
+        <div class="panel">
+          <h2>通过 schema 切分成员分工</h2>
+          <p class="summary-text">
+            协作方式采用 schema-first：先把 wide event schema、字段前缀、semantic type、null semantics、feature suitability、
+            allowed dimension families 和 leakage rules 固定下来，再由不同成员按字段族并行实现 ingestion、codegen、feature capability 和 UI。
+          </p>
+          <div class="schema-flow">
+            <div class="flow-step">
+              <span>1</span>
+              <div>
+                <h3>Schema contract</h3>
+                <p>定义事件粒度、join keys、字段前缀和每列语义，避免 Jaeger/HBN/ML/UI 各自解释字段。</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <span>2</span>
+              <div>
+                <h3>Generated artifacts</h3>
+                <p>从 schema 生成 columns JSON、col maps、DDL 和 SQL templates，Data jobs 和 Dashboard 共用同一份元数据。</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <span>3</span>
+              <div>
+                <h3>Prefix ownership</h3>
+                <p>成员按字段族负责：identity / attribution、<code>jgr_*</code>、<code>hbn_*</code>、feature metadata、simulation schema。</p>
+              </div>
+            </div>
+            <div class="flow-step">
+              <span>4</span>
+              <div>
+                <h3>Review by compatibility</h3>
+                <p>review 重点看字段兼容性、点时间正确性、成本边界和是否改变已有消息语义。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Schema slice</th>
+                <th>Owner focus</th>
+                <th>Output contract</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Identity / attribution</strong><br><code>event_id</code>, <code>imp_id</code>, <code>source_event_type</code>, <code>lookup_status</code></td>
+                <td>WideTable + Data</td>
+                <td>统一 join key、lookup state、dedupe key 和 event grain。</td>
+              </tr>
+              <tr>
+                <td><strong>Jaeger context</strong><br><code>jgr_*</code>, delivery, placement, device, auction fields</td>
+                <td>Jaeger writer + Data staging</td>
+                <td>完整 transaction/context projection，禁止把 raw payload 直接作为长期 hot KV。</td>
+              </tr>
+              <tr>
+                <td><strong>HB notification</strong><br><code>hbn_*</code>, bid, win/loss, bill, settlement fields</td>
+                <td>Scrat lookup + HB staging</td>
+                <td>source-prefixed fields，不覆盖 transaction 同名字段。</td>
+              </tr>
+              <tr>
+                <td><strong>Feature capability</strong><br>semantic type, aggregation strategy, dimension family</td>
+                <td>Data + Dashboard</td>
+                <td>UI 只暴露 reviewed capabilities，不开放任意 SQL / arbitrary dimensions。</td>
+              </tr>
+              <tr>
+                <td><strong>Simulation</strong><br>feature set, dataset, run metrics, labels</td>
+                <td>MachineLearning</td>
+                <td>point-in-time join、baseline-vs-treatment、coverage 和 cohort diagnostics。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="progress">
+        <h2>当前进展</h2>
+        <div class="status-grid">
+          <article class="status-card done">
+            <span class="status-label">FOUNDATION - Design</span>
+            <h3>两份 Chapter 7 TRD 已形成主设计</h3>
+            <p>明确了 realtime attribution wide table、layered TTL、global event-id sampling、feature capability catalog、aggregation compiler、offline simulation 和 Feature Workbench 的目标路径。</p>
+            <div class="bar"><i style="width: 24%"></i></div>
+          </article>
+
+          <article class="status-card done">
+            <span class="status-label">FOUNDATION - Data</span>
+            <h3>离线 wide table pipeline scaffold 已完成</h3>
+            <p>已有 3 个 Scala/Spark jobs、3 份 DDL、3 份 SQL templates、3 份 generated column JSON。当前 generated resource 规模为 wide 200 columns、Jaeger staging 153 columns、HB staging 49 columns。</p>
+            <div class="bar"><i style="width: 26%"></i></div>
+          </article>
+
+          <article class="status-card active">
+            <span class="status-label">ACTIVE - WideTable</span>
+            <h3>Jaeger / Scrat HB POC dev spec 已完成</h3>
+            <p><code>components/WideTable/spec/dev_spec.md</code> 已定义 HB successful delivery writer、KVDB key、dedupe key、3h TTL、metrics、Scrat wide topic、UT/regression 和 review/PR 流程。</p>
+            <div class="bar"><i style="width: 18%"></i></div>
+          </article>
+
+          <article class="status-card active">
+            <span class="status-label">ACTIVE - MachineLearning</span>
+            <h3>Round 1/2 离线验证正在推进</h3>
+            <p>Round 1 best trial val_loss 较 control 下降 5.9%。Round 2 已产出 model artifacts 和 segment analysis，发现 video、interstitial、US、appopen 等高误差段，price volatility 是主要候选 gap。</p>
+            <div class="bar"><i style="width: 24%"></i></div>
+          </article>
+
+          <article class="status-card active">
+            <span class="status-label">ACTIVE - Dashboard</span>
+            <h3>Feature Workbench 静态页面已存在</h3>
+            <p><code>components/Dashboard/feature_dashboard.html</code> 已实现 capability 浏览和 selection tray 方向，后续需要接入真实 schema metadata、profiling metrics 和 simulation results。</p>
+            <div class="bar"><i style="width: 16%"></i></div>
+          </article>
+
+          <article class="status-card pending">
+            <span class="status-label">NEXT - Integration</span>
+            <h3>下一步是把 offline golden path 和 realtime shadow path 对齐</h3>
+            <p>需要完成 Jaeger/Scrat POC 编码，收集 lookup hit/miss、payload size、delay CDF、dedupe rate，并与 offline join output 做 sampled cohort 对账。</p>
+            <div class="bar"><i style="width: 14%"></i></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="pain">
+        <h2>问题和痛点</h2>
+        <div class="pain-grid">
+          <article class="pain">
+            <b>event_id 不一定跨源稳定</b>
+            <p>如果 HBN/TPAT 和 delivery 使用不同 id，即使 KVDB TTL 足够也会 miss。需要 Phase 0 key coverage 和 fallback key normalization。</p>
+          </article>
+          <article class="pain">
+            <b>跨 Kubernetes cluster 归因</b>
+            <p>delivery 可能在 cluster A，notification 到 cluster B。测试单位必须是 global event-id sampled cohort，而不是某个 cluster。</p>
+          </article>
+          <article class="pain">
+            <b>7-day hot KV 成本过高</b>
+            <p>全量 7 天 hot KV 容易到 TB/PB 级。demo 应先用短 TTL、compact projection、cold log repair 和 measured delay CDF 决策。</p>
+          </article>
+          <article class="pain">
+            <b>serving latency 不能受影响</b>
+            <p>Jaeger writer 必须 async、bounded、non-blocking，KVDB outage 只能表现为 metrics/logs，不能影响 auction response。</p>
+          </article>
+          <article class="pain">
+            <b>feature leakage 和 point-in-time correctness</b>
+            <p>Feature formula 不能引用未来 label，同一 event 不应贡献给自己的 trailing feature，GMinor join 必须按 request_time 做点时间约束。</p>
+          </article>
+          <article class="pain">
+            <b>维度自由组合会失控</b>
+            <p>Dashboard 不能开放任意 dimensions 或 SQL。必须使用 reviewed dimension families、sample-first execution 和 row-count/cost gates。</p>
+          </article>
+          <article class="pain">
+            <b>schema drift 会破坏 downstream</b>
+            <p>字段含义、null semantics、前缀规则和 generated artifacts 必须从同一 schema source 派生，并在 CI 中做 validation。</p>
+          </article>
+          <article class="pain">
+            <b>offline 指标不等价于 online A/B</b>
+            <p>Demo 能证明 candidate feature 值得 productionize，但完整 counterfactual 仍依赖 bid response array、served feature log 和 policy replay semantics。</p>
+          </article>
+          <article class="pain">
+            <b>数据质量和缺失原因要可解释</b>
+            <p>lookup miss 要拆成 sampled out、no key、expired、source key mismatch、write failure 等原因，否则无法判断架构是否有效。</p>
+          </article>
+          <article class="pain">
+            <b>UI 和全流程交互接口还需要设计</b>
+            <p>Dashboard、MLE analyzer、aggregation compiler、pipeline runner 和 simulation runner 之间需要明确 command schema、状态回传、权限边界和失败重试语义。</p>
+          </article>
+          <article class="pain">
+            <b>是否能真正探索出有价值的数据需要验证</b>
+            <p>当前假设是宽表能暴露新的有效信号，但仍需用离线实验确认候选列能稳定提升目标模型，而不是只解释历史误差或引入泄漏。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="footer">
+        <p>
+          Source inputs: <code>proj_trd/realtime_attribution_wide_table_demo.md</code>,
+          <code>proj_trd/end_to_end_mlops_wide_table_demo.md</code>,
+          and completed artifacts under <code>components/WideTable</code>, <code>components/Data</code>,
+          <code>components/MachineLearning</code>, and <code>components/Dashboard</code>.
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "trial_id": "000",
+  "search_id": "2026-06-27-dcnv2-hp-initial",
+  "created_at": "2026-06-27T00:00:00Z",
+  "status": "success",
+  "kind": "control",
+  "parent_trial_id": null,
+  "rationale": "Baseline DCN v2 configuration — all defaults. Establishes the val_loss anchor for all subsequent trials.",
+  "hp_config": {
+    "num_cross_layers": 3,
+    "hidden_dim1": 256,
+    "hidden_dim2": 128,
+    "hidden_dim3": 64,
+    "embedding_dim": 16,
+    "dropout_rate": 0.2,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "gradient_clipping": null,
+    "epochs": 20,
+    "batch_size": 1024,
+    "num_workers": 4,
+    "val_split": 0.1,
+    "track_grad_norms": true
+  },
+  "training": {
+    "started_at": "2026-06-28T13:30:17Z",
+    "finished_at": "2026-06-28T14:40:41Z",
+    "duration_s": 4224,
+    "databricks_run_id": 337672788067921,
+    "result_s3_uri": "s3://vungle2-ssp-dev/gminor/hp_sweep/floor_optimization/dcnv2/2026-06-27-dcnv2-hp-initial/trial_000/result.json"
+  },
+  "metrics": {
+    "final_train_loss": 1.5692631761970952e-05,
+    "final_val_loss": 1.2295969199300956e-05,
+    "train_val_gap": -3.396662562669996e-06,
+    "max_grad_norm": 1835.5132932514716,
+    "total_training_time_s": 738.9586861133575,
+    "device": "cuda",
+    "num_rows": 4999606,
+    "epochs_run": 20
+  },
+  "evaluation": null,
+  "score": 0.0,
+  "error": null
+}

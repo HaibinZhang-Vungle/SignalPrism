@@ -14,3 +14,4 @@ components/Dashboard/feature_sets/*
 
 # OS noise
 .DS_Store
+.idea/

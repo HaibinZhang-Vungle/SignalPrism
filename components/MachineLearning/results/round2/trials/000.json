@@ -1,0 +1,30 @@
+{
+  "trial_id": "000",
+  "search_id": "2026-07-01-dcnv2-r2-artifacts",
+  "created_at": "2026-07-01T00:00:00Z",
+  "status": "pending",
+  "kind": "experiment",
+  "parent_trial_id": null,
+  "rationale": "Retrain T004 (Round 1 best) with temporal val split and artifact saving. Same 23 features, same HP. Goal is model.pt + val_predictions.parquet for Phase 1 feature gap analysis (permutation importance, CART segment discovery, Trino feature scan, cross weight heatmap).",
+  "hp_config": {
+    "num_cross_layers": 3,
+    "hidden_dim1": 512,
+    "hidden_dim2": 256,
+    "hidden_dim3": 128,
+    "embedding_dim": 16,
+    "dropout_rate": 0.2,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0001,
+    "gradient_clipping": null,
+    "epochs": 20,
+    "batch_size": 1024,
+    "num_workers": 4,
+    "val_split": 0.0,
+    "track_grad_norms": true
+  },
+  "training": null,
+  "metrics": null,
+  "evaluation": null,
+  "score": null,
+  "error": null
+}

@@ -1,0 +1,24 @@
+=== Multi-Dimensional Hierarchical Drill-Down ===
+Global MAE : 0.000360
+Config     : MIN_N=200, threshold=2.0x, top_k=2, max_depth=4
+
+supply_name=rovio  |  n=234  |  MAE=0.003487  |  9.7x global
+  → sdk_supply_name=others  |  n=234  |  MAE=0.003487  |  9.7x global
+    → ad_type=video  |  n=234  |  MAE=0.003487  |  9.7x global
+  → ad_type=video  |  n=234  |  MAE=0.003487  |  9.7x global
+    → sdk_supply_name=others  |  n=234  |  MAE=0.003487  |  9.7x global
+placement_type=appopen  |  n=16,170  |  MAE=0.001602  |  4.5x global
+  → country=US  |  n=683  |  MAE=0.010166  |  28.2x global
+    → supply_name=admob  |  n=395  |  MAE=0.010469  |  29.1x global
+      → device_os=android  |  n=203  |  MAE=0.012180  |  33.8x global
+      → ad_type=video  |  n=395  |  MAE=0.010469  |  29.1x global
+    → device_os=android  |  n=365  |  MAE=0.010243  |  28.4x global
+      → supply_name=admob  |  n=203  |  MAE=0.012180  |  33.8x global
+      → ad_type=video  |  n=365  |  MAE=0.010243  |  28.4x global
+  → supply_name=max  |  n=1,956  |  MAE=0.002829  |  7.8x global
+    → device_os=iOS  |  n=367  |  MAE=0.005641  |  15.7x global
+      → sdk_supply_name=max  |  n=333  |  MAE=0.005767  |  16.0x global
+      → ad_type=video  |  n=367  |  MAE=0.005641  |  15.7x global
+    → sdk_supply_name=max  |  n=1,280  |  MAE=0.003057  |  8.5x global
+      → device_os=iOS  |  n=333  |  MAE=0.005767  |  16.0x global
+      → ad_type=video  |  n=1,280  |  MAE=0.003057  |  8.5x global
