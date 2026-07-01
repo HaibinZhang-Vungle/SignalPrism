@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phase 1B — Distribution Analysis Findings</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #faf9f6; color: #2c2c2a; padding: 28px; }
+h1 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.sub { font-size: 12px; color: #898781; margin-bottom: 24px; }
+
+.section { margin-bottom: 28px; }
+.section-title { font-size: 13px; font-weight: 700; color: #2c2c2a; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #e1e0d9; }
+
+/* Two column layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+/* Query result card */
+.card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 10px; padding: 16px; }
+.card-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; color: #2c2c2a; }
+
+/* Table */
+table { width: 100%; border-collapse: collapse; font-size: 11px; }
+th { background: #f1efe8; font-weight: 600; text-align: left; padding: 6px 8px; border-bottom: 1px solid #d3d1c7; color: #52514e; }
+td { padding: 6px 8px; border-bottom: 0.5px solid #e9e8e2; }
+tr.target td { background: #fff8f0; font-weight: 500; }
+tr.highlight td { background: #fef3ec; }
+
+/* Finding pills */
+.findings { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.finding { background: #f7f6f1; border-left: 3px solid #eda100; border-radius: 0 6px 6px 0; padding: 8px 12px; font-size: 11px; line-height: 1.5; }
+.finding strong { color: #2c2c2a; }
+.finding .label { font-size: 10px; font-weight: 700; color: #854f0b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+.finding.blue { border-left-color: #2a78d6; }
+.finding.blue .label { color: #185fa5; }
+.finding.teal { border-left-color: #0f6e56; }
+.finding.teal .label { color: #0f6e56; }
+.finding.red { border-left-color: #e34948; }
+.finding.red .label { color: #993c1d; }
+
+/* Feature priority table */
+.priority-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.priority-table th { background: #f1efe8; font-weight: 600; padding: 7px 10px; border-bottom: 1px solid #d3d1c7; text-align: left; color: #52514e; }
+.priority-table td { padding: 7px 10px; border-bottom: 0.5px solid #e9e8e2; vertical-align: top; }
+.priority-table tr:hover td { background: #faf9f6; }
+.badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+.badge-zero { background: #e1f5ee; color: #0f6e56; }
+.badge-low  { background: #e6f1fb; color: #185fa5; }
+.badge-med  { background: #faeeda; color: #854f0b; }
+.p1 { color: #0f6e56; font-weight: 700; }
+.p2 { color: #185fa5; font-weight: 700; }
+.p3 { color: #185fa5; font-weight: 600; }
+.p4 { color: #52514e; }
+.p5 { color: #52514e; }
+
+/* Device tier table */
+.tier-flagship td { background: #fff8f0; }
+.tier-mid td { background: #f7f6f1; }
+.tier-budget td { background: #f1efe8; }
+.tier-label { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.t-flagship { background: #faeeda; color: #854f0b; }
+.t-mid      { background: #e6f1fb; color: #185fa5; }
+.t-budget   { background: #e1f5ee; color: #0f6e56; }
+
+/* Diff highlight */
+.diff-up   { color: #e34948; font-weight: 600; }
+.diff-note { font-size: 10px; color: #898781; }
+
+/* Schema box */
+.schema { background: #f1efe8; border-radius: 8px; padding: 12px 14px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace; color: #52514e; margin-bottom: 16px; line-height: 1.7; }
+.schema span { color: #185fa5; font-weight: 600; }
+
+/* Section divider */
+.divider { height: 1px; background: #e1e0d9; margin: 24px 0; }
+</style>
+</head>
+<body>
+
+<h1 id="phase1b-distribution-top">Phase 1B — Wide Table Distribution Analysis</h1>
+<p class="sub">Target: appopen / US / admob / android (33.8× global MAE) · sample dt=2026-06-28 hr 00–03</p>
+
+<!-- Two queries side by side -->
+<div class="two-col">
+
+  <!-- Query 1 -->
+  <div class="card">
+    <div class="card-title">Query 1 — Price Shape: Target vs Controls</div>
+    <table>
+      <tr>
+        <th>Group</th><th>n</th><th>mean</th><th>p25</th><th>p75</th><th>p90</th><th>std</th><th>spread</th><th>med_floor</th>
+      </tr>
+      <tr class="target">
+        <td><strong>target</strong><br><span style="font-size:10px;color:#898781;font-weight:400">appopen/US/admob/android</span></td><td>3.0M</td><td><strong>31.8</strong></td><td>4.1</td><td>31.3</td><td>75.7</td><td><strong class="diff-up">66.0</strong></td><td>2.7</td><td>1.5</td>
+      </tr>
+      <tr>
+        <td>ctrl_non_android</td><td>1.8M</td><td>15.1</td><td>3.2</td><td>13.1</td><td>31.1</td><td>44.0</td><td>1.6</td><td>1.9</td>
+      </tr>
+      <tr>
+        <td>ctrl_non_admob</td><td>2.8M</td><td>23.3</td><td>4.8</td><td>22.9</td><td>49.9</td><td>50.6</td><td><strong class="diff-up">7.9</strong></td><td>0.2</td>
+      </tr>
+    </table>
+    <div class="findings" style="margin-top:12px">
+      <div class="finding">
+        <div class="label">Finding A — Price Distribution</div>
+        Target IQR-range = 27.2 vs ctrl_non_android = 9.9 → <strong>2.7× wider</strong>. Target std=66 vs 44 (+50%). Model uses a single avg≈$31.8 but impressions span $4–$75+.
+      </div>
+      <div class="finding blue">
+        <div class="label">Finding B — Percentile Problem</div>
+        Target p90/p50 = 6.0× (ctrl = 5.2×). Setting floor at 7d avg misses both ends: too high for $4 impressions, too low for $75 impressions.
+      </div>
+      <div class="finding teal">
+        <div class="label">Finding C — Tight Bid Spread</div>
+        Target spread=2.7 vs ctrl_non_admob=7.9. Despite 79 DSPs, bids cluster near winner → floor precision matters more here than elsewhere.
+      </div>
+      <div class="finding red">
+        <div class="label">Finding D — med_floor Truncation</div>
+        Target med_floor=1.5 vs 0.2 in ctrl_non_admob. Filters low bids but leaves heavy right tail intact — raw price distribution is already truncated.
+      </div>
+    </div>
+  </div>
+
+  <!-- Query 2 -->
+  <div class="card">
+    <div class="card-title">Query 2 — Device Model Breakdown (within target)</div>
+    <table>
+      <tr>
+        <th>Tier</th><th>Model</th><th>Make</th><th>n</th><th>mean</th><th>p75</th><th>p90</th><th>CV</th>
+      </tr>
+      <tr class="tier-flagship">
+        <td><span class="tier-label t-flagship">Flagship</span></td><td>sm-s938u</td><td>Samsung</td><td>60K</td><td>41.0</td><td>42.3</td><td>97.7</td><td>1.82</td>
+      </tr>
+      <tr class="tier-flagship">
+        <td><span class="tier-label t-flagship">Flagship</span></td><td>sm-s928u</td><td>Samsung</td><td>50K</td><td>42.7</td><td>43.2</td><td>102.7</td><td>1.75</td>
+      </tr>
+      <tr class="tier-flagship">
+        <td><span class="tier-label t-flagship">Flagship</span></td><td>sm-s921u</td><td>Samsung</td><td>45K</td><td>38.5</td><td>38.5</td><td>95.9</td><td>1.84</td>
+      </tr>
+      <tr class="tier-mid">
+        <td><span class="tier-label t-mid">Mid</span></td><td>sm-a166u</td><td>Samsung</td><td>193K</td><td>32.7</td><td>32.6</td><td>75.7</td><td>2.00</td>
+      </tr>
+      <tr class="tier-mid">
+        <td><span class="tier-label t-mid">Mid</span></td><td>sm-a156u</td><td>Samsung</td><td>153K</td><td>30.5</td><td>31.1</td><td>73.3</td><td>1.80</td>
+      </tr>
+      <tr class="tier-mid">
+        <td><span class="tier-label t-mid">Mid</span></td><td>sm-a176u</td><td>Samsung</td><td>56K</td><td>36.8</td><td>37.3</td><td>80.3</td><td>2.23</td>
+      </tr>
+      <tr class="tier-budget">
+        <td><span class="tier-label t-budget">Budget</span></td><td>moto g-2025</td><td>Motorola</td><td>138K</td><td>29.7</td><td>30.1</td><td>69.7</td><td>1.99</td>
+      </tr>
+      <tr class="tier-budget">
+        <td><span class="tier-label t-budget">Budget</span></td><td>moto g 5g-2024</td><td>Motorola</td><td>104K</td><td>27.9</td><td>27.8</td><td>64.2</td><td>1.85</td>
+      </tr>
+      <tr class="tier-budget">
+        <td><span class="tier-label t-budget">Budget</span></td><td>moto g play-2024</td><td>Motorola</td><td>62K</td><td>28.1</td><td>27.4</td><td>63.8</td><td>2.29</td>
+      </tr>
+    </table>
+    <div class="findings" style="margin-top:12px">
+      <div class="finding">
+        <div class="label">Finding A — 3-Tier Price Structure</div>
+        Flagship p90=$97–103 vs Budget p90=$64–70 → <strong>1.47× gap</strong>. Consistent across all models within tier — not outlier-driven.
+      </div>
+      <div class="finding blue">
+        <div class="label">Finding B — Gap in Tail, Not Floor</div>
+        p25 range: $3.7–7.0 (nearly identical). p75/p90 range: 1.6× gap. Device tier is most predictive exactly where error is worst (high-CPM region).
+      </div>
+      <div class="finding teal">
+        <div class="label">Finding C — Budget = More Random</div>
+        Motorola CV≈2.0–2.3 vs Flagship CV≈1.75–2.05. Flagship auctions are more consistently premium — interaction <code>device_tier × var_price</code> may add signal.
+      </div>
+      <div class="finding red">
+        <div class="label">Finding D — Coverage</div>
+        Top-15 models cover ~37% of 3M target impressions. top-N=20 bucket + "other" would cover 50%+. Low-cardinality bucket is sufficient.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Feature priority table -->
+<div class="section" id="phase1b-recommendations">
+  <div class="section-title">Feature Recommendations for Round 2</div>
+  <table class="priority-table">
+    <tr>
+      <th>Priority</th>
+      <th>Feature</th>
+      <th>Validation source</th>
+      <th>Gap filled</th>
+    </tr>
+    <tr>
+      <td class="p1">🥇 P1</td>
+      <td><code>var_hbedsp_highest_price_{placement_type}7d</code></td>
+      <td>Q1: target std=66 >> controls; IQR-range 2.7× wider than ctrl_non_android</td>
+      <td>Price distribution shape / volatility</td>
+    </tr>
+    <tr>
+      <td class="p2">🥈 P2</td>
+      <td><code>avg_hbedsp_highest_price_by_device_make_7d</code></td>
+      <td>Q2: 1.41× mean gap flagship vs budget; gap stable across all tier models</td>
+      <td>Device-tier price level (continuous)</td>
+    </tr>
+    <tr>
+      <td class="p3">🥉 P3</td>
+      <td><code>device_make</code> (categorical)</td>
+      <td>Q2: Samsung vs Motorola gap consistent across all models within tier</td>
+      <td>Device-tier embedding</td>
+    </tr>
+    <tr>
+      <td class="p4">P4</td>
+      <td><code>android_osv_major</code></td>
+      <td>Q2: implied by tier structure (newer OS ≈ premium device)</td>
+      <td>Device recency proxy</td>
+    </tr>
+    <tr>
+      <td class="p5">P5</td>
+      <td><code>p75_hbedsp_highest_price_7d</code></td>
+      <td>Q1: IQR ratio=2.16, strong right skew; quantile anchor for floor setting</td>
+      <td>Quantile floor anchor</td>
+    </tr>
+  </table>
+  <p style="font-size:11px;color:#898781;margin-top:10px">Recommended path: validate P1–P3 first. P4–P5 only if P1–P3 trial shows insufficient lift on target segment.</p>
+</div>
+
+<div class="divider"></div>
+
+<!-- Rank list summary -->
+<div class="section">
+  <div class="section-title">Candidate Rank List — Within appopen/US/admob/android (203 rows)</div>
+  <table class="priority-table">
+    <tr>
+      <th>Rank</th><th>Candidate</th><th>Test metric</th>
+    </tr>
+    <tr>
+      <td>1</td><td>device model bucket</td><td>JS divergence by bucket, high-error rate lift</td>
+    </tr>
+    <tr>
+      <td>2</td><td>appopen ad unit / placement identity</td><td>high-error concentration, entropy, lift over peer control</td>
+    </tr>
+    <tr>
+      <td>3</td><td>auction / mediation timeout</td><td>KS/Wasserstein, p90 high vs low error</td>
+    </tr>
+    <tr>
+      <td>4</td><td>floor lifecycle position</td><td>JS/KS on floor ratios, overwrite flag lift</td>
+    </tr>
+    <tr>
+      <td>5</td><td>price / auction shape</td><td>KS, p90 ratio, high-error lift by spread bucket</td>
+    </tr>
+    <tr>
+      <td>6</td><td>supply economics</td><td>effect size, bucket lift</td>
+    </tr>
+    <tr>
+      <td>7</td><td>connection / device runtime</td><td>JS/KS, interaction with device model</td>
+    </tr>
+    <tr>
+      <td>8</td><td>creative / render context</td><td>high-error lift by encoded category</td>
+    </tr>
+  </table>
+  <p style="font-size:11px;color:#e34948;margin-top:8px">⚠ Leakage guard: settlement_price, winning_bid_price, settlement_status, is_realtime — trailing aggregates only, not direct features.</p>
+</div>
+
+</body>
+</html>

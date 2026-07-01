@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CART Residual Tree — Floor DCN-v2</title>
+<style>
+body { font-family: system-ui, sans-serif; background: #faf9f6; margin: 0; padding: 24px; }
+h2 { font-size: 16px; font-weight: 600; color: #2c2c2a; margin: 0 0 4px; }
+p  { font-size: 12px; color: #898781; margin: 0 0 16px; }
+svg text { font-family: system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<h2>CART Residual Tree — Floor DCN-v2</h2>
+<p>Shallow decision tree fit on absolute residuals from val_predictions.parquet. Splits reveal which features drive error concentration.</p>
+<svg width="100%" viewBox="0 0 820 680" xmlns="http://www.w3.org/2000/svg">
+<style>
+.lbl { font-size: 10px; fill: #52514e; }
+.th  { font-size: 11px; font-weight: 600; fill: #2c2c2a; }
+.ts  { font-size: 10px; fill: #52514e; }
+.edge { stroke: #c5c3bb; stroke-width: 1.2; fill: none; }
+.elbl { font-size: 9px; fill: #898781; }
+</style>
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#c5c3bb" stroke-width="1.5"/>
+  </marker>
+</defs>
+
+<rect x="300" y="10" width="220" height="52" rx="7" fill="#F1EFE8" stroke="#C5C3BB" stroke-width="0.8"/>
+<text class="th" x="410" y="30" text-anchor="middle">all val rows</text>
+<text class="ts" x="410" y="46" text-anchor="middle">MAE = 1.0× global</text>
+<text class="ts" x="410" y="60" text-anchor="middle">n = 1,031,662</text>
+
+<text class="elbl" x="250" y="80" text-anchor="middle">≤ 20.36</text>
+<text class="elbl" x="570" y="80" text-anchor="middle">&gt; 20.36</text>
+<path class="edge" d="M360 62 L200 120" marker-end="url(#arr)"/>
+<path class="edge" d="M460 62 L620 120" marker-end="url(#arr)"/>
+
+<rect x="100" y="120" width="200" height="52" rx="7" fill="#F1EFE8" stroke="#C5C3BB" stroke-width="0.8"/>
+<text class="th" x="200" y="140" text-anchor="middle">avg_price ≤ 20.36</text>
+<text class="ts" x="200" y="154" text-anchor="middle">avg_price ≤ 3.97</text>
+<text class="ts" x="200" y="168" text-anchor="middle">→ split further</text>
+
+<text class="elbl" x="110" y="195" text-anchor="middle">≤ 3.97</text>
+<text class="elbl" x="285" y="195" text-anchor="middle">&gt; 3.97</text>
+<path class="edge" d="M150 172 L100 218" marker-end="url(#arr)"/>
+<path class="edge" d="M250 172 L290 218" marker-end="url(#arr)"/>
+
+<rect x="20" y="218" width="160" height="44" rx="7" fill="#F1EFE8" stroke="#C5C3BB" stroke-width="0.8"/>
+<text class="th" x="100" y="236" text-anchor="middle">ad_type ≤ 1.5</text>
+<text class="ts" x="100" y="252" text-anchor="middle">banner / native</text>
+<text class="elbl" x="40" y="277" text-anchor="middle">≤ 1.5</text>
+<text class="elbl" x="145" y="277" text-anchor="middle">&gt; 1.5</text>
+<path class="edge" d="M60 262 L44 294" marker-end="url(#arr)"/>
+<path class="edge" d="M140 262 L158 294" marker-end="url(#arr)"/>
+
+<rect x="10" y="294" width="70" height="52" rx="6" fill="#FFF0EE" stroke="#e34948" stroke-width="0.8"/>
+<text class="th" x="45" y="312" text-anchor="middle" fill="#7a1c1a">leaf 4</text>
+<text class="lbl" x="45" y="326" text-anchor="middle">0.14×</text>
+<text class="lbl" x="45" y="338" text-anchor="middle">n=626K</text>
+
+<rect x="116" y="294" width="70" height="52" rx="6" fill="#FFF0EE" stroke="#e34948" stroke-width="0.8"/>
+<text class="th" x="151" y="312" text-anchor="middle" fill="#7a1c1a">leaf 8</text>
+<text class="lbl" x="151" y="326" text-anchor="middle">0.81×</text>
+<text class="lbl" x="151" y="338" text-anchor="middle">n=248K</text>
+
+<rect x="220" y="218" width="165" height="44" rx="7" fill="#F1EFE8" stroke="#C5C3BB" stroke-width="0.8"/>
+<text class="th" x="302" y="236" text-anchor="middle">net_rev_7d split</text>
+<text class="ts" x="302" y="252" text-anchor="middle">+ med_floor / mkt_price</text>
+<text class="elbl" x="240" y="278" text-anchor="middle">low</text>
+<text class="elbl" x="360" y="278" text-anchor="middle">high</text>
+<path class="edge" d="M255 262 L240 294" marker-end="url(#arr)"/>
+<path class="edge" d="M350 262 L365 294" marker-end="url(#arr)"/>
+
+<rect x="200" y="294" width="70" height="52" rx="6" fill="#FAEBD7" stroke="#c96a00" stroke-width="0.8"/>
+<text class="th" x="235" y="312" text-anchor="middle" fill="#7a3a00">leaf 5</text>
+<text class="lbl" x="235" y="326" text-anchor="middle">1.30×</text>
+<text class="lbl" x="235" y="338" text-anchor="middle">n=18K</text>
+
+<rect x="325" y="294" width="70" height="52" rx="6" fill="#FAE0C8" stroke="#c96a00" stroke-width="0.8"/>
+<text class="th" x="360" y="312" text-anchor="middle" fill="#7a3a00">leaf 11</text>
+<text class="lbl" x="360" y="326" text-anchor="middle">5.64×</text>
+<text class="lbl" x="360" y="338" text-anchor="middle">n=17K</text>
+
+<rect x="520" y="120" width="210" height="52" rx="7" fill="#FAE0C8" stroke="#c96a00" stroke-width="0.8"/>
+<text class="th" x="625" y="140" text-anchor="middle">avg_price &gt; 20.36</text>
+<text class="ts" x="625" y="154" text-anchor="middle">high-price regime</text>
+<text class="ts" x="625" y="168" text-anchor="middle">MAE &gt;&gt; global</text>
+
+<text class="elbl" x="555" y="196" text-anchor="middle">≤ 110.93</text>
+<text class="elbl" x="720" y="196" text-anchor="middle">&gt; 110.93</text>
+<path class="edge" d="M580 172 L555 218" marker-end="url(#arr)"/>
+<path class="edge" d="M680 172 L720 218" marker-end="url(#arr)"/>
+
+<rect x="460" y="218" width="185" height="44" rx="7" fill="#FAE0C8" stroke="#c96a00" stroke-width="0.8"/>
+<text class="th" x="552" y="236" text-anchor="middle">hbedsp_net_rev_7d</text>
+<text class="ts" x="552" y="252" text-anchor="middle">+ avg_price ≤/&gt; 56.91</text>
+<text class="elbl" x="485" y="278" text-anchor="middle">≤ 0.06</text>
+<text class="elbl" x="630" y="278" text-anchor="middle">&gt; 0.06</text>
+<path class="edge" d="M505 262 L490 294" marker-end="url(#arr)"/>
+<path class="edge" d="M605 262 L630 294" marker-end="url(#arr)"/>
+
+<rect x="440" y="294" width="80" height="52" rx="6" fill="#F7C8A0" stroke="#a84400" stroke-width="0.8"/>
+<text class="th" x="480" y="312" text-anchor="middle" fill="#5a2000">leaf 7</text>
+<text class="lbl" x="480" y="326" text-anchor="middle">2.68×</text>
+<text class="lbl" x="480" y="338" text-anchor="middle">n=72K</text>
+
+<rect x="545" y="294" width="80" height="52" rx="6" fill="#F0A070" stroke="#a84400" stroke-width="0.8"/>
+<text class="th" x="585" y="312" text-anchor="middle" fill="#5a2000">leaf 14</text>
+<text class="lbl" x="585" y="326" text-anchor="middle">6.92×</text>
+<text class="lbl" x="585" y="338" text-anchor="middle">n=12K</text>
+
+<rect x="645" y="294" width="80" height="52" rx="6" fill="#E87040" stroke="#a84400" stroke-width="0.8"/>
+<text class="th" x="685" y="312" text-anchor="middle" fill="#fff">leaf 15</text>
+<text class="lbl" x="685" y="326" text-anchor="middle" fill="#fff">13.2×</text>
+<text class="lbl" x="685" y="338" text-anchor="middle" fill="#fff">n=4.6K</text>
+
+<rect x="700" y="218" width="90" height="44" rx="7" fill="#E05020" stroke="#8a2800" stroke-width="0.8"/>
+<text class="th" x="745" y="236" text-anchor="middle" fill="#fff">price &gt; 110</text>
+<text class="ts" x="745" y="252" text-anchor="middle" fill="#ffe0d0">top tail</text>
+<text class="elbl" x="715" y="278" text-anchor="middle">≤ 110</text>
+<text class="elbl" x="772" y="278" text-anchor="middle">&gt;110</text>
+<path class="edge" d="M725 262 L710 294" marker-end="url(#arr)"/>
+<path class="edge" d="M762 262 L768 294" marker-end="url(#arr)"/>
+
+<rect x="680" y="294" width="76" height="52" rx="6" fill="#D03010" stroke="#8a2800" stroke-width="0.8"/>
+<text class="th" x="718" y="312" text-anchor="middle" fill="#fff">leaf 22</text>
+<text class="lbl" x="718" y="326" text-anchor="middle" fill="#fff">26.7×</text>
+<text class="lbl" x="718" y="338" text-anchor="middle" fill="#fff">n=2.6K</text>
+
+<rect x="750" y="294" width="60" height="52" rx="6" fill="#900000" stroke="#600000" stroke-width="0.8"/>
+<text class="th" x="780" y="312" text-anchor="middle" fill="#fff">leaf 24</text>
+<text class="lbl" x="780" y="326" text-anchor="middle" fill="#fff">85.1×</text>
+<text class="lbl" x="780" y="338" text-anchor="middle" fill="#fff">n=639</text>
+
+<rect x="10" y="390" width="800" height="86" rx="10" fill="#FFF6EC" stroke="#eda100" stroke-width="0.8"/>
+<text class="th" x="30" y="410" fill="#2c2c2a">key insight: error scales with avg_hbedsp_highest_price_7d, not other dimensions</text>
+<text class="ts" x="30" y="430" fill="#52514e">every primary split cuts on avg_hbedsp_highest_price_7d (≤3.97 / ≤20.36 / ≤56.91 / ≤110.93).</text>
+<text class="ts" x="30" y="448" fill="#52514e">other features (ad_type, net_rev_7d, med_floor, device_market_price1d) only appear as secondary splits</text>
+<text class="ts" x="30" y="466" fill="#52514e">within a price tier — they don't independently drive error, they modulate within a tier.</text>
+
+<rect x="10" y="490" width="800" height="44" rx="8" fill="#F1EFE8" stroke="#C5C3BB" stroke-width="0.5"/>
+<text class="ts" x="30" y="508" fill="#52514e">MAE vs global colour scale:</text>
+<rect x="170" y="496" width="14" height="14" rx="2" fill="#FFF0EE" stroke="#e34948" stroke-width="0.7"/><text class="lbl" x="188" y="508">&lt;1×</text>
+<rect x="240" y="496" width="14" height="14" rx="2" fill="#FAEBD7" stroke="#c96a00" stroke-width="0.7"/><text class="lbl" x="258" y="508">1–6×</text>
+<rect x="310" y="496" width="14" height="14" rx="2" fill="#F0A070" stroke="#a84400" stroke-width="0.7"/><text class="lbl" x="328" y="508">6–15×</text>
+<rect x="390" y="496" width="14" height="14" rx="2" fill="#E05020" stroke="#8a2800" stroke-width="0.7"/><text class="lbl" x="408" y="508">15–30×</text>
+<rect x="470" y="496" width="14" height="14" rx="2" fill="#900000" stroke="#600000" stroke-width="0.7"/><text class="lbl" x="488" y="508">&gt;30× (worst)</text>
+</svg>
+</body>
+</html>
