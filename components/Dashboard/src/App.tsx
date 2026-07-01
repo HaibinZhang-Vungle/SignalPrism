@@ -5,6 +5,7 @@ import { ResidualDiagnostics } from './screens/ResidualDiagnostics'
 import { DistributionScreen } from './screens/DistributionScreen'
 import { CapabilityMap } from './screens/CapabilityMap'
 import { AggregationBuilder } from './screens/AggregationBuilder'
+import { FeatureRegistry } from './screens/FeatureRegistry'
 import { FormulaStudio } from './screens/FormulaStudio'
 import { SimulationLab } from './screens/SimulationLab'
 import { Lineage } from './screens/Lineage'
@@ -14,6 +15,7 @@ export type SurfaceId =
   | 'distribution-screen'
   | 'capability-map'
   | 'aggregation-builder'
+  | 'feature-registry'
   | 'formula-studio'
   | 'simulation-lab'
   | 'lineage'
@@ -24,6 +26,7 @@ const SURFACES: { id: SurfaceId; label: string; step?: string }[] = [
   { id: 'distribution-screen', label: 'Distribution Screen', step: '2–4' },
   { id: 'capability-map', label: 'Capability Map' },
   { id: 'aggregation-builder', label: 'Aggregation Builder', step: '5' },
+  { id: 'feature-registry', label: 'Feature Registry' },
   { id: 'formula-studio', label: 'Formula Studio' },
   { id: 'simulation-lab', label: 'Simulation Lab', step: '6–7' },
   { id: 'lineage', label: 'Lineage' },
@@ -97,6 +100,7 @@ export function App({ dataSource }: AppProps) {
         )}
         {active === 'capability-map' && <CapabilityMap ds={ds} onTrace={goLineage} />}
         {active === 'aggregation-builder' && <AggregationBuilder ds={ds} promoted={promoted} />}
+        {active === 'feature-registry' && <FeatureRegistry ds={ds} />}
         {active === 'formula-studio' && <FormulaStudio ds={ds} />}
         {active === 'simulation-lab' && <SimulationLab ds={ds} onTrace={goLineage} />}
         {active === 'lineage' && <Lineage ds={ds} seed={lineageSeed} />}

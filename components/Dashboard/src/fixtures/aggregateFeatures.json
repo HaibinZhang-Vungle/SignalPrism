@@ -1,0 +1,543 @@
+{
+  "tables": [
+    {
+      "tableId": "realtime_attributed_device_level_hly",
+      "dimensionFamily": "device_level_v1",
+      "purpose": "Device / user history features and KVRocks export candidates.",
+      "primaryKey": "device_id",
+      "dimensionColumns": [
+        "device_id",
+        "device_dim_id",
+        "dev_id_source",
+        "dev_platform",
+        "os_version_major",
+        "os_version_bucket",
+        "dev_make_bucket",
+        "dev_model_bucket",
+        "dev_type",
+        "screen_width_bucket",
+        "screen_height_bucket",
+        "screen_size_bucket",
+        "dev_connection",
+        "dev_connection_detail",
+        "dev_carrier_bucket",
+        "dev_language",
+        "device_country_iso2",
+        "store_country_iso2",
+        "geo_country",
+        "geo_region",
+        "geo_city_bucket",
+        "geo_type",
+        "geo_ipservice",
+        "dnt_flag",
+        "lmt_flag",
+        "ccpa_opt_out",
+        "coppa_applied",
+        "consent_status",
+        "consent_source",
+        "tcf_result",
+        "tcf_cmp_id",
+        "tcf_version",
+        "tcf_invalid_reason",
+        "first_party_data_valid",
+        "is_anonymous_vpn",
+        "is_suspicious_ip",
+        "battery_level_bucket",
+        "volume_bucket"
+      ]
+    },
+    {
+      "tableId": "realtime_attributed_non_device_context_hly",
+      "dimensionFamily": "non_device_context_v1",
+      "purpose": "Supply, inventory, geo, privacy/cohort, and experiment context without device identity.",
+      "primaryKey": "context_dim_id",
+      "dimensionColumns": [
+        "context_dim_id",
+        "source_has_hb",
+        "supply_traffic_source",
+        "supply_name",
+        "supply_fee_bucket",
+        "account_id",
+        "pub_account_id",
+        "application_id",
+        "pub_app_object_id",
+        "pub_app_id",
+        "pub_app_bundle_id",
+        "pub_genre_bucket",
+        "app_bundle",
+        "app_iab_tier1",
+        "app_object_id",
+        "app_hb_partner",
+        "app_version_major",
+        "is_header_bidding",
+        "is_gam",
+        "placement_id",
+        "placement_reference_id",
+        "placement_type",
+        "ad_size",
+        "ad_type",
+        "is_flat_cpm_enabled",
+        "flat_cpm_model_type",
+        "is_incentivized",
+        "is_max_profit_enabled",
+        "publisher_payout_type",
+        "ad_unit_id",
+        "geoip_country_code",
+        "geo_region",
+        "geo_city_bucket",
+        "geo_type",
+        "geo_ipservice",
+        "ccpa_opt_out",
+        "coppa_applied",
+        "consent_status",
+        "consent_source",
+        "jaeger_experiment_id",
+        "dte_experiment_group",
+        "ssp_exp_num",
+        "vxac_exp_id",
+        "ml_experiment_id",
+        "recommender_tag",
+        "qps_type",
+        "qps_exp_name",
+        "is_ad_podding",
+        "ad_podding_multiplier_bucket",
+        "traffic_quality_action",
+        "traffic_quality_strategy"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "metricId": "min_bid_to_win",
+      "kind": "distribution",
+      "generatedColumns": [
+        "min_bid_to_win_sum",
+        "min_bid_to_win_count",
+        "min_bid_to_win_min",
+        "min_bid_to_win_max",
+        "min_bid_to_win_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_min_bid_to_win",
+      "notes": "First-price minimum bid to win.",
+      "labelLike": false
+    },
+    {
+      "metricId": "vx_min_bid_to_win",
+      "kind": "distribution",
+      "generatedColumns": [
+        "vx_min_bid_to_win_sum",
+        "vx_min_bid_to_win_count",
+        "vx_min_bid_to_win_min",
+        "vx_min_bid_to_win_max",
+        "vx_min_bid_to_win_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "modulo-compatible VX filter over min bid to win",
+      "notes": "Exact VX predicate must match the existing modulo job.",
+      "labelLike": false
+    },
+    {
+      "metricId": "second_place_price",
+      "kind": "distribution",
+      "generatedColumns": [
+        "second_place_price_sum",
+        "second_place_price_count",
+        "second_place_price_min",
+        "second_place_price_max",
+        "second_place_price_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_second_place_price",
+      "notes": "Second-highest auction bid.",
+      "labelLike": false
+    },
+    {
+      "metricId": "edsp_highest_price",
+      "kind": "distribution",
+      "generatedColumns": [
+        "edsp_highest_price_sum",
+        "edsp_highest_price_count",
+        "edsp_highest_price_min",
+        "edsp_highest_price_max",
+        "edsp_highest_price_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_edsp_highest_price",
+      "notes": "Highest eDSP price in the request.",
+      "labelLike": false
+    },
+    {
+      "metricId": "edsp_highest_price_non_acc",
+      "kind": "distribution",
+      "generatedColumns": [
+        "edsp_highest_price_non_acc_sum",
+        "edsp_highest_price_non_acc_count",
+        "edsp_highest_price_non_acc_min",
+        "edsp_highest_price_non_acc_max",
+        "edsp_highest_price_non_acc_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_edsp_highest_price filtered to non-Accelerate",
+      "notes": "Exact non-ACC predicate must match the existing modulo job.",
+      "labelLike": false
+    },
+    {
+      "metricId": "mediation_floor",
+      "kind": "distribution",
+      "generatedColumns": [
+        "mediation_floor_sum",
+        "mediation_floor_count",
+        "mediation_floor_min",
+        "mediation_floor_max",
+        "mediation_floor_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_mediation_floor",
+      "notes": "Mediation floor at impression grain.",
+      "labelLike": false
+    },
+    {
+      "metricId": "mediation_floor_txn",
+      "kind": "distribution",
+      "generatedColumns": [
+        "mediation_floor_txn_sum",
+        "mediation_floor_txn_count",
+        "mediation_floor_txn_min",
+        "mediation_floor_txn_max",
+        "mediation_floor_txn_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "transaction-level jgr_mediation_floor",
+      "notes": "Preserve modulo semantics when multiple impressions share a transaction.",
+      "labelLike": false
+    },
+    {
+      "metricId": "min_bid_to_win_med",
+      "kind": "distribution",
+      "generatedColumns": [
+        "min_bid_to_win_med_sum",
+        "min_bid_to_win_med_count",
+        "min_bid_to_win_med_min",
+        "min_bid_to_win_med_max",
+        "min_bid_to_win_med_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "mediation-filtered jgr_min_bid_to_win",
+      "notes": "Exact mediation predicate must match the existing modulo job.",
+      "labelLike": false
+    },
+    {
+      "metricId": "bid_price",
+      "kind": "distribution",
+      "generatedColumns": [
+        "bid_price_sum",
+        "bid_price_count",
+        "bid_price_min",
+        "bid_price_max",
+        "bid_price_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "hbn_hbp_bid_price",
+      "notes": "HBP bid price.",
+      "labelLike": false
+    },
+    {
+      "metricId": "settlement_price",
+      "kind": "distribution",
+      "generatedColumns": [
+        "settlement_price_sum",
+        "settlement_price_count",
+        "settlement_price_min",
+        "settlement_price_max",
+        "settlement_price_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_settlement_price",
+      "notes": "Label-like clearing price; point-in-time care required.",
+      "labelLike": true
+    },
+    {
+      "metricId": "settlement_price_loss",
+      "kind": "distribution",
+      "generatedColumns": [
+        "settlement_price_loss_sum",
+        "settlement_price_loss_count",
+        "settlement_price_loss_min",
+        "settlement_price_loss_max",
+        "settlement_price_loss_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_settlement_price filtered to loss events",
+      "notes": "Diagnostic/backtest metric.",
+      "labelLike": false
+    },
+    {
+      "metricId": "settlement_price_won",
+      "kind": "distribution",
+      "generatedColumns": [
+        "settlement_price_won_sum",
+        "settlement_price_won_count",
+        "settlement_price_won_min",
+        "settlement_price_won_max",
+        "settlement_price_won_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_settlement_price filtered to won/delivered events",
+      "notes": "Diagnostic/backtest metric.",
+      "labelLike": false
+    },
+    {
+      "metricId": "net_revenue",
+      "kind": "distribution",
+      "generatedColumns": [
+        "net_revenue_sum",
+        "net_revenue_count",
+        "net_revenue_min",
+        "net_revenue_max",
+        "net_revenue_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "derived from settlement, supply fee, rev share, and hosting cost",
+      "notes": "Requires a reviewed revenue formula.",
+      "labelLike": false
+    },
+    {
+      "metricId": "auction_winner_price",
+      "kind": "distribution",
+      "generatedColumns": [
+        "auction_winner_price_sum",
+        "auction_winner_price_count",
+        "auction_winner_price_min",
+        "auction_winner_price_max",
+        "auction_winner_price_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_winning_bid_price",
+      "notes": "Label-adjacent auction outcome.",
+      "labelLike": true
+    },
+    {
+      "metricId": "bid_price_moloco",
+      "kind": "distribution",
+      "generatedColumns": [
+        "bid_price_moloco_sum",
+        "bid_price_moloco_count",
+        "bid_price_moloco_min",
+        "bid_price_moloco_max",
+        "bid_price_moloco_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "hbn_hbp_bid_price filtered to Moloco bidder",
+      "notes": "Exact bidder predicate must match existing modulo job.",
+      "labelLike": false
+    },
+    {
+      "metricId": "bid_price_acc",
+      "kind": "distribution",
+      "generatedColumns": [
+        "bid_price_acc_sum",
+        "bid_price_acc_count",
+        "bid_price_acc_min",
+        "bid_price_acc_max",
+        "bid_price_acc_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "hbn_acc_bid_price",
+      "notes": "Accelerate bid price.",
+      "labelLike": false
+    },
+    {
+      "metricId": "bid_price_all",
+      "kind": "distribution",
+      "generatedColumns": [
+        "bid_price_all_sum",
+        "bid_price_all_count",
+        "bid_price_all_min",
+        "bid_price_all_max",
+        "bid_price_all_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "all bid prices from the bid source",
+      "notes": "Needs bid-grain/all-bid source if wider than served bid.",
+      "labelLike": false
+    },
+    {
+      "metricId": "adv_spend",
+      "kind": "distribution",
+      "generatedColumns": [
+        "adv_spend_sum",
+        "adv_spend_count",
+        "adv_spend_min",
+        "adv_spend_max",
+        "adv_spend_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "derived advertiser spend",
+      "notes": "Requires reviewed spend formula / billing source.",
+      "labelLike": false
+    },
+    {
+      "metricId": "pub_revenue",
+      "kind": "distribution",
+      "generatedColumns": [
+        "pub_revenue_sum",
+        "pub_revenue_count",
+        "pub_revenue_min",
+        "pub_revenue_max",
+        "pub_revenue_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "derived publisher revenue",
+      "notes": "Requires reviewed payout formula.",
+      "labelLike": false
+    },
+    {
+      "metricId": "unshaded_bid_price",
+      "kind": "distribution",
+      "generatedColumns": [
+        "unshaded_bid_price_sum",
+        "unshaded_bid_price_count",
+        "unshaded_bid_price_min",
+        "unshaded_bid_price_max",
+        "unshaded_bid_price_squaresum"
+      ],
+      "dataType": "DOUBLE",
+      "source": "jgr_sr_ocpm",
+      "notes": "Unshaded private value / original CPM.",
+      "labelLike": false
+    },
+    {
+      "metricId": "delivery_count",
+      "kind": "count",
+      "generatedColumns": [
+        "delivery_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "count rows where jgr_no_serv_reason = 0",
+      "notes": "Delivered impressions.",
+      "labelLike": false
+    },
+    {
+      "metricId": "mediation_loss_count",
+      "kind": "count",
+      "generatedColumns": [
+        "mediation_loss_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "hb-notifications / mediation outcome source",
+      "notes": "Not fully available from the two-topic wide table alone.",
+      "labelLike": false
+    },
+    {
+      "metricId": "mediation_win_count",
+      "kind": "count",
+      "generatedColumns": [
+        "mediation_win_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "hb-notifications / mediation outcome source",
+      "notes": "Not fully available from the two-topic wide table alone.",
+      "labelLike": false
+    },
+    {
+      "metricId": "mediation_bill_count",
+      "kind": "count",
+      "generatedColumns": [
+        "mediation_bill_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "hb-notifications / mediation billing source",
+      "notes": "Not fully available from the two-topic wide table alone.",
+      "labelLike": false
+    },
+    {
+      "metricId": "event_start_count",
+      "kind": "count",
+      "generatedColumns": [
+        "event_start_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "derived TPAT/event-start count",
+      "notes": "Use point-in-time-safe event source.",
+      "labelLike": true
+    },
+    {
+      "metricId": "mediation_auctions_count",
+      "kind": "count",
+      "generatedColumns": [
+        "mediation_auctions_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "count mediation auction opportunities",
+      "notes": "Derive from HB/S2S auction rows.",
+      "labelLike": false
+    },
+    {
+      "metricId": "no_bid_count",
+      "kind": "count",
+      "generatedColumns": [
+        "no_bid_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "count no-bid events",
+      "notes": "Align to modulo no-bid predicate.",
+      "labelLike": false
+    },
+    {
+      "metricId": "bid_count",
+      "kind": "count",
+      "generatedColumns": [
+        "bid_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "count bid events",
+      "notes": "Align to modulo bid predicate.",
+      "labelLike": false
+    },
+    {
+      "metricId": "bid_count_moloco_count",
+      "kind": "count",
+      "generatedColumns": [
+        "bid_count_moloco_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "count Moloco bid events",
+      "notes": "Existing modulo name is intentionally preserved.",
+      "labelLike": false
+    },
+    {
+      "metricId": "bid_count_acc_count",
+      "kind": "count",
+      "generatedColumns": [
+        "bid_count_acc_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "count Accelerate bid events",
+      "notes": "Existing modulo name is intentionally preserved.",
+      "labelLike": false
+    },
+    {
+      "metricId": "sp_at_mediation_floor_count",
+      "kind": "count",
+      "generatedColumns": [
+        "sp_at_mediation_floor_count"
+      ],
+      "dataType": "BIGINT",
+      "source": "count settlement/winner price at mediation floor",
+      "notes": "Exact modulo predicate required.",
+      "labelLike": false
+    },
+    {
+      "metricId": "hb_bid_count",
+      "kind": "count",
+      "generatedColumns": [
+        "hb_bid_count"
+      ],
+      "dataType": "DOUBLE",
+      "source": "count HB bids",
+      "notes": "Type preserved from modulo SQL (DOUBLE).",
+      "labelLike": false
+    }
+  ]
+}

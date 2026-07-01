@@ -3,6 +3,7 @@
 
 import type { WorkbenchDataSource } from './WorkbenchDataSource'
 import type {
+  AggregateFeatureCatalog,
   AggregationConfig,
   AggregationPreview,
   DimensionFamily,
@@ -21,6 +22,7 @@ import capabilitiesFixture from '../fixtures/capabilities.json'
 import primitivesFixture from '../fixtures/primitives.json'
 import simulationRunsFixture from '../fixtures/simulationRuns.json'
 import residualPocketsFixture from '../fixtures/residualPockets.json'
+import aggregateFeaturesFixture from '../fixtures/aggregateFeatures.json'
 
 const capabilities = capabilitiesFixture as FeatureCapability[]
 const primitives = primitivesFixture as Primitive[]
@@ -82,6 +84,10 @@ export class FixtureWorkbenchDataSource implements WorkbenchDataSource {
 
   async listPrimitives(): Promise<Primitive[]> {
     return primitives
+  }
+
+  async listAggregateFeatures(): Promise<AggregateFeatureCatalog> {
+    return aggregateFeaturesFixture as AggregateFeatureCatalog
   }
 
   async previewAggregation(config: AggregationConfig): Promise<AggregationPreview> {

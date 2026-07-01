@@ -4,6 +4,7 @@
 // the scanner / aggregation-runner / simulation-runner sub-projects.
 
 import type {
+  AggregateFeatureCatalog,
   AggregationConfig,
   AggregationPreview,
   DimensionFamily,
@@ -34,6 +35,9 @@ export interface WorkbenchDataSource {
 
   /** Materialized primitives available for formula composition. */
   listPrimitives(): Promise<Primitive[]>
+
+  /** Existing aggregate features (metric catalog + dimensions) from the aggregation table schema. */
+  listAggregateFeatures(): Promise<AggregateFeatureCatalog>
 
   /** Cost/plan preview for a proposed aggregation config (no materialization). */
   previewAggregation(config: AggregationConfig): Promise<AggregationPreview>
