@@ -44,6 +44,17 @@ describe('previewAggregation', () => {
   })
 })
 
+describe('screenFields scope', () => {
+  it('screens only the distribution-profiled candidates, not the full catalog', async () => {
+    const caps = await ds.listCapabilities()
+    const fields = await ds.screenFields('pocket_in_rewarded_ios')
+    // Far fewer than the full catalog; equals the screenProfiled candidate count.
+    expect(caps.length).toBeGreaterThan(100)
+    expect(fields.length).toBe(caps.filter((c) => c.screenProfiled).length)
+    expect(fields.every((f) => caps.find((c) => c.capabilityId === f.capabilityId)?.screenProfiled)).toBe(true)
+  })
+})
+
 describe('getLineage', () => {
   it('returns a chain ending in a simulation run', async () => {
     const chain = await ds.getLineage('hbn_settlement_price')

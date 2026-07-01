@@ -9,6 +9,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",
+    "gen:capabilities": "node scripts/genCapabilities.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

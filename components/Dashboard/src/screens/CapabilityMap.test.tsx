@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import { CapabilityMap, isSelectable } from './CapabilityMap'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import { CapabilityMap, isSelectable, isFeatureCandidate } from './CapabilityMap'
 import { FixtureWorkbenchDataSource } from '../data/fixtureAdapter'
 import type { FeatureCapability } from '../data/types'
 
@@ -16,27 +16,40 @@ const cap = (over: Partial<FeatureCapability>): FeatureCapability => ({
   klDivergence: 0.2, baseSeparation: 0.7, ...over,
 })
 
-describe('isSelectable', () => {
-  it('rejects PII / exclude columns', () => {
+describe('classification helpers', () => {
+  it('isSelectable rejects PII and un-profiled', () => {
     expect(isSelectable(cap({ feat: 'exclude' }))).toBe(false)
-  })
-  it('rejects columns that have not passed profiling', () => {
     expect(isSelectable(cap({ profilingStatus: 'not_profiled' }))).toBe(false)
-    expect(isSelectable(cap({ profilingStatus: 'profiling' }))).toBe(false)
+    expect(isSelectable(cap({}))).toBe(true)
   })
-  it('accepts available, non-excluded columns', () => {
-    expect(isSelectable(cap({ feat: 'feature', profilingStatus: 'available' }))).toBe(true)
+  it('isFeatureCandidate excludes dims and keys', () => {
+    expect(isFeatureCandidate(cap({ feat: 'dim' }))).toBe(false)
+    expect(isFeatureCandidate(cap({ feat: 'key' }))).toBe(false)
+    expect(isFeatureCandidate(cap({ feat: 'feature' }))).toBe(true)
+    expect(isFeatureCandidate(cap({ feat: 'leak_risk' }))).toBe(true)
   })
 })
 
-describe('CapabilityMap render', () => {
-  it('shows available capabilities but not PII or un-profiled ones', async () => {
+describe('CapabilityMap full catalog', () => {
+  it('renders the full schema catalog (well over the 9 curated fields)', async () => {
     render(<CapabilityMap ds={ds} onTrace={noop} />)
-    // available:
     await waitFor(() => expect(screen.getByTestId('cap-hbn_settlement_price')).toBeInTheDocument())
-    // PII (jgr_dev_ifa) excluded, un-profiled (adv_erpm), profiling (predicted_user_value):
-    expect(screen.queryByTestId('cap-dev_ifa')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('cap-adv_erpm')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('cap-predicted_user_value')).not.toBeInTheDocument()
+    const cards = screen.getAllByTestId(/^cap-/)
+    expect(cards.length).toBeGreaterThan(100)
+  })
+
+  it('shows a PII field but does not offer it (no trace, marked PII)', async () => {
+    render(<CapabilityMap ds={ds} onTrace={noop} />)
+    await waitFor(() => expect(screen.getByTestId('cap-jgr_dev_ifa')).toBeInTheDocument())
+    const piiCard = screen.getByTestId('cap-jgr_dev_ifa')
+    expect(within(piiCard).getByText(/raw PII/)).toBeInTheDocument()
+    expect(within(piiCard).queryByRole('button', { name: /Trace lineage/ })).not.toBeInTheDocument()
+  })
+
+  it('catalogs a dimension without treating it as a feature candidate', async () => {
+    render(<CapabilityMap ds={ds} onTrace={noop} />)
+    await waitFor(() => expect(screen.getByTestId('cap-hbn_supply_name')).toBeInTheDocument())
+    const dimCard = screen.getByTestId('cap-hbn_supply_name')
+    expect(within(dimCard).getByText(/not a feature candidate/)).toBeInTheDocument()
   })
 })

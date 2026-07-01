@@ -82,6 +82,10 @@ body {
 }
 .chip.strat { color: #a9c4ff; }
 .chip.fam { color: #9fe6c4; }
+.chip.role { font-weight: 600; }
+.chip.role-ok { color: var(--good); border-color: rgba(63,191,127,0.4); }
+.chip.role-bad { color: var(--bad); border-color: rgba(229,103,95,0.4); }
+.chip.role-muted { color: var(--muted); }
 
 .domain-group { margin-bottom: 22px; }
 .domain-group > h2 {

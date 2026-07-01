@@ -27,11 +27,16 @@ const primitives = primitivesFixture as Primitive[]
 const simulationRuns = simulationRunsFixture as SimulationRun[]
 const residualPockets = residualPocketsFixture as ResidualPocket[]
 
-/** Feature candidates worth screening: available, not PII, and can become features. */
+/**
+ * Feature candidates worth screening: available, distribution-profiled, and can
+ * become features. The full catalog (200 fields) is NOT screened — only the
+ * profiled subset, so the Distribution Screen stays focused (design D3).
+ */
 function screenCandidates(): FeatureCapability[] {
   return capabilities.filter(
     (c) =>
       c.profilingStatus === 'available' &&
+      c.screenProfiled === true &&
       (c.feat === 'feature' || c.feat === 'feature_after_encode' || c.feat === 'leak_risk'),
   )
 }

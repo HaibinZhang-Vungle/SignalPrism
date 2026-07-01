@@ -43,6 +43,7 @@ export type SourceEventType = 'delivery' | 'no_serv' | 'hbn' | 'tpat'
 
 /** Capability domains for grouping (TRD §7.10.1). */
 export type Domain =
+  | 'identity'
   | 'supply'
   | 'placement'
   | 'device'
@@ -55,6 +56,7 @@ export type Domain =
   | 'creative'
   | 'tpat'
   | 'experiment'
+  | 'rtb'
   | 'timing'
 
 /** Aggregation strategy library (TRD §7.5). */
@@ -123,6 +125,8 @@ export interface FeatureCapability {
   psi: number // population stability index vs a prior window
   klDivergence: number // KL vs the global distribution
   baseSeparation: number // [0,1] intrinsic discriminative power before pocket weighting
+  /** True only for fields with real distribution profiling — the Distribution Screen candidate set. */
+  screenProfiled?: boolean
 }
 
 /** A high-error residual pocket to search for features (fast-screen step 1). */
