@@ -3,7 +3,8 @@ package com.vungle.signalprism.data.realtime_attributed_aggregation
 import com.vungle.lena.{BoilerplateSparkMain, UDFUtil}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import scala.util.parsing.json.JSON
+import org.json4s.{JValue, JObject, JArray, JString, JNull, JNothing}
+import org.json4s.native.JsonMethods.parse
 
 /**
  * Hourly aggregation over ml_shadow.realtime_attributed_event_wide into one of two reviewed
@@ -46,21 +47,25 @@ object SparkMain extends BoilerplateSparkMain {
   lazy val sampleRate  = args(s"$NS.sample_rate").toDouble
   lazy val aggVersion  = args(s"$NS.aggregation_version")
 
-  // ---- spec loading (scala.util.parsing.json keeps this dependency-free) ----
-  private def json(res: String): Map[String, Any] =
-    JSON.parseFull(getResourceString(res)).get.asInstanceOf[Map[String, Any]]
-  private def arr(a: Any): List[Any] = a.asInstanceOf[List[Any]]
-  private def obj(a: Any): Map[String, Any] = a.asInstanceOf[Map[String, Any]]
-  private def str(a: Any): String = if (a == null) null else a.toString
+  // ---- spec loading via json4s (already on lena's classpath; same lib as Boilerplate) ----
+  private def parseObj(res: String): Map[String, JValue] =
+    parse(getResourceString(res)).asInstanceOf[JObject].obj.toMap
+  private def arr(a: JValue): List[JValue] = a.asInstanceOf[JArray].arr
+  private def obj(a: JValue): Map[String, JValue] = a.asInstanceOf[JObject].obj.toMap
+  private def str(a: JValue): String = a match {
+    case JString(s)       => s
+    case JNull | JNothing => null
+    case other            => other.values.toString
+  }
 
-  lazy val spec        = json(s"agg_specs/$family.json")
-  lazy val metricCat   = json("agg_specs/metric_catalog.json")
+  lazy val spec        = parseObj(s"agg_specs/$family.json")
+  lazy val metricCat   = parseObj("agg_specs/metric_catalog.json")
   lazy val primaryKey  = str(obj(spec("primary_key"))("name"))
-  lazy val dropNullSrc = str(spec.getOrElse("drop_null_source", null))
+  lazy val dropNullSrc = str(spec.getOrElse("drop_null_source", JNull))
   lazy val dims        = arr(spec("dimensions")).map(obj)
 
   // normalized, still-nullable stored dimension expression
-  private def dimExpr(d: Map[String, Any]): String = {
+  private def dimExpr(d: Map[String, JValue]): String = {
     val name = str(d("name")); val src = str(d("source_col")); val norm = str(d("norm"))
     val e = norm match {
       case _ if src == null       => "CAST(NULL AS STRING)"
@@ -74,7 +79,7 @@ object SparkMain extends BoilerplateSparkMain {
   }
 
   // key concat coalesces every dim to '__unknown__' (contract §2)
-  private def keyConcatArg(d: Map[String, Any]): String =
+  private def keyConcatArg(d: Map[String, JValue]): String =
     s"coalesce(CAST(${str(d("name"))} AS STRING), '__unknown__')"
 
   private def computedMetricSelects: Seq[String] = {
