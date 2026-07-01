@@ -116,7 +116,6 @@ object SparkMain extends BoilerplateSparkMain {
         SELECT
           $dimStored,
           date_trunc('HOUR', source_event_time) AS event_time,
-          source_event_time,
           *
         FROM $inputTable
         WHERE source_event_time >= '$s' AND source_event_time < '$t'
