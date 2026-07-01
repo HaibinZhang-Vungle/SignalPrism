@@ -1,0 +1,270 @@
+{
+  "dimension_family": "device_level_v1",
+  "primary_key": {
+    "name": "device_dim_id",
+    "recipe": "sha256_concat"
+  },
+  "hashid_from": "device_dim_id",
+  "drop_null_source": "jgr_lo_id",
+  "dimensions": [
+    {
+      "name": "device_id",
+      "type": "string",
+      "source_col": "jgr_lo_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "dev_id_source",
+      "type": "string",
+      "source_col": "jgr_dev_id_source",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "dev_platform",
+      "type": "string",
+      "source_col": "jgr_dev_os",
+      "fallback_col": null,
+      "norm": "normalize"
+    },
+    {
+      "name": "os_version_major",
+      "type": "string",
+      "source_col": "jgr_dev_osv",
+      "fallback_col": null,
+      "norm": "parse_major"
+    },
+    {
+      "name": "os_version_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_osv",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "dev_make_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_make",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "dev_model_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_model",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "dev_type",
+      "type": "bigint",
+      "source_col": "jgr_dev_devicetype",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "screen_width_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_w",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "screen_height_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_h",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "screen_size_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_w",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "dev_connection",
+      "type": "bigint",
+      "source_col": "jgr_dev_connectiontype",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "dev_connection_detail",
+      "type": "string",
+      "source_col": "jgr_dev_connection_type_detail",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "dev_carrier_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_carrier",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "dev_language",
+      "type": "string",
+      "source_col": "jgr_dev_language",
+      "fallback_col": null,
+      "norm": "normalize"
+    },
+    {
+      "name": "device_country_iso2",
+      "type": "string",
+      "source_col": "jgr_dev_country_iso2",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "store_country_iso2",
+      "type": "string",
+      "source_col": "jgr_dev_store_country_iso2",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "geo_country",
+      "type": "string",
+      "source_col": "jgr_geo_country",
+      "fallback_col": null,
+      "norm": "normalize"
+    },
+    {
+      "name": "geo_region",
+      "type": "string",
+      "source_col": "jgr_geo_region",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "geo_city_bucket",
+      "type": "string",
+      "source_col": "jgr_geo_city",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "geo_type",
+      "type": "bigint",
+      "source_col": "jgr_geo_type",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "geo_ipservice",
+      "type": "bigint",
+      "source_col": "jgr_geo_ipservice",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "dnt_flag",
+      "type": "bigint",
+      "source_col": "jgr_dev_dnt",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "lmt_flag",
+      "type": "bigint",
+      "source_col": "jgr_dev_lmt",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "ccpa_opt_out",
+      "type": "boolean",
+      "source_col": "jgr_ccpa_opt_out",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "coppa_applied",
+      "type": "boolean",
+      "source_col": "jgr_coppa_applied",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "consent_status",
+      "type": "string",
+      "source_col": "jgr_consent_status",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "consent_source",
+      "type": "string",
+      "source_col": "jgr_consent_source",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "tcf_result",
+      "type": "int",
+      "source_col": "jgr_tcf_result",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "tcf_cmp_id",
+      "type": "int",
+      "source_col": "jgr_tcf_cmp_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "tcf_version",
+      "type": "string",
+      "source_col": "jgr_tcf_ver",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "tcf_invalid_reason",
+      "type": "int",
+      "source_col": "jgr_tcf_invalid_reason",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "first_party_data_valid",
+      "type": "boolean",
+      "source_col": "jgr_is_first_party_data_valid",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "is_anonymous_vpn",
+      "type": "boolean",
+      "source_col": "jgr_dev_is_anonymous_vpn",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "is_suspicious_ip",
+      "type": "boolean",
+      "source_col": "jgr_dev_is_suspicious_ip",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "battery_level_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_battery_level",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "volume_bucket",
+      "type": "string",
+      "source_col": "jgr_dev_volume",
+      "fallback_col": null,
+      "norm": "bucket"
+    }
+  ]
+}

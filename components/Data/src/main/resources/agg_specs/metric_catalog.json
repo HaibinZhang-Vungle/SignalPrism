@@ -1,0 +1,306 @@
+{
+  "distribution": [
+    {
+      "family": "min_bid_to_win",
+      "kind": "computed",
+      "base_expr": "jgr_min_bid_to_win",
+      "columns": [
+        "min_bid_to_win_sum",
+        "min_bid_to_win_count",
+        "min_bid_to_win_min",
+        "min_bid_to_win_max",
+        "min_bid_to_win_squaresum"
+      ]
+    },
+    {
+      "family": "vx_min_bid_to_win",
+      "kind": "null_predicate_dependent",
+      "base_expr": null,
+      "columns": [
+        "vx_min_bid_to_win_sum",
+        "vx_min_bid_to_win_count",
+        "vx_min_bid_to_win_min",
+        "vx_min_bid_to_win_max",
+        "vx_min_bid_to_win_squaresum"
+      ]
+    },
+    {
+      "family": "second_place_price",
+      "kind": "computed",
+      "base_expr": "jgr_second_place_price",
+      "columns": [
+        "second_place_price_sum",
+        "second_place_price_count",
+        "second_place_price_min",
+        "second_place_price_max",
+        "second_place_price_squaresum"
+      ]
+    },
+    {
+      "family": "edsp_highest_price",
+      "kind": "computed",
+      "base_expr": "jgr_edsp_highest_price",
+      "columns": [
+        "edsp_highest_price_sum",
+        "edsp_highest_price_count",
+        "edsp_highest_price_min",
+        "edsp_highest_price_max",
+        "edsp_highest_price_squaresum"
+      ]
+    },
+    {
+      "family": "edsp_highest_price_non_acc",
+      "kind": "null_predicate_dependent",
+      "base_expr": null,
+      "columns": [
+        "edsp_highest_price_non_acc_sum",
+        "edsp_highest_price_non_acc_count",
+        "edsp_highest_price_non_acc_min",
+        "edsp_highest_price_non_acc_max",
+        "edsp_highest_price_non_acc_squaresum"
+      ]
+    },
+    {
+      "family": "mediation_floor",
+      "kind": "computed",
+      "base_expr": "jgr_mediation_floor",
+      "columns": [
+        "mediation_floor_sum",
+        "mediation_floor_count",
+        "mediation_floor_min",
+        "mediation_floor_max",
+        "mediation_floor_squaresum"
+      ]
+    },
+    {
+      "family": "mediation_floor_txn",
+      "kind": "null_predicate_dependent",
+      "base_expr": null,
+      "columns": [
+        "mediation_floor_txn_sum",
+        "mediation_floor_txn_count",
+        "mediation_floor_txn_min",
+        "mediation_floor_txn_max",
+        "mediation_floor_txn_squaresum"
+      ]
+    },
+    {
+      "family": "min_bid_to_win_med",
+      "kind": "null_predicate_dependent",
+      "base_expr": null,
+      "columns": [
+        "min_bid_to_win_med_sum",
+        "min_bid_to_win_med_count",
+        "min_bid_to_win_med_min",
+        "min_bid_to_win_med_max",
+        "min_bid_to_win_med_squaresum"
+      ]
+    },
+    {
+      "family": "bid_price",
+      "kind": "computed",
+      "base_expr": "hbn_hbp_bid_price",
+      "columns": [
+        "bid_price_sum",
+        "bid_price_count",
+        "bid_price_min",
+        "bid_price_max",
+        "bid_price_squaresum"
+      ]
+    },
+    {
+      "family": "settlement_price",
+      "kind": "computed",
+      "base_expr": "jgr_settlement_price",
+      "columns": [
+        "settlement_price_sum",
+        "settlement_price_count",
+        "settlement_price_min",
+        "settlement_price_max",
+        "settlement_price_squaresum"
+      ]
+    },
+    {
+      "family": "settlement_price_loss",
+      "kind": "null_predicate_dependent",
+      "base_expr": null,
+      "columns": [
+        "settlement_price_loss_sum",
+        "settlement_price_loss_count",
+        "settlement_price_loss_min",
+        "settlement_price_loss_max",
+        "settlement_price_loss_squaresum"
+      ]
+    },
+    {
+      "family": "settlement_price_won",
+      "kind": "null_predicate_dependent",
+      "base_expr": null,
+      "columns": [
+        "settlement_price_won_sum",
+        "settlement_price_won_count",
+        "settlement_price_won_min",
+        "settlement_price_won_max",
+        "settlement_price_won_squaresum"
+      ]
+    },
+    {
+      "family": "net_revenue",
+      "kind": "null_absent_source",
+      "base_expr": null,
+      "columns": [
+        "net_revenue_sum",
+        "net_revenue_count",
+        "net_revenue_min",
+        "net_revenue_max",
+        "net_revenue_squaresum"
+      ]
+    },
+    {
+      "family": "auction_winner_price",
+      "kind": "computed",
+      "base_expr": "jgr_winning_bid_price",
+      "columns": [
+        "auction_winner_price_sum",
+        "auction_winner_price_count",
+        "auction_winner_price_min",
+        "auction_winner_price_max",
+        "auction_winner_price_squaresum"
+      ]
+    },
+    {
+      "family": "bid_price_moloco",
+      "kind": "null_predicate_dependent",
+      "base_expr": null,
+      "columns": [
+        "bid_price_moloco_sum",
+        "bid_price_moloco_count",
+        "bid_price_moloco_min",
+        "bid_price_moloco_max",
+        "bid_price_moloco_squaresum"
+      ]
+    },
+    {
+      "family": "bid_price_acc",
+      "kind": "computed",
+      "base_expr": "hbn_acc_bid_price",
+      "columns": [
+        "bid_price_acc_sum",
+        "bid_price_acc_count",
+        "bid_price_acc_min",
+        "bid_price_acc_max",
+        "bid_price_acc_squaresum"
+      ]
+    },
+    {
+      "family": "bid_price_all",
+      "kind": "null_absent_source",
+      "base_expr": null,
+      "columns": [
+        "bid_price_all_sum",
+        "bid_price_all_count",
+        "bid_price_all_min",
+        "bid_price_all_max",
+        "bid_price_all_squaresum"
+      ]
+    },
+    {
+      "family": "adv_spend",
+      "kind": "null_absent_source",
+      "base_expr": null,
+      "columns": [
+        "adv_spend_sum",
+        "adv_spend_count",
+        "adv_spend_min",
+        "adv_spend_max",
+        "adv_spend_squaresum"
+      ]
+    },
+    {
+      "family": "pub_revenue",
+      "kind": "null_absent_source",
+      "base_expr": null,
+      "columns": [
+        "pub_revenue_sum",
+        "pub_revenue_count",
+        "pub_revenue_min",
+        "pub_revenue_max",
+        "pub_revenue_squaresum"
+      ]
+    },
+    {
+      "family": "unshaded_bid_price",
+      "kind": "computed",
+      "base_expr": "jgr_sr_ocpm",
+      "columns": [
+        "unshaded_bid_price_sum",
+        "unshaded_bid_price_count",
+        "unshaded_bid_price_min",
+        "unshaded_bid_price_max",
+        "unshaded_bid_price_squaresum"
+      ]
+    }
+  ],
+  "count": [
+    {
+      "name": "delivery_count",
+      "kind": "computed",
+      "predicate": "jgr_no_serv_reason = 0"
+    },
+    {
+      "name": "mediation_loss_count",
+      "kind": "null_absent_source",
+      "predicate": null
+    },
+    {
+      "name": "mediation_win_count",
+      "kind": "null_absent_source",
+      "predicate": null
+    },
+    {
+      "name": "mediation_bill_count",
+      "kind": "null_absent_source",
+      "predicate": null
+    },
+    {
+      "name": "event_start_count",
+      "kind": "null_absent_source",
+      "predicate": null
+    },
+    {
+      "name": "mediation_auctions_count",
+      "kind": "null_predicate_dependent",
+      "predicate": null
+    },
+    {
+      "name": "no_bid_count",
+      "kind": "null_predicate_dependent",
+      "predicate": null
+    },
+    {
+      "name": "bid_count",
+      "kind": "null_predicate_dependent",
+      "predicate": null
+    },
+    {
+      "name": "bid_count_moloco_count",
+      "kind": "null_predicate_dependent",
+      "predicate": null
+    },
+    {
+      "name": "bid_count_acc_count",
+      "kind": "null_predicate_dependent",
+      "predicate": null
+    },
+    {
+      "name": "sp_at_mediation_floor_count",
+      "kind": "null_predicate_dependent",
+      "predicate": null
+    },
+    {
+      "name": "hb_bid_count",
+      "kind": "null_predicate_dependent",
+      "predicate": null
+    }
+  ]
+}

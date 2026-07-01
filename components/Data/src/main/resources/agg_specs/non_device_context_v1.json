@@ -1,0 +1,361 @@
+{
+  "dimension_family": "non_device_context_v1",
+  "primary_key": {
+    "name": "context_dim_id",
+    "recipe": "sha256_concat"
+  },
+  "hashid_from": "context_dim_id",
+  "drop_null_source": null,
+  "dimensions": [
+    {
+      "name": "source_has_hb",
+      "type": "boolean",
+      "source_col": null,
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "supply_traffic_source",
+      "type": "string",
+      "source_col": "jgr_supply_traffic_source",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "supply_name",
+      "type": "string",
+      "source_col": "hbn_supply_name",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "supply_fee_bucket",
+      "type": "string",
+      "source_col": "hbn_supply_fee",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "account_id",
+      "type": "string",
+      "source_col": "hbn_pub_account_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "pub_account_id",
+      "type": "string",
+      "source_col": "hbn_pub_account_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "application_id",
+      "type": "string",
+      "source_col": "hbn_pub_app_object_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "pub_app_object_id",
+      "type": "string",
+      "source_col": "hbn_pub_app_object_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "pub_app_id",
+      "type": "string",
+      "source_col": "hbn_pub_app_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "pub_app_bundle_id",
+      "type": "string",
+      "source_col": "hbn_pub_app_bundle_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "pub_genre_bucket",
+      "type": "string",
+      "source_col": "hbn_pub_genre",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "app_bundle",
+      "type": "string",
+      "source_col": "jgr_app_bundle",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "app_iab_tier1",
+      "type": "string",
+      "source_col": "jgr_app_cat",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "app_object_id",
+      "type": "string",
+      "source_col": "jgr_app_object_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "app_hb_partner",
+      "type": "string",
+      "source_col": "jgr_app_hb_partner",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "app_version_major",
+      "type": "string",
+      "source_col": "jgr_app_ver",
+      "fallback_col": null,
+      "norm": "parse_major"
+    },
+    {
+      "name": "is_header_bidding",
+      "type": "boolean",
+      "source_col": "jgr_is_header_bidding",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "is_gam",
+      "type": "boolean",
+      "source_col": "jgr_is_gam",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "placement_id",
+      "type": "string",
+      "source_col": "jgr_placement_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "placement_reference_id",
+      "type": "string",
+      "source_col": "jgr_placement_reference_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "placement_type",
+      "type": "string",
+      "source_col": "jgr_placement_type",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "ad_size",
+      "type": "string",
+      "source_col": "jgr_ad_size",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "ad_type",
+      "type": "string",
+      "source_col": "jgr_ad_type",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "is_flat_cpm_enabled",
+      "type": "boolean",
+      "source_col": "jgr_is_flat_cpm_enabled",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "flat_cpm_model_type",
+      "type": "string",
+      "source_col": "jgr_flat_cpm_model_type",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "is_incentivized",
+      "type": "boolean",
+      "source_col": "jgr_is_incentivized",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "is_max_profit_enabled",
+      "type": "boolean",
+      "source_col": "jgr_is_max_profit_enabled",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "publisher_payout_type",
+      "type": "string",
+      "source_col": "jgr_publisher_payout_type",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "ad_unit_id",
+      "type": "string",
+      "source_col": "jgr_ad_unit_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "geoip_country_code",
+      "type": "string",
+      "source_col": "jgr_dev_country_iso2",
+      "fallback_col": "jgr_geo_country",
+      "norm": "coalesce"
+    },
+    {
+      "name": "geo_region",
+      "type": "string",
+      "source_col": "jgr_geo_region",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "geo_city_bucket",
+      "type": "string",
+      "source_col": "jgr_geo_city",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "geo_type",
+      "type": "bigint",
+      "source_col": "jgr_geo_type",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "geo_ipservice",
+      "type": "bigint",
+      "source_col": "jgr_geo_ipservice",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "ccpa_opt_out",
+      "type": "boolean",
+      "source_col": "jgr_ccpa_opt_out",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "coppa_applied",
+      "type": "boolean",
+      "source_col": "jgr_coppa_applied",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "consent_status",
+      "type": "string",
+      "source_col": "jgr_consent_status",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "consent_source",
+      "type": "string",
+      "source_col": "jgr_consent_source",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "jaeger_experiment_id",
+      "type": "string",
+      "source_col": "jgr_exp_to_bucket",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "dte_experiment_group",
+      "type": "string",
+      "source_col": "jgr_dte_experiment_group",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "ssp_exp_num",
+      "type": "bigint",
+      "source_col": "jgr_ssp_exp_num",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "vxac_exp_id",
+      "type": "string",
+      "source_col": "jgr_vxac_exp_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "ml_experiment_id",
+      "type": "bigint",
+      "source_col": "hbn_experiment_id",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "recommender_tag",
+      "type": "string",
+      "source_col": "hbn_recommender_tag",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "qps_type",
+      "type": "string",
+      "source_col": "jgr_qps_type",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "qps_exp_name",
+      "type": "string",
+      "source_col": "jgr_qps_exp_name",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "is_ad_podding",
+      "type": "boolean",
+      "source_col": "jgr_is_ad_podding",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "ad_podding_multiplier_bucket",
+      "type": "string",
+      "source_col": "jgr_ad_podding_multiplier",
+      "fallback_col": null,
+      "norm": "bucket"
+    },
+    {
+      "name": "traffic_quality_action",
+      "type": "string",
+      "source_col": "jgr_traffic_quality_action",
+      "fallback_col": null,
+      "norm": "passthrough"
+    },
+    {
+      "name": "traffic_quality_strategy",
+      "type": "string",
+      "source_col": "jgr_traffic_quality_strategy",
+      "fallback_col": null,
+      "norm": "passthrough"
+    }
+  ]
+}
