@@ -74,13 +74,17 @@ def _backticked(text):
 
 def parse_shared_columns(md_path=AGG_MD):
     out = []
+    in_table = False
     for heading, cells in _rows(md_path):
         if not heading.startswith("1."):
             continue
         header = [c.lower() for c in cells]
+        # Gate: only start collecting rows after we see the shared-columns header
         if header[:4] == ["column", "type", "role", "description"]:
+            in_table = True
             continue
-        if len(cells) >= 4 and cells[0] not in ("column", "table"):
+        # Only append data rows if we've seen the header and it's not a header/skip row
+        if in_table and len(cells) >= 4 and cells[0] not in ("column", "table"):
             out.append(SharedCol(_clean(cells[0]), _clean(cells[1]), _clean(cells[2]), cells[3]))
     return out
 

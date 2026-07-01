@@ -62,3 +62,13 @@ def test_type_mapping():
     assert agg_sql_type("LONG") == "bigint"
     assert agg_sql_type("TIMESTAMP") == "timestamp"
     assert agg_sql_type("BOOLEAN") == "boolean"
+
+def test_shared_columns_excludes_table_listing():
+    shared = parse_shared_columns()
+    assert len(shared) == 7
+    # the §1 table-listing rows (fully-qualified table names) must not leak in
+    assert all("." not in c.name for c in shared)
+    assert {c.name for c in shared} == {
+        "event_time", "ingest_time", "hashid", "source_event_count",
+        "first_source_event_time", "last_source_event_time", "aggregation_version",
+    }
