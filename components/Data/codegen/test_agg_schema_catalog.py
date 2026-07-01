@@ -63,6 +63,13 @@ def test_type_mapping():
     assert agg_sql_type("TIMESTAMP") == "timestamp"
     assert agg_sql_type("BOOLEAN") == "boolean"
 
+def test_source_has_hb_is_derived_expr():
+    dims = {d.name: d for d in parse_dims("non_device_context_v1")}
+    d = dims["source_has_hb"]
+    assert d.norm == "expr"
+    assert d.source_col == "hbn_bidrequest_id IS NOT NULL"
+    assert d.fallback_col is None
+
 def test_shared_columns_excludes_table_listing():
     shared = parse_shared_columns()
     assert len(shared) == 7

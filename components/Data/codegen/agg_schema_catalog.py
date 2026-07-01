@@ -30,6 +30,9 @@ PREDICATE_DEPENDENT = {
 # Known count-metric predicates for the computed ones (only delivery_count this round).
 _COUNT_PREDICATE = {"delivery_count": "jgr_no_serv_reason = 0"}
 
+# Dimensions with no single source column: a reviewed derived expression (emitted verbatim).
+_DERIVED_DIM_EXPR = {"source_has_hb": "hbn_bidrequest_id IS NOT NULL"}
+
 _DIST_SUFFIXES = [("sum", "double"), ("count", "bigint"), ("min", "double"),
                   ("max", "double"), ("squaresum", "double")]
 
@@ -122,6 +125,8 @@ def parse_dims(family, md_path=AGG_MD):
         typ = agg_sql_type(cells[1])
         source_text = cells[2]
         norm, src, fallback = _dim_norm(name, source_text)
+        if name in _DERIVED_DIM_EXPR:
+            norm, src, fallback = "expr", _DERIVED_DIM_EXPR[name], None
         role = "surrogate_key" if norm == "surrogate" else "dimension"
         # surrogate keys: device_dim_id derives from device_id; context_dim_id from all dims.
         out.append(AggDim(name, typ, src, fallback, norm, role))

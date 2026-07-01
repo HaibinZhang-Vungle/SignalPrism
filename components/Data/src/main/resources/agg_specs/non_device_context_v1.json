@@ -10,9 +10,9 @@
     {
       "name": "source_has_hb",
       "type": "boolean",
-      "source_col": null,
+      "source_col": "hbn_bidrequest_id IS NOT NULL",
       "fallback_col": null,
-      "norm": "passthrough"
+      "norm": "expr"
     },
     {
       "name": "supply_traffic_source",

@@ -67,6 +67,7 @@ object SparkMain extends BoilerplateSparkMain {
       case "parse_major"          => s"split($src, '\\\\.')[0]"
       case "coalesce"             => s"coalesce($src, ${str(d("fallback_col"))})"
       case "normalize" | "bucket" => s"lower(trim($src))"  // bucket: top-N deferred → normalized passthrough
+      case "expr"                 => src
       case _                      => src
     }
     s"$e AS $name"
