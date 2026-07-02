@@ -93,6 +93,13 @@ object SparkMain extends BoilerplateSparkMain {
     // 2) wide bridge -> both surrogate keys (KeySpec, same as agg) + labels, event grain.
     // Inner projects the raw dimension columns; outer computes the sha2 surrogate over them so the
     // device_dim_id / context_dim_id are byte-identical to realtime_attributed_aggregation.
+    //
+    // Wide table grain is (event_id, imp_id) -- an event can carry up to several served/attempted
+    // impressions -- but GMinor is event-grain, so this bridge MUST emit exactly one row per
+    // event_id. We collapse via row_number() choosing a deterministic representative impression:
+    // prefer the delivered/served impression (jgr_no_serv_reason = 0), tie-break on lowest imp_id.
+    // Without this, the LEFT JOIN below fans out per event_id and the later PIT row_number() picks
+    // an arbitrary fanned row, making context_dim_id / lbl_* nondeterministic per event.
     val dimProj = KeySpec.allDimProjections(Seq("device_level_v1", "non_device_context_v1")).mkString(",\n        ")
     val labelSel = LABEL_COLS.map(c => s"$c AS lbl_$c").mkString(",\n        ")
     spark.sql(s"""
@@ -104,8 +111,18 @@ object SparkMain extends BoilerplateSparkMain {
           SELECT event_id,
                  $dimProj,
                  ${LABEL_COLS.mkString(", ")}
-            FROM $wideTable
-           WHERE source_event_time >= '$s' AND source_event_time < '$t'
+            FROM (
+              SELECT event_id, imp_id,
+                     $dimProj,
+                     ${LABEL_COLS.mkString(", ")},
+                     row_number() OVER (
+                       PARTITION BY event_id
+                       ORDER BY (CASE WHEN jgr_no_serv_reason = 0 THEN 0 ELSE 1 END) ASC, imp_id ASC
+                     ) AS _imp_rn
+                FROM $wideTable
+               WHERE source_event_time >= '$s' AND source_event_time < '$t'
+            )
+           WHERE _imp_rn = 1
         )
     """).createOrReplaceTempView("_wide_keyed")
 
