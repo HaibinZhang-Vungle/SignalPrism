@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SignalPrism - Workshop POC Overview</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface-2: #f0f4f8;
+      --ink: #182536;
+      --muted: #5e6b7a;
+      --line: #d9e0e8;
+      --blue: #3169d8;
+      --teal: #0c9488;
+      --green: #1d8a55;
+      --amber: #b77700;
+      --red: #c54a4a;
+      --violet: #7657d8;
+      --cyan-bg: #e8f7f6;
+      --blue-bg: #ebf2ff;
+      --amber-bg: #fff7e8;
+      --green-bg: #eaf7ef;
+      --violet-bg: #f1edff;
+      --shadow: 0 18px 46px rgba(24, 37, 54, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.48;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(217, 224, 232, 0.92);
+      background: rgba(246, 247, 251, 0.92);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 240px;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background:
+        linear-gradient(110deg, transparent 0 38%, rgba(255, 255, 255, 0.9) 39% 45%, transparent 46%),
+        conic-gradient(from 18deg, #f05d5e, #f2c94c, #27c071, #2ec9e6, #496fd8, #8a63df, #f05d5e);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 10px 22px rgba(49, 105, 216, 0.18);
+    }
+
+    .nav {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .nav a {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 680;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 540px;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      background: #f4f5f7;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(246, 247, 251, 0.94) 0%, rgba(246, 247, 251, 0.72) 34%, rgba(246, 247, 251, 0.18) 70%, rgba(246, 247, 251, 0.08) 100%),
+        linear-gradient(0deg, rgba(246, 247, 251, 0.96) 0%, rgba(246, 247, 251, 0.1) 52%);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: min(1240px, 100%);
+      margin: 0 auto;
+      padding: 96px 24px 36px;
+    }
+
+    .kicker {
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 12px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 720px;
+      margin-bottom: 14px;
+      color: #102033;
+      font-size: clamp(36px, 6vw, 72px);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .hero-copy {
+      max-width: 660px;
+      color: #314254;
+      font-size: 20px;
+      font-weight: 560;
+    }
+
+    .spectrum-rule {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      width: min(660px, 100%);
+      height: 8px;
+      margin-top: 24px;
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: 0 12px 28px rgba(24, 37, 54, 0.12);
+    }
+
+    .spectrum-rule i:nth-child(1) { background: #ef5559; }
+    .spectrum-rule i:nth-child(2) { background: #f2994a; }
+    .spectrum-rule i:nth-child(3) { background: #f2c94c; }
+    .spectrum-rule i:nth-child(4) { background: #27ae60; }
+    .spectrum-rule i:nth-child(5) { background: #2dcae4; }
+    .spectrum-rule i:nth-child(6) { background: #3169d8; }
+    .spectrum-rule i:nth-child(7) { background: #8a63df; }
+
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 26px 24px 52px;
+      display: grid;
+      gap: 22px;
+    }
+
+    section {
+      scroll-margin-top: 82px;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: 1.22fr repeat(3, minmax(0, 0.72fr));
+      gap: 12px;
+      margin-top: -54px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .summary-card,
+    .panel,
+    .metric,
+    .stage,
+    .status-card,
+    .note {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 10px 24px rgba(24, 37, 54, 0.06);
+    }
+
+    .summary-card {
+      padding: 18px;
+      min-height: 120px;
+    }
+
+    .summary-card strong,
+    .metric strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .summary-card b,
+    .metric b {
+      display: block;
+      color: var(--ink);
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .summary-card p,
+    .metric p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .panel {
+      padding: 22px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-head h2 {
+      margin-bottom: 6px;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .panel-head p {
+      max-width: 780px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .tag {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .stage {
+      position: relative;
+      padding: 14px;
+      min-height: 178px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stage:not(:last-child)::after {
+      content: "->";
+      position: absolute;
+      right: -12px;
+      top: 28px;
+      width: 12px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .stage-index {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .stage:nth-child(1) .stage-index { background: var(--violet); }
+    .stage:nth-child(2) .stage-index { background: var(--blue); }
+    .stage:nth-child(3) .stage-index { background: var(--teal); }
+    .stage:nth-child(4) .stage-index { background: var(--amber); }
+    .stage:nth-child(5) .stage-index { background: var(--green); }
+
+    .stage h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .stage p,
+    .stage ul {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stage ul {
+      padding-left: 18px;
+    }
+
+    .stage li {
+      margin: 4px 0;
+    }
+
+    .join-lanes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .note {
+      padding: 14px;
+      background: var(--surface-2);
+    }
+
+    .note h3 {
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .note p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      padding: 15px;
+    }
+
+    .metric:nth-child(1) { background: var(--blue-bg); }
+    .metric:nth-child(2) { background: var(--cyan-bg); }
+    .metric:nth-child(3) { background: var(--amber-bg); }
+    .metric:nth-child(4) { background: var(--violet-bg); }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    th {
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    td strong {
+      color: var(--ink);
+      font-weight: 760;
+    }
+
+    .row-highlight td {
+      background: #f7fbff;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+      gap: 18px;
+    }
+
+    .progress-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .progress-hero {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--green-bg);
+      padding: 18px;
+      min-height: 238px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .progress-value {
+      color: var(--green);
+      font-size: 74px;
+      line-height: 0.95;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(29, 138, 85, 0.16);
+      overflow: hidden;
+      margin: 16px 0 10px;
+    }
+
+    .bar i {
+      display: block;
+      width: 70%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--teal), var(--green));
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .status-card {
+      padding: 15px;
+      min-height: 112px;
+    }
+
+    .status-card h3 {
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .status-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status-card.done { background: var(--green-bg); }
+    .status-card.active { background: var(--blue-bg); }
+    .status-card.next { background: var(--amber-bg); }
+    .status-card.risk { background: #fff0f0; }
+
+    .footer {
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 1100px) {
+      .summary-strip,
+      .architecture,
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stage:not(:last-child)::after {
+        content: "";
+      }
+
+      .two-col,
+      .progress-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px 16px;
+      }
+
+      .nav {
+        margin-left: 0;
+        justify-content: flex-start;
+      }
+
+      .hero {
+        min-height: 620px;
+      }
+
+      .hero::after {
+        background:
+          linear-gradient(180deg, rgba(246, 247, 251, 0.9) 0%, rgba(246, 247, 251, 0.72) 48%, rgba(246, 247, 251, 0.98) 100%);
+      }
+
+      .hero-inner {
+        padding: 86px 16px 30px;
+      }
+
+      .hero-copy {
+        font-size: 17px;
+      }
+
+      main {
+        padding: 20px 16px 42px;
+      }
+
+      .summary-strip,
+      .architecture,
+      .join-lanes,
+      .metric-grid,
+      .status-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .panel-head {
+        display: block;
+      }
+
+      .tag {
+        display: inline-block;
+        margin-top: 10px;
+      }
+
+      .progress-value {
+        font-size: 58px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top" aria-label="SignalPrism overview">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>SignalPrism Workshop POC</span>
+      </a>
+      <nav class="nav" aria-label="Page sections">
+        <a href="#architecture">Architecture</a>
+        <a href="#kvdb">KVDB</a>
+        <a href="#ttl">TTL Accuracy</a>
+        <a href="#progress">Progress</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <img src="assets/signalprism_prism_spectrum.png" alt="White signal beam entering a glass prism and exiting as separated color spectra" />
+    <div class="hero-inner">
+      <p class="kicker">Final Workshop POC Architecture</p>
+      <h1>SignalPrism</h1>
+      <p class="hero-copy">
+        Transform full-volume mixed realtime traffic into clean, attributable, aggregate signals for feature discovery and experimentation.
+      </p>
+      <div class="spectrum-rule" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="summary-strip" aria-label="Executive summary">
+      <div class="summary-card">
+        <strong>Design intent</strong>
+        <b>Useful signal extraction</b>
+        <p>Wide attribution, aggregation schemas, and GMinor samples connect raw event streams to stable feature-quality signals.</p>
+      </div>
+      <div class="summary-card">
+        <strong>Workshop status</strong>
+        <b>70%</b>
+        <p>Core schema and component story are ready for POC review.</p>
+      </div>
+      <div class="summary-card">
+        <strong>Hot path load</strong>
+        <b>0.7M-1.2M ops/s</b>
+        <p>KVDB must be treated as a sharded production dependency.</p>
+      </div>
+      <div class="summary-card">
+        <strong>POC guardrail</strong>
+        <b>3h baseline TTL</b>
+        <p>Longer TTLs improve match rate but scale storage linearly.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="architecture">
+      <div class="panel-head">
+        <div>
+          <h2>Design Architecture</h2>
+          <p>The POC separates raw mixed traffic, realtime join context, aggregate dimensions, and feature workbench outputs into explicit contracts.</p>
+        </div>
+        <span class="tag">Signal path</span>
+      </div>
+
+      <div class="architecture">
+        <article class="stage">
+          <span class="stage-index">1</span>
+          <h3>Mixed Signal Inputs</h3>
+          <ul>
+            <li>HB transactions</li>
+            <li>HB notifications</li>
+            <li>TPAT samples</li>
+            <li>GMinor logs</li>
+          </ul>
+        </article>
+        <article class="stage">
+          <span class="stage-index">2</span>
+          <h3>Realtime WideTable</h3>
+          <p>Join bid, transaction, notification, device, and non-device context into attribution-ready records.</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">3</span>
+          <h3>Aggregation Schemas</h3>
+          <p>Device-level and non-device context dimensions define the stable rollup surface.</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">4</span>
+          <h3>Metrics Compiler</h3>
+          <p>Modulo metrics and workshop dimensions produce shadow aggregation tables for validation.</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">5</span>
+          <h3>Feature Workbench</h3>
+          <p>Offline datasets, simulation views, and candidate feature ranking expose reusable signals.</p>
+        </article>
+      </div>
+
+      <div class="join-lanes">
+        <article class="note">
+          <h3>WideTable join lane</h3>
+          <p>KVDB provides short-lived transaction context so delayed notifications can enrich the wide attribution row.</p>
+        </article>
+        <article class="note">
+          <h3>GMinor join lane</h3>
+          <p>GMinor logs add experiment samples, feature payloads, prediction payloads, and normalized device identifiers.</p>
+        </article>
+        <article class="note">
+          <h3>Aggregation lane</h3>
+          <p>Only aggregate-safe dimensions flow into rollup tables; bid-level identifiers stay out of context dimensions.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="kvdb">
+      <div class="panel-head">
+        <div>
+          <h2>KVDB Resource Estimation</h2>
+          <p>Reference sizing is based on the current realtime HB attribution estimate. Storage and live key count scale linearly with TTL.</p>
+        </div>
+        <span class="tag">Full transaction basis</span>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric">
+          <strong>HB transaction rate</strong>
+          <b>332K/s</b>
+          <p>Closest stream to the value stored in KVDB.</p>
+        </div>
+        <div class="metric">
+          <strong>HB notification reads</strong>
+          <b>404K/s</b>
+          <p>One lookup per notification before wide-row write.</p>
+        </div>
+        <div class="metric">
+          <strong>Current 3h storage</strong>
+          <b>11.5 TB</b>
+          <p>HB transaction basis, before gate fraction.</p>
+        </div>
+        <div class="metric">
+          <strong>7d upper bound</strong>
+          <b>1.43 PB</b>
+          <p>Ex-Jaeger proxy, showing why long TTL is expensive.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap" role="region" aria-label="KVDB sizing table" tabindex="0">
+        <table>
+          <thead>
+            <tr>
+              <th>TTL</th>
+              <th>Live txn keys</th>
+              <th>HB txn storage</th>
+              <th>Ex-Jaeger upper storage</th>
+              <th>Dedupe storage upper bound</th>
+              <th>Workshop readout</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-highlight">
+              <td><strong>3h</strong></td>
+              <td><strong>3.59 B</strong></td>
+              <td><strong>11.5 TB</strong></td>
+              <td>25.5 TB</td>
+              <td>0.61 TB</td>
+              <td>Baseline POC guardrail.</td>
+            </tr>
+            <tr>
+              <td><strong>24h</strong></td>
+              <td>28.7 B</td>
+              <td>91.8 TB</td>
+              <td>203.7 TB</td>
+              <td>4.9 TB</td>
+              <td>Strong accuracy lift, large storage multiplier.</td>
+            </tr>
+            <tr>
+              <td><strong>3d</strong></td>
+              <td>86.1 B</td>
+              <td>275 TB</td>
+              <td>611 TB</td>
+              <td>14.7 TB</td>
+              <td>Marginal accuracy gain over 1d.</td>
+            </tr>
+            <tr>
+              <td><strong>7d</strong></td>
+              <td>201 B</td>
+              <td>643 TB</td>
+              <td>1.43 PB</td>
+              <td>34 TB</td>
+              <td>Out of POC scope without projection/sharding redesign.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="ttl">
+      <div class="panel-head">
+        <div>
+          <h2>TTL Accuracy Evaluation</h2>
+          <p>Accuracy reflects the share captured within the delay window. Remaining QPS is the delayed traffic that still falls outside that TTL.</p>
+        </div>
+        <span class="tag">TPAT 200K QPS / HB notification 500K QPS</span>
+      </div>
+
+      <div class="two-col">
+        <div class="table-wrap" role="region" aria-label="TTL accuracy table" tabindex="0">
+          <table>
+            <thead>
+              <tr>
+                <th>Delay Time</th>
+                <th>TPAT</th>
+                <th>HB Notification</th>
+                <th>TPAT Remain QPS</th>
+                <th>HB Notification Remain QPS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1m</strong></td>
+                <td>73.00%</td>
+                <td>95.00%</td>
+                <td>54,000</td>
+                <td>25,000</td>
+              </tr>
+              <tr>
+                <td><strong>10m</strong></td>
+                <td>92.00%</td>
+                <td>98.70%</td>
+                <td>16,000</td>
+                <td>6,500</td>
+              </tr>
+              <tr>
+                <td><strong>30m</strong></td>
+                <td>96.50%</td>
+                <td>99.20%</td>
+                <td>7,000</td>
+                <td>4,000</td>
+              </tr>
+              <tr>
+                <td><strong>60m</strong></td>
+                <td>98.00%</td>
+                <td>99.50%</td>
+                <td>4,000</td>
+                <td>2,500</td>
+              </tr>
+              <tr class="row-highlight">
+                <td><strong>1d</strong></td>
+                <td><strong>99.20%</strong></td>
+                <td><strong>99.92%</strong></td>
+                <td><strong>1,600</strong></td>
+                <td><strong>400</strong></td>
+              </tr>
+              <tr>
+                <td><strong>3d</strong></td>
+                <td>99.65%</td>
+                <td>99.97%</td>
+                <td>700</td>
+                <td>100</td>
+              </tr>
+              <tr>
+                <td><strong>6d</strong></td>
+                <td>99.80%</td>
+                <td>99.99%</td>
+                <td>400</td>
+                <td>75</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note">
+          <h3>Trade-off summary</h3>
+          <p>
+            60m already captures 98.00% TPAT and 99.50% HB notification traffic. 1d raises the capture rate to 99.20% and 99.92%, but the full-transaction KVDB footprint reaches about 91.8 TB on the HB transaction basis. 3d and 6d provide smaller incremental accuracy gains while multiplying storage and expiry compaction pressure.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="progress">
+      <div class="panel-head">
+        <div>
+          <h2>Project Progress</h2>
+          <p>The workshop POC is ready to explain the architecture and schema contracts, with implementation hardening still ahead.</p>
+        </div>
+        <span class="tag">Updated to 70%</span>
+      </div>
+
+      <div class="progress-layout">
+        <div class="progress-hero">
+          <div>
+            <div class="progress-value">70%</div>
+            <div class="bar" aria-label="Project progress 70 percent"><i></i></div>
+            <p>POC architecture, schemas, and resource trade-offs are presentation-ready.</p>
+          </div>
+          <p>Next review should focus on the KVDB TTL decision, projection value shape, and PE sign-off for production traffic.</p>
+        </div>
+
+        <div class="status-grid">
+          <article class="status-card done">
+            <h3>Schema contracts</h3>
+            <p>WideTable, aggregation tables, GMinor logs, and dimensions are documented for workshop review.</p>
+          </article>
+          <article class="status-card done">
+            <h3>Component framing</h3>
+            <p>Component READMEs and module boundaries describe the POC roles.</p>
+          </article>
+          <article class="status-card active">
+            <h3>KVDB design</h3>
+            <p>Resource estimate and TTL accuracy table clarify the storage versus signal-recovery trade-off.</p>
+          </article>
+          <article class="status-card next">
+            <h3>Implementation validation</h3>
+            <p>Remaining work: pipeline hardening, shadow-table verification, feature workbench flows, and rollout checks.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Sources: demo/signalprism_widetable_demo_20260701_103607.html, components/WideTable/kvdb_resource_estimation.md, realtime attribution workshop schema notes.
+    </footer>
+  </main>
+</body>
+</html>
