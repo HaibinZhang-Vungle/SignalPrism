@@ -80,9 +80,9 @@
     {
       "name": "pub_genre_bucket",
       "type": "string",
-      "source_col": "hbn_pub_genre",
+      "source_col": "lower(array_join(array_sort(hbn_pub_genre), ','))",
       "fallback_col": null,
-      "norm": "bucket"
+      "norm": "expr"
     },
     {
       "name": "app_bundle",
@@ -94,9 +94,9 @@
     {
       "name": "app_iab_tier1",
       "type": "string",
-      "source_col": "jgr_app_cat",
+      "source_col": "array_join(array_sort(array_distinct(transform(jgr_app_cat, x -> split(x, '-')[0]))), ',')",
       "fallback_col": null,
-      "norm": "passthrough"
+      "norm": "expr"
     },
     {
       "name": "app_object_id",

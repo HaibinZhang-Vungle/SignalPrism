@@ -143,9 +143,9 @@ Excluded from this dimension family:
 | `pub_app_object_id` | STRING | `hbn_pub_app_object_id` | Primary publisher app dimension. |
 | `pub_app_id` | STRING | `hbn_pub_app_id` | Publisher app store id. |
 | `pub_app_bundle_id` | STRING | `hbn_pub_app_bundle_id` | Publisher app bundle / package. |
-| `pub_genre_bucket` | STRING | bucketed `hbn_pub_genre` | Multi-value field; use sorted bucket or MAP primitive. |
+| `pub_genre_bucket` | STRING | sorted-join of `hbn_pub_genre` (array) | Multi-value field reduced to a stable scalar key (`lower(array_join(array_sort(...), ','))`). |
 | `app_bundle` | STRING | `jgr_app_bundle` | Exchange-independent app bundle. |
-| `app_iab_tier1` | STRING | tier-1 rollup from `jgr_app_cat` | Multi-value IAB category rollup. |
+| `app_iab_tier1` | STRING | tier-1 rollup from `jgr_app_cat` (array) | Multi-value IAB category rollup: strip each code before `-`, dedupe, sort, join. |
 | `app_object_id` | STRING | `jgr_app_object_id` | Jaeger app object id. |
 | `app_hb_partner` | STRING | `jgr_app_hb_partner` | Third-party HB partner. |
 | `app_version_major` | STRING | parse major from `jgr_app_ver` | Keep raw versions out of default keys. |

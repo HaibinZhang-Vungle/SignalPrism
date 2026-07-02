@@ -33,9 +33,15 @@ _COUNT_PREDICATE = {"delivery_count": "jgr_no_serv_reason = 0"}
 # Dimensions with no single source column: a reviewed derived expression (emitted verbatim).
 # device_id is keyed on the SDK normalized id (jgr_lo_id is empty upstream), normalized the
 # same way lena's device-feature pipelines do (normalize_device_id: trim/lowercase, nil-UUID->null).
+# pub_genre_bucket / app_iab_tier1 have ARRAY<STRING> sources (hbn_pub_genre / jgr_app_cat), so they
+# are reduced to a stable scalar STRING: pub_genre = sorted-join of genres; app_iab_tier1 = tier-1
+# rollup (strip each IAB code before '-', dedupe, sort, join). A plain trim/passthrough would fail
+# ("trim requires STRING" / array-into-string append mismatch).
 _DERIVED_DIM_EXPR = {
     "source_has_hb": "hbn_bidrequest_id IS NOT NULL",
     "device_id": "normalize_device_id(jgr_dev_normalized_id)",
+    "pub_genre_bucket": "lower(array_join(array_sort(hbn_pub_genre), ','))",
+    "app_iab_tier1": "array_join(array_sort(array_distinct(transform(jgr_app_cat, x -> split(x, '-')[0]))), ',')",
 }
 
 _DIST_SUFFIXES = [("sum", "double"), ("count", "bigint"), ("min", "double"),
