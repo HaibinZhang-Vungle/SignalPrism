@@ -1,0 +1,32 @@
+[
+  {
+    "featureId": "avg_hbn_settlement_price_7d",
+    "displayName": "Avg HBN settlement price, 7d",
+    "dimensionFamily": "non_device_context_v1",
+    "window": "7d",
+    "formula": "safe_div(hbn_settlement_price_sum_7d, hbn_settlement_price_count_7d)",
+    "sourcePrimitives": ["hbn_settlement_price_sum_7d", "hbn_settlement_price_count_7d"],
+    "fillPolicy": { "default": "null", "modelInput": "nan" },
+    "status": "proposed"
+  },
+  {
+    "featureId": "hbn_settlement_price_cv_7d",
+    "displayName": "HBN settlement price CV, 7d",
+    "dimensionFamily": "non_device_context_v1",
+    "window": "7d",
+    "formula": "cv(hbn_settlement_price_sum_7d, hbn_settlement_price_sum_sq_7d, hbn_settlement_price_count_7d)",
+    "sourcePrimitives": ["hbn_settlement_price_sum_7d", "hbn_settlement_price_sum_sq_7d", "hbn_settlement_price_count_7d"],
+    "fillPolicy": { "default": "null", "modelInput": "nan" },
+    "status": "proposed"
+  },
+  {
+    "featureId": "tpat_start_rate_7d",
+    "displayName": "TPAT event-start rate, 7d",
+    "dimensionFamily": "non_device_context_v1",
+    "window": "7d",
+    "formula": "safe_div(tpat_event_start_count_sum_7d, delivery_count_7d)",
+    "sourcePrimitives": ["tpat_event_start_count_sum_7d", "delivery_count_7d"],
+    "fillPolicy": { "default": "null", "modelInput": "nan" },
+    "status": "proposed"
+  }
+]

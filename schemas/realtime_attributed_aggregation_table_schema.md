@@ -240,8 +240,27 @@ These columns are materialized exactly as named.
 | `bid_count` | BIGINT | count bid events | Align to modulo bid predicate. |
 | `bid_count_moloco_count` | BIGINT | count Moloco bid events | Existing modulo name is intentionally preserved. |
 | `bid_count_acc_count` | BIGINT | count Accelerate bid events | Existing modulo name is intentionally preserved. |
-| `sp_at_mediation_floor_count` | BIGINT | count settlement/winner price at mediation floor | Exact modulo predicate required. |
 | `hb_bid_count` | DOUBLE | count HB bids | Type preserved from modulo SQL (`DOUBLE`). |
+
+The columns above are raw event counts of a single event type, materialized
+directly. Predicate-based counts that compare two fields are **not** base counts;
+see §5.4.
+
+### 5.4 Conditional (`count_if`) Metric Families
+
+Some legacy modulo counts are not raw event counts — they count rows where a
+**predicate over two fields** holds. These are modeled with the `count_if`
+strategy (TRD §7.5): materialize `count_true` (the modulo-named column, for
+backwards compatibility) and reuse an existing denominator count for the rate.
+The useful ML feature is the derived **rate**, not the bare count.
+
+| family | count_true column | denominator | derived rate feature | predicate | notes |
+|---|---|---|---|---|---|
+| `sp_at_mediation_floor` | `sp_at_mediation_floor_count` (BIGINT) | `settlement_price_count` | `sp_at_mediation_floor_rate = safe_div(sp_at_mediation_floor_count, settlement_price_count)` | settlement / winner price is at the mediation floor | Exact modulo predicate required. Not a raw event count. |
+
+`sp_at_mediation_floor_count` is retained under its modulo name as the
+`count_true` column so §6 compatibility holds; it is a conditional metric, not a
+base count.
 
 ---
 

@@ -7,8 +7,10 @@ import type {
   AggregateFeatureCatalog,
   AggregationConfig,
   AggregationPreview,
+  DerivedFeature,
   DimensionFamily,
   FeatureCapability,
+  FeatureSet,
   FieldFamily,
   LineageChain,
   Primitive,
@@ -41,6 +43,15 @@ export interface WorkbenchDataSource {
 
   /** Cost/plan preview for a proposed aggregation config (no materialization). */
   previewAggregation(config: AggregationConfig): Promise<AggregationPreview>
+
+  /** Derived features composed in Formula Studio (TRD §7.3.3). */
+  listDerivedFeatures(): Promise<DerivedFeature[]>
+  /** Persist a derived feature. Upserts by `featureId`; returns the stored record. */
+  saveDerivedFeature(feature: DerivedFeature): Promise<DerivedFeature>
+
+  /** Candidate/base feature sets ML tests (TRD §7.3.4). A set is a delta on a base. */
+  listFeatureSets(): Promise<FeatureSet[]>
+  readFeatureSet(featureSetId: string): Promise<FeatureSet | undefined>
 
   /** Completed simulation runs. Display-only for the demo (launch is stubbed). */
   listSimulationRuns(): Promise<SimulationRun[]>

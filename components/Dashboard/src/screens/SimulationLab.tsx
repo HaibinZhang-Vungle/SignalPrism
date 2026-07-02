@@ -30,12 +30,19 @@ export function SimulationLab({
   onTrace: (nodeId: string) => void
 }) {
   const runs = useAsync(() => ds.listSimulationRuns(), [ds])
+  const featureSets = useAsync(() => ds.listFeatureSets(), [ds])
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
 
   const selected = useMemo(() => {
     const list = runs ?? []
     return list.find((r) => r.runId === selectedId) ?? list[0]
   }, [runs, selectedId])
+
+  // The candidate set under test for the selected run, resolved from §7.3.4 metadata.
+  const activeSet = useMemo(
+    () => (featureSets ?? []).find((fs) => fs.featureSetId === selected?.featureSetId),
+    [featureSets, selected],
+  )
 
   const cohortDims = useMemo(() => {
     const set = new Map<string, { value: string; lift: number }[]>()
@@ -54,7 +61,12 @@ export function SimulationLab({
 
       <div className="layout-2">
         <div className="panel">
-          <h2>Feature set</h2>
+          <h2>Feature set{activeSet && <span className="col"> · {activeSet.featureSetId}</span>}</h2>
+          {activeSet && (
+            <p className="sub" style={{ marginTop: -4 }}>
+              owner <code>{activeSet.owner}</code> · purpose <code>{activeSet.purpose}</code>
+            </p>
+          )}
           <label className="field">
             Model endpoint
             <select defaultValue="Floor">
@@ -65,18 +77,33 @@ export function SimulationLab({
           </label>
           <label className="field">
             Baseline feature set
-            <select defaultValue="production_floor_model_current">
-              <option>production_floor_model_current</option>
+            <select value={activeSet?.baseFeatureSet ?? ''} disabled>
+              {(featureSets ?? []).map((fs) => (
+                <option key={fs.featureSetId} value={fs.featureSetId}>{fs.featureSetId}</option>
+              ))}
             </select>
           </label>
           <label className="field">
-            Candidate features
+            Candidate features (added)
             <div className="multi">
-              {['avg_hbn_settlement_price_7d', 'hbn_settlement_price_cv_7d', 'bid_premium_rate_7d', 'tpat_start_rate_7d'].map((f) => (
+              {(activeSet?.addedFeatures ?? []).map((f) => (
                 <label key={f}><input type="checkbox" defaultChecked /> {f}</label>
               ))}
+              {activeSet && activeSet.addedFeatures.length === 0 && (
+                <span className="sub">No added features (baseline set).</span>
+              )}
             </div>
           </label>
+          {activeSet && activeSet.removedFeatures.length > 0 && (
+            <label className="field">
+              Removed features
+              <div className="multi">
+                {activeSet.removedFeatures.map((f) => (
+                  <label key={f}><input type="checkbox" defaultChecked disabled /> {f}</label>
+                ))}
+              </div>
+            </label>
+          )}
           <label className="field">
             Target label
             <select defaultValue={TARGET_LABELS[0]}>

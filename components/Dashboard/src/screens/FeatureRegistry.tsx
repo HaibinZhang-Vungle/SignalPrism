@@ -17,6 +17,7 @@ export function FeatureRegistry({ ds }: { ds: WorkbenchDataSource }) {
   const metrics = catalog?.metrics ?? []
   const distribution = metrics.filter((m) => m.kind === 'distribution')
   const counts = metrics.filter((m) => m.kind === 'count')
+  const conditional = metrics.filter((m) => m.kind === 'count_if')
 
   const metricCard = (m: AggregateMetric) => (
     <div className="card" key={m.metricId} data-testid={`metric-${m.metricId}`}>
@@ -35,7 +36,19 @@ export function FeatureRegistry({ ds }: { ds: WorkbenchDataSource }) {
         </div>
       ) : (
         <div className="chips" style={{ marginTop: 8 }}>
-          <span className="chip strat"><code>{m.metricId}</code></span>
+          {m.generatedColumns.map((c) => (
+            <span className="chip strat" key={c}><code>{c}</code></span>
+          ))}
+        </div>
+      )}
+      {m.kind === 'count_if' && (
+        <div className="sub" style={{ marginTop: 8, fontSize: 11 }}>
+          {m.predicate && <div>predicate: <code>{m.predicate}</code></div>}
+          {m.denominator && (
+            <div>
+              derived rate: <code>{`safe_div(${m.generatedColumns[0]}, ${m.denominator})`}</code>
+            </div>
+          )}
         </div>
       )}
       {m.notes && <div className="sub" style={{ marginTop: 8, fontSize: 11 }}>{m.notes}</div>}
@@ -47,8 +60,8 @@ export function FeatureRegistry({ ds }: { ds: WorkbenchDataSource }) {
       <h1>Feature Registry</h1>
       <p className="sub">
         Existing aggregate features from the aggregation table schema — {distribution.length} distribution
-        metric families (each → 5 columns), {counts.length} count metrics, shared across both tables. Select
-        a table to see its dimensions.
+        metric families (each → 5 columns), {counts.length} count metrics, {conditional.length} conditional
+        (count_if) metrics, shared across both tables. Select a table to see its dimensions.
       </p>
 
       <div className="tabs" role="tablist">
@@ -66,8 +79,23 @@ export function FeatureRegistry({ ds }: { ds: WorkbenchDataSource }) {
 
       {table && (
         <p className="sub">
-          <code>ml_shadow_feature.{table.tableId}</code> · key <code>{table.primaryKey}</code> · {table.purpose}
+          <code>ml_shadow_feature.{table.tableId}</code> · key <code>{table.primaryKey}</code>
+          {' · '}
+          <span className="chip role role-muted" title="Base bucket grain (aggregation schema §1)">
+            {table.grain} grain
+          </span>
+          {' '}
+          {table.purpose}
         </p>
+      )}
+
+      {table && (
+        <div className="warn-box" role="note" data-testid="window-flag">
+          <strong>Time window:</strong> metrics are <b>{table.grain}</b> buckets — not a single
+          feature value. Any feature composes a trailing window (1h / 1d / 7d / 30d) that must{' '}
+          <b>end strictly before the scoring event</b> for point-in-time correctness (aggregation
+          schema §2). Current-event rows must not contribute to their own trailing aggregates.
+        </div>
       )}
 
       <div className="domain-group">
@@ -79,6 +107,17 @@ export function FeatureRegistry({ ds }: { ds: WorkbenchDataSource }) {
         <h2>Count metrics · {counts.length}</h2>
         <div className="grid">{counts.map(metricCard)}</div>
       </div>
+
+      {conditional.length > 0 && (
+        <div className="domain-group" data-testid="count-if-group">
+          <h2>Conditional (count_if) metrics · {conditional.length}</h2>
+          <p className="sub">
+            Predicate-based counts over two fields — not raw event counts (§5.4). The ML feature is
+            the derived rate.
+          </p>
+          <div className="grid">{conditional.map(metricCard)}</div>
+        </div>
+      )}
 
       <div className="domain-group">
         <h2>Dimensions · {table?.dimensionColumns.length ?? 0} <span className="col">({table?.dimensionFamily})</span></h2>

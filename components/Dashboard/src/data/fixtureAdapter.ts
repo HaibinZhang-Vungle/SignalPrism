@@ -6,8 +6,10 @@ import type {
   AggregateFeatureCatalog,
   AggregationConfig,
   AggregationPreview,
+  DerivedFeature,
   DimensionFamily,
   FeatureCapability,
+  FeatureSet,
   FieldFamily,
   LineageChain,
   LineageNode,
@@ -21,12 +23,16 @@ import { screenAndRank } from '../screen/screen'
 import capabilitiesFixture from '../fixtures/capabilities.json'
 import primitivesFixture from '../fixtures/primitives.json'
 import simulationRunsFixture from '../fixtures/simulationRuns.json'
+import featureSetsFixture from '../fixtures/featureSets.json'
+import derivedFeaturesFixture from '../fixtures/derivedFeatures.json'
 import residualPocketsFixture from '../fixtures/residualPockets.json'
 import aggregateFeaturesFixture from '../fixtures/aggregateFeatures.json'
 
 const capabilities = capabilitiesFixture as FeatureCapability[]
 const primitives = primitivesFixture as Primitive[]
 const simulationRuns = simulationRunsFixture as SimulationRun[]
+const featureSets = featureSetsFixture as FeatureSet[]
+const derivedFeaturesSeed = derivedFeaturesFixture as DerivedFeature[]
 const residualPockets = residualPocketsFixture as ResidualPocket[]
 
 /**
@@ -61,6 +67,11 @@ function sampleFraction(rate: string): number {
 }
 
 export class FixtureWorkbenchDataSource implements WorkbenchDataSource {
+  // Derived features are mutable in the demo: Formula Studio saves into this
+  // in-memory store (seeded from the fixture). Session-only — not persisted to
+  // disk. Copied per instance so tests and separate sessions don't share state.
+  private derivedFeatures: DerivedFeature[] = derivedFeaturesSeed.map((f) => ({ ...f }))
+
   async listCapabilities(): Promise<FeatureCapability[]> {
     return capabilities
   }
@@ -152,6 +163,26 @@ export class FixtureWorkbenchDataSource implements WorkbenchDataSource {
     ]
 
     return { outputTables, estimatedRowsPerDay, estimatedBytesPerDay, warnings, blocked, blockReason }
+  }
+
+  async listDerivedFeatures(): Promise<DerivedFeature[]> {
+    return this.derivedFeatures
+  }
+
+  async saveDerivedFeature(feature: DerivedFeature): Promise<DerivedFeature> {
+    const stored: DerivedFeature = { ...feature }
+    const idx = this.derivedFeatures.findIndex((f) => f.featureId === stored.featureId)
+    if (idx >= 0) this.derivedFeatures[idx] = stored
+    else this.derivedFeatures.push(stored)
+    return stored
+  }
+
+  async listFeatureSets(): Promise<FeatureSet[]> {
+    return featureSets
+  }
+
+  async readFeatureSet(featureSetId: string): Promise<FeatureSet | undefined> {
+    return featureSets.find((fs) => fs.featureSetId === featureSetId)
   }
 
   async listSimulationRuns(): Promise<SimulationRun[]> {

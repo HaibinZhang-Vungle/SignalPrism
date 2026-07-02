@@ -1,0 +1,23 @@
+[
+  {
+    "featureSetId": "production_floor_model_current",
+    "baseFeatureSet": null,
+    "addedFeatures": [],
+    "removedFeatures": [],
+    "owner": "supply_ai",
+    "purpose": "production_floor_model_baseline"
+  },
+  {
+    "featureSetId": "floor_model_candidate_2026_06_demo",
+    "baseFeatureSet": "production_floor_model_current",
+    "addedFeatures": [
+      "avg_hbn_settlement_price_7d",
+      "hbn_settlement_price_cv_7d",
+      "bid_premium_rate_7d",
+      "tpat_start_rate_7d"
+    ],
+    "removedFeatures": [],
+    "owner": "mle",
+    "purpose": "offline_floor_simulation"
+  }
+]

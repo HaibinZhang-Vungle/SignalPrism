@@ -90,6 +90,21 @@ describe('fixture shape (drift guard)', () => {
     }
   })
 
+  it('every simulation run resolves to a real feature set, and bases resolve too', async () => {
+    const sets = await ds.listFeatureSets()
+    const setIds = new Set(sets.map((s) => s.featureSetId))
+    for (const s of sets) {
+      if (s.baseFeatureSet !== null) {
+        expect(setIds.has(s.baseFeatureSet), `${s.featureSetId} base ${s.baseFeatureSet}`).toBe(true)
+      }
+    }
+    const runs = await ds.listSimulationRuns()
+    for (const r of runs) {
+      expect(setIds.has(r.featureSetId), `${r.runId} -> ${r.featureSetId}`).toBe(true)
+      expect(await ds.readFeatureSet(r.featureSetId)).toBeDefined()
+    }
+  })
+
   it('every primitive points to a real capability', async () => {
     const caps = await ds.listCapabilities()
     const capIds = new Set(caps.map((c) => c.capabilityId))

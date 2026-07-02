@@ -175,18 +175,26 @@ export interface DimensionFamily {
 
 /**
  * An existing aggregate feature from the aggregation table schema (§5 metric catalog).
- * Distribution metrics expand to 5 columns; count metrics are a single column.
+ * Distribution metrics expand to 5 columns; count metrics are a single column;
+ * `count_if` metrics are predicate-based conditional counts (§5.4), not raw counts.
  */
 export interface AggregateMetric {
   metricId: string
-  kind: 'distribution' | 'count'
+  kind: 'distribution' | 'count' | 'count_if'
   generatedColumns: string[]
   dataType: string
   source: string
   notes?: string
   /** Label-like / point-in-time sensitive — must not be used naively as a feature input. */
   labelLike?: boolean
+  /** `count_if` only (§5.4): the two-field predicate this metric counts. */
+  predicate?: string
+  /** `count_if` only (§5.4): denominator count for the derived rate feature. */
+  denominator?: string
 }
+
+/** Base time grain of an aggregation table (aggregation schema §1: "Both tables are hourly"). */
+export type AggregateGrain = 'hourly'
 
 /** A reviewed hourly aggregation table (§1) with its dimension columns (§3/§4). */
 export interface AggregateTable {
@@ -195,6 +203,13 @@ export interface AggregateTable {
   purpose: string
   primaryKey: string
   dimensionColumns: string[]
+  /**
+   * Base bucket grain (aggregation schema §1). Metrics are hourly buckets; any
+   * feature use composes a trailing window that must END BEFORE the scoring
+   * event for point-in-time correctness (§2, rule "Metric windows must end
+   * strictly before the scoring event").
+   */
+  grain: AggregateGrain
 }
 
 /** The aggregate-feature catalog browsed by the Feature Registry. */
@@ -245,6 +260,49 @@ export interface FormulaValidation {
   coverageEstimate: number // [0,1]
   errors: string[]
   outputType?: 'numeric'
+}
+
+/** Derived-feature lifecycle state (TRD §7.10.4). New saves start `proposed`. */
+export type DerivedFeatureStatus = 'proposed' | 'approved' | 'production' | 'rejected'
+
+/**
+ * Null / fill policy a derived feature must declare (TRD §7.3.3, §7.6 rule
+ * "Feature must declare null/fill policy"). `default` is the stored value;
+ * `modelInput` is what the model sees.
+ */
+export interface FillPolicy {
+  default: 'null' | 'zero'
+  modelInput: 'nan' | 'zero'
+}
+
+/**
+ * A derived feature: formula + source primitives + dimension family + window
+ * (TRD §7.3.3). This is what Formula Studio produces and saves.
+ */
+export interface DerivedFeature {
+  featureId: string
+  displayName: string
+  dimensionFamily: DimensionFamilyId
+  window: WindowSpec
+  formula: string
+  sourcePrimitives: string[]
+  fillPolicy: FillPolicy
+  status: DerivedFeatureStatus
+}
+
+/**
+ * A feature set: the selected list ML actually tests in one simulation
+ * (TRD §7.3.4). A candidate set is defined as a delta on a base set —
+ * `addedFeatures` minus `removedFeatures` — so runs stay comparable.
+ */
+export interface FeatureSet {
+  featureSetId: string
+  /** The set this one is diffed against; `null` for a root/production set. */
+  baseFeatureSet: string | null
+  addedFeatures: string[]
+  removedFeatures: string[]
+  owner: string
+  purpose: string
 }
 
 /** A simulation run result (TRD §7.3.5 / §7.9.5). */

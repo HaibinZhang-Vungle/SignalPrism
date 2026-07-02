@@ -5,6 +5,7 @@
       "dimensionFamily": "device_level_v1",
       "purpose": "Device / user history features and KVRocks export candidates.",
       "primaryKey": "device_id",
+      "grain": "hourly",
       "dimensionColumns": [
         "device_id",
         "device_dim_id",
@@ -51,6 +52,7 @@
       "dimensionFamily": "non_device_context_v1",
       "purpose": "Supply, inventory, geo, privacy/cohort, and experiment context without device identity.",
       "primaryKey": "context_dim_id",
+      "grain": "hourly",
       "dimensionColumns": [
         "context_dim_id",
         "source_has_hb",
@@ -518,14 +520,16 @@
       "labelLike": false
     },
     {
-      "metricId": "sp_at_mediation_floor_count",
-      "kind": "count",
+      "metricId": "sp_at_mediation_floor",
+      "kind": "count_if",
       "generatedColumns": [
         "sp_at_mediation_floor_count"
       ],
       "dataType": "BIGINT",
-      "source": "count settlement/winner price at mediation floor",
-      "notes": "Exact modulo predicate required.",
+      "source": "count_if settlement/winner price at mediation floor",
+      "predicate": "settlement / winner price == mediation_floor",
+      "denominator": "settlement_price_count",
+      "notes": "Conditional (count_if) metric, not a raw event count. Exact modulo predicate required. Derived rate: sp_at_mediation_floor_rate = safe_div(sp_at_mediation_floor_count, settlement_price_count).",
       "labelLike": false
     },
     {

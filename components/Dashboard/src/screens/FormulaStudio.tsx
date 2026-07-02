@@ -1,9 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { WorkbenchDataSource } from '../data/WorkbenchDataSource'
-import type { DimensionFamilyId, WindowSpec } from '../data/types'
+import type { DerivedFeature, DimensionFamilyId, FillPolicy, WindowSpec } from '../data/types'
 import { useAsync } from '../hooks/useAsync'
-import { validateFormula, ALLOWED_FUNCTIONS } from '../formula/dsl'
+import { validateFormula, ALLOWED_FUNCTIONS, parseFormula, referencedIdentifiers } from '../formula/dsl'
 import type { ValidationContext } from '../formula/dsl'
+
+/** Referenced identifiers that resolve to real primitives in scope (§7.3.3 source_primitives). */
+function sourcePrimitivesOf(formula: string, available: ReadonlySet<string>): string[] {
+  try {
+    return referencedIdentifiers(parseFormula(formula)).filter((id) => available.has(id))
+  } catch {
+    return []
+  }
+}
 
 const GUIDED_TEMPLATES: { label: string; formula: string }[] = [
   { label: 'avg(sum, count)', formula: 'safe_div(hbn_settlement_price_sum_7d, hbn_settlement_price_count_7d)' },
@@ -19,6 +28,19 @@ export function FormulaStudio({ ds }: { ds: WorkbenchDataSource }) {
   const [win, setWin] = useState<WindowSpec>('7d')
   const [mode, setMode] = useState<'guided' | 'advanced'>('advanced')
   const [formula, setFormula] = useState(GUIDED_TEMPLATES[0].formula)
+
+  // Save-as-derived-feature form (TRD §7.3.3).
+  const [featureId, setFeatureId] = useState('')
+  const [displayName, setDisplayName] = useState('')
+  const [fillDefault, setFillDefault] = useState<FillPolicy['default']>('null')
+  const [fillModelInput, setFillModelInput] = useState<FillPolicy['modelInput']>('nan')
+  const [saved, setSaved] = useState<DerivedFeature[]>([])
+  const [savedMsg, setSavedMsg] = useState<string | undefined>(undefined)
+
+  // Seed the saved list from the data source once loaded.
+  useEffect(() => {
+    ds.listDerivedFeatures().then(setSaved)
+  }, [ds])
 
   const scopedPrimitives = useMemo(
     () => (primitives ?? []).filter((p) => p.dimensionFamily === family && p.window === win),
@@ -44,6 +66,30 @@ export function FormulaStudio({ ds }: { ds: WorkbenchDataSource }) {
   }, [capabilities, scopedPrimitives])
 
   const result = useMemo(() => validateFormula(formula, ctx), [formula, ctx])
+
+  const sourcePrimitives = useMemo(
+    () => sourcePrimitivesOf(formula, ctx.availablePrimitives),
+    [formula, ctx],
+  )
+  const trimmedId = featureId.trim()
+  const canSave = result.ok && trimmedId.length > 0 && sourcePrimitives.length > 0
+
+  const onSave = async () => {
+    if (!canSave) return
+    const feature: DerivedFeature = {
+      featureId: trimmedId,
+      displayName: displayName.trim() || trimmedId,
+      dimensionFamily: family,
+      window: win,
+      formula: formula.trim(),
+      sourcePrimitives,
+      fillPolicy: { default: fillDefault, modelInput: fillModelInput },
+      status: 'proposed',
+    }
+    const stored = await ds.saveDerivedFeature(feature)
+    setSaved(await ds.listDerivedFeatures())
+    setSavedMsg(`Saved "${stored.featureId}" (${stored.status}).`)
+  }
 
   const checkRow = (label: string, status: 'pass' | 'fail') => (
     <div className="check-row">
@@ -146,7 +192,83 @@ export function FormulaStudio({ ds }: { ds: WorkbenchDataSource }) {
               />
             ))}
           </div>
+
+          {/* Save as a derived feature (TRD §7.3.3). Requires a valid formula. */}
+          <div className="save-derived" style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
+            <h2>Save as derived feature</h2>
+            <label className="field">
+              Feature ID
+              <input
+                value={featureId}
+                onChange={(e) => setFeatureId(e.target.value)}
+                placeholder={`e.g. bid_premium_rate_${win}`}
+                spellCheck={false}
+              />
+            </label>
+            <label className="field">
+              Display name
+              <input
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="optional; defaults to Feature ID"
+              />
+            </label>
+            <div className="check-row">
+              <span>Fill policy</span>
+              <span>
+                default{' '}
+                <select value={fillDefault} onChange={(e) => setFillDefault(e.target.value as FillPolicy['default'])}>
+                  <option value="null">null</option>
+                  <option value="zero">zero</option>
+                </select>
+                {'  '}model_input{' '}
+                <select value={fillModelInput} onChange={(e) => setFillModelInput(e.target.value as FillPolicy['modelInput'])}>
+                  <option value="nan">nan</option>
+                  <option value="zero">zero</option>
+                </select>
+              </span>
+            </div>
+            <p className="sub">
+              Source primitives:{' '}
+              {sourcePrimitives.length ? sourcePrimitives.map((p) => <code key={p} style={{ marginRight: 6 }}>{p}</code>) : '—'}
+              {' · '}{family} · {win}
+            </p>
+            <button className="primary" onClick={onSave} disabled={!canSave} data-testid="save-derived">
+              Save derived feature
+            </button>
+            {!result.ok && <p className="sub">Fix validation errors before saving.</p>}
+            {savedMsg && <p className="sub" role="status" style={{ color: 'var(--good, #3fbf7f)' }}>{savedMsg}</p>}
+          </div>
         </div>
+      </div>
+
+      <div className="panel" style={{ marginTop: 16 }}>
+        <h2>Saved derived features · {saved.length}</h2>
+        <table className="tbl" data-testid="derived-list">
+          <thead>
+            <tr>
+              <th>feature_id</th>
+              <th>formula</th>
+              <th>dimension family</th>
+              <th>window</th>
+              <th>status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {saved.map((f) => (
+              <tr key={f.featureId} data-testid={`derived-${f.featureId}`}>
+                <td>{f.featureId}</td>
+                <td><code style={{ fontSize: 11 }}>{f.formula}</code></td>
+                <td>{f.dimensionFamily}</td>
+                <td>{f.window}</td>
+                <td><span className="pill">{f.status}</span></td>
+              </tr>
+            ))}
+            {saved.length === 0 && (
+              <tr><td colSpan={5} className="sub">No derived features saved yet.</td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
