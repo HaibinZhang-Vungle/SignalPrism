@@ -1,0 +1,2312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Round 1 Convergence Story</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f1f3f8;
+      --line: #d9dee9;
+      --text: #171a22;
+      --muted: #657083;
+      --teal: #009d87;
+      --amber: #b66d00;
+      --rose: #d83a61;
+      --lime: #6d9f1a;
+      --violet: #7357d7;
+      --cyan: #087db3;
+      --orange: #c85b22;
+      --shadow: 0 24px 80px rgba(26, 34, 50, .12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    [id] {
+      scroll-margin-top: 86px;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        linear-gradient(135deg, rgba(0, 157, 135, .08), transparent 28%),
+        linear-gradient(225deg, rgba(182, 109, 0, .08), transparent 32%),
+        linear-gradient(180deg, #ffffff 0%, var(--bg) 46%, #ffffff 100%);
+      letter-spacing: 0;
+    }
+
+    .page {
+      width: min(1440px, calc(100vw - 48px));
+      margin: 0 auto;
+      padding: 32px 0 56px;
+    }
+
+    .story-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .story-nav a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid rgba(23, 26, 34, .12);
+      color: var(--text);
+      background: rgba(255, 255, 255, .78);
+      font-size: 12px;
+      font-weight: 850;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .story-page {
+      scroll-margin-top: 24px;
+    }
+
+    .story-page + .story-page {
+      margin-top: 56px;
+      padding-top: 34px;
+      border-top: 1px solid rgba(23, 26, 34, .12);
+    }
+
+    .page-marker {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      padding: 0 10px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(182, 109, 0, .22);
+      color: var(--amber);
+      background: rgba(255, 189, 74, .08);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(360px, .7fr);
+      gap: 22px;
+      min-height: 360px;
+      padding: 34px;
+      border: 1px solid rgba(23, 26, 34, .11);
+      background:
+        linear-gradient(120deg, rgba(255, 255, 255, .92), transparent 56%),
+        linear-gradient(90deg, rgba(0, 157, 135, .09), rgba(216, 58, 97, .08)),
+        #ffffff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--teal), var(--amber), var(--rose), transparent);
+      opacity: .9;
+    }
+
+    .eyebrow {
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+    }
+
+    h1 {
+      max-width: 980px;
+      margin: 18px 0 18px;
+      font-size: clamp(42px, 6vw, 92px);
+      line-height: .9;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 720px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .hero-aside {
+      align-self: stretch;
+      display: grid;
+      gap: 12px;
+      grid-template-rows: repeat(4, 1fr);
+    }
+
+    .hero-metric {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid rgba(23, 26, 34, .11);
+      background: rgba(255, 255, 255, .82);
+      min-height: 72px;
+    }
+
+    .hero-metric strong {
+      color: var(--text);
+      font-size: 26px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .hero-metric span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .panel {
+      position: relative;
+      border: 1px solid rgba(23, 26, 34, .11);
+      background:
+        linear-gradient(180deg, rgba(0, 157, 135, .035), transparent 38%),
+        var(--panel);
+      box-shadow: 0 16px 54px rgba(26, 34, 50, .10);
+      overflow: hidden;
+    }
+
+    .panel.full {
+      grid-column: span 12;
+    }
+
+    .panel.large {
+      grid-column: span 8;
+    }
+
+    .panel.side {
+      grid-column: span 4;
+    }
+
+    .panel.half {
+      grid-column: span 6;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 16px;
+      padding: 20px 20px 6px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 850;
+    }
+
+    .panel-subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      flex: none;
+      padding: 7px 10px;
+      border: 1px solid rgba(23, 26, 34, .12);
+      color: var(--text);
+      background: rgba(247, 248, 251, .92);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      white-space: nowrap;
+    }
+
+    .chart {
+      width: 100%;
+      height: 360px;
+      display: block;
+      padding: 0 10px 14px;
+    }
+
+    .chart.tall {
+      height: 420px;
+    }
+
+    .chart text {
+      fill: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .axis {
+      stroke: rgba(23, 26, 34, .34);
+      stroke-width: 1;
+    }
+
+    .grid-line {
+      stroke: rgba(23, 26, 34, .09);
+      stroke-width: 1;
+    }
+
+    .series-line {
+      fill: none;
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 3px 8px rgba(26, 34, 50, .12));
+      animation: draw 1.45s ease-out both;
+    }
+
+    .series-point {
+      stroke: #ffffff;
+      stroke-width: 1.6;
+      cursor: pointer;
+    }
+
+    .floor-line {
+      stroke: var(--amber);
+      stroke-width: 1.4;
+      stroke-dasharray: 7 7;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      padding: 0 20px 18px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      background: var(--color);
+    }
+
+    .callout-list {
+      display: grid;
+      gap: 12px;
+      padding: 18px 20px 20px;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent);
+      padding: 12px 13px;
+      background: rgba(247, 248, 251, .92);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .callout span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .trial-strip {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      padding: 18px 20px 20px;
+    }
+
+    .trial-card {
+      min-width: 0;
+      padding: 12px 10px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(247, 248, 251, .92);
+    }
+
+    .trial-card.best {
+      border-color: rgba(0, 157, 135, .55);
+      box-shadow: inset 0 0 0 1px rgba(0, 157, 135, .16);
+    }
+
+    .trial-card.control {
+      opacity: .74;
+      border-color: rgba(216, 58, 97, .34);
+    }
+
+    .trial-id {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .trial-val {
+      margin-top: 8px;
+      font-size: 15px;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .trial-note {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 18px 20px 22px;
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 150px;
+      padding: 16px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(247, 248, 251, .92);
+      overflow: hidden;
+    }
+
+    .flow-step::before {
+      content: attr(data-step);
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      color: rgba(23, 26, 34, .12);
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .flow-step h3 {
+      position: relative;
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+
+    .flow-step p {
+      position: relative;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .process-compare {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr);
+      gap: 14px;
+      padding: 18px 20px 22px;
+      align-items: stretch;
+    }
+
+    .process-column {
+      --accent: var(--slate);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+      min-height: 390px;
+      padding: 18px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 56%);
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 93%), transparent 48%),
+        rgba(255, 255, 255, .92);
+    }
+
+    .process-column.old {
+      --accent: var(--rose);
+    }
+
+    .process-column.new {
+      --accent: var(--teal);
+    }
+
+    .process-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .process-label {
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .process-title {
+      margin-top: 8px;
+      color: var(--text);
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.12;
+    }
+
+    .process-speed {
+      flex: none;
+      min-width: 88px;
+      padding: 9px 10px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 52%);
+      color: var(--accent);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .process-steps {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .process-step {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 10px;
+      align-items: start;
+      min-height: 58px;
+    }
+
+    .step-dot {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 48%);
+      color: var(--accent);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .step-copy strong {
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .step-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .process-outcome {
+      padding: 12px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 62%);
+      background: color-mix(in srgb, var(--accent), transparent 94%);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .process-outcome span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .compare-vs {
+      display: grid;
+      place-items: center;
+      align-self: center;
+      height: 58px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(247, 248, 251, .92);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .bars {
+      display: grid;
+      gap: 12px;
+      padding: 18px 20px 22px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 158px 1fr 74px;
+      align-items: center;
+      gap: 12px;
+      min-height: 34px;
+    }
+
+    .bar-label {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--text);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      height: 12px;
+      background: rgba(23, 26, 34, .07);
+      border: 1px solid rgba(23, 26, 34, .09);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      width: var(--w);
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), rgba(255, 255, 255, .72));
+      box-shadow: 0 0 22px color-mix(in srgb, var(--accent), transparent 55%);
+      transform-origin: left;
+      animation: grow .9s ease-out both;
+    }
+
+    .bar-value {
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .tree-stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: auto auto auto;
+      gap: 16px;
+      min-height: 430px;
+      padding: 22px 20px 24px;
+    }
+
+    .tree-links {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: .78;
+    }
+
+    .tree-links path {
+      fill: none;
+      stroke: rgba(23, 26, 34, .22);
+      stroke-width: 1.4;
+      stroke-dasharray: 6 6;
+    }
+
+    .cart-node {
+      position: relative;
+      z-index: 1;
+      min-height: 116px;
+      padding: 14px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 55%);
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 92%), transparent),
+        rgba(255, 255, 255, .84);
+      box-shadow: inset 0 0 0 1px rgba(23, 26, 34, .03);
+    }
+
+    .cart-node.root {
+      grid-column: 2 / span 2;
+      grid-row: 1;
+    }
+
+    .cart-node.low {
+      grid-column: 1 / span 2;
+      grid-row: 2;
+    }
+
+    .cart-node.high {
+      grid-column: 3 / span 2;
+      grid-row: 2;
+    }
+
+    .cart-node.base {
+      grid-column: 1;
+      grid-row: 3;
+    }
+
+    .cart-node.mass {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    .cart-node.worst {
+      grid-column: 3;
+      grid-row: 3;
+    }
+
+    .cart-node.micro {
+      grid-column: 4;
+      grid-row: 3;
+    }
+
+    .node-label {
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+    }
+
+    .node-rule {
+      margin-top: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 850;
+      line-height: 1.25;
+    }
+
+    .node-stat {
+      margin-top: 9px;
+      color: var(--text);
+      font-size: 22px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .node-note {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.38;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 18px 20px 22px;
+    }
+
+    .feature {
+      min-height: 112px;
+      padding: 14px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(247, 248, 251, .92);
+    }
+
+    .feature strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .feature span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .diagnostic-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 18px 20px 22px;
+    }
+
+    .diagnostic {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      min-height: 164px;
+      padding: 15px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .84), transparent),
+        rgba(247, 248, 251, .92);
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .diagnostic:hover,
+    .diagnostic:focus-visible {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--accent), transparent 44%);
+      box-shadow: 0 12px 28px rgba(26, 34, 50, .10);
+      outline: none;
+    }
+
+    .diagnostic.is-active {
+      border-color: color-mix(in srgb, var(--accent), transparent 30%);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent), transparent 72%);
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      height: 23px;
+      padding: 0 8px;
+      margin-bottom: 12px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 45%);
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent), transparent 90%);
+      font-size: 10px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .diagnostic strong {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 14px;
+    }
+
+    .diagnostic span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.43;
+    }
+
+    .artifact-wrap {
+      padding: 14px 16px 18px;
+    }
+
+    .artifact-frame {
+      display: block;
+      width: 100%;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: #fff;
+    }
+
+    .artifact-frame.cart {
+      height: 600px;
+    }
+
+    .artifact-frame.drilldown {
+      height: 600px;
+    }
+
+    .artifact-frame.phase1b {
+      height: 760px;
+    }
+
+    .artifact-frame.recommendations {
+      height: 560px;
+    }
+
+    .round2-stage-viewer {
+      grid-column: span 12;
+      overflow: hidden;
+    }
+
+    .round2-stage-track {
+      display: flex;
+      align-items: stretch;
+      transition: transform .42s cubic-bezier(.22, .78, .22, 1);
+      will-change: transform;
+    }
+
+    .round2-stage-slide {
+      flex: 0 0 100%;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .round2-stage-slide > .panel {
+      min-width: 0;
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 18px 20px 22px;
+    }
+
+    .dimension {
+      display: grid;
+      grid-template-columns: 138px 1fr;
+      gap: 12px;
+      min-height: 128px;
+      padding: 14px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(247, 248, 251, .92);
+    }
+
+    .dimension-key {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .dimension-key strong {
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .dimension-key span {
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .dimension p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      color: var(--muted);
+      background: rgba(255, 255, 255, .84);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 18px 20px 22px;
+    }
+
+    .decision {
+      min-height: 150px;
+      padding: 16px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 50%);
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 91%), transparent),
+        rgba(255, 255, 255, .84);
+    }
+
+    .decision span {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .decision strong {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .decision p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .search-map {
+      display: grid;
+      grid-template-columns: 1fr 54px 1fr;
+      gap: 12px;
+      padding: 18px 20px 22px;
+      align-items: stretch;
+    }
+
+    .route-card {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 50%);
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 92%), transparent 42%),
+        rgba(255, 255, 255, .9);
+      min-height: 330px;
+    }
+
+    .route-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 16px;
+    }
+
+    .route-kicker {
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .route-title {
+      margin-top: 8px;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .route-metric {
+      flex: none;
+      min-width: 88px;
+      padding: 10px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 54%);
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent), transparent 92%);
+      text-align: center;
+      font-size: 28px;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .route-question {
+      padding: 12px 13px;
+      border-left: 3px solid var(--accent);
+      background: rgba(247, 248, 251, .92);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .field-pills {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .field-pill {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(247, 248, 251, .9);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .route-track {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-top: auto;
+    }
+
+    .track-step {
+      min-height: 42px;
+      display: grid;
+      place-items: center;
+      padding: 7px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 62%);
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent), transparent 94%);
+      font-size: 10px;
+      font-weight: 900;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .map-connector {
+      display: grid;
+      place-items: center;
+      min-height: 330px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .map-connector::before,
+    .map-connector::after {
+      content: "";
+      display: block;
+      width: 1px;
+      height: 116px;
+      background: linear-gradient(180deg, transparent, rgba(23, 26, 34, .18), transparent);
+    }
+
+    .leaderboard-map {
+      display: grid;
+      grid-template-columns: minmax(180px, .8fr) minmax(210px, .9fr) minmax(360px, 1.6fr);
+      gap: 12px;
+      padding: 18px 20px 22px;
+      align-items: stretch;
+    }
+
+    .candidate-pool,
+    .selection-filter,
+    .winner-board {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(255, 255, 255, .9);
+    }
+
+    .candidate-pool {
+      background:
+        linear-gradient(180deg, rgba(96, 165, 250, .10), transparent 46%),
+        rgba(255, 255, 255, .9);
+    }
+
+    .selection-filter {
+      background:
+        linear-gradient(180deg, rgba(250, 204, 21, .13), transparent 46%),
+        rgba(255, 255, 255, .9);
+    }
+
+    .winner-board {
+      display: grid;
+      gap: 12px;
+      background:
+        linear-gradient(180deg, rgba(0, 157, 135, .11), transparent 46%),
+        rgba(255, 255, 255, .9);
+    }
+
+    .map-kicker {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .map-title {
+      margin-top: 8px;
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    .candidate-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .candidate-section {
+      margin-top: 16px;
+      padding: 13px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(247, 248, 251, .72);
+    }
+
+    .candidate-section + .candidate-section {
+      margin-top: 10px;
+    }
+
+    .candidate-section-title {
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .candidate-section .candidate-cloud {
+      margin-top: 10px;
+    }
+
+    .candidate-chip {
+      padding: 7px 9px;
+      border: 1px solid rgba(23, 26, 34, .10);
+      background: rgba(247, 248, 251, .92);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.2;
+    }
+
+    .filter-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .filter-item {
+      padding: 11px 12px;
+      border-left: 3px solid var(--accent);
+      background: rgba(247, 248, 251, .92);
+    }
+
+    .filter-item strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .filter-item span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .winner-card {
+      --accent: var(--teal);
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      gap: 14px;
+      padding: 15px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 50%);
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 92%), transparent 54%),
+        rgba(255, 255, 255, .94);
+    }
+
+    .winner-rank {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 6px 8px;
+      border: 1px solid color-mix(in srgb, var(--accent), transparent 45%);
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent), transparent 90%);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .winner-dimension {
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    .winner-cost {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .winner-detail {
+      min-width: 0;
+    }
+
+    .winner-feature {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .winner-evidence {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .evidence-stat {
+      min-height: 76px;
+      padding: 10px;
+      border: 1px solid rgba(23, 26, 34, .09);
+      background: rgba(247, 248, 251, .9);
+    }
+
+    .evidence-stat strong {
+      display: block;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .evidence-stat span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.28;
+    }
+
+    .deferred-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 2px;
+    }
+
+    .deferred-chip {
+      padding: 7px 9px;
+      border: 1px dashed rgba(23, 26, 34, .18);
+      color: var(--muted);
+      background: rgba(247, 248, 251, .72);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    @keyframes draw {
+      from {
+        stroke-dashoffset: var(--path-len, 1000);
+      }
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes grow {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-aside {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: auto;
+      }
+
+      .panel.large,
+      .panel.side,
+      .panel.half {
+        grid-column: span 12;
+      }
+
+      .flow,
+      .diagnostic-grid,
+      .decision-grid,
+      .feature-grid,
+      .process-compare {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .compare-vs {
+        display: none;
+      }
+
+      .search-map {
+        grid-template-columns: 1fr;
+      }
+
+      .leaderboard-map {
+        grid-template-columns: 1fr;
+      }
+
+      .map-connector {
+        display: none;
+      }
+
+      .tree-stage {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cart-node.root,
+      .cart-node.low,
+      .cart-node.high,
+      .cart-node.base,
+      .cart-node.mass,
+      .cart-node.worst,
+      .cart-node.micro {
+        grid-column: auto;
+        grid-row: auto;
+      }
+
+      .tree-links {
+        display: none;
+      }
+
+      .trial-strip {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100vw - 24px, 720px);
+        padding-top: 16px;
+      }
+
+      .hero {
+        padding: 22px;
+      }
+
+      h1 {
+        font-size: 44px;
+      }
+
+      .hero-aside,
+      .flow,
+      .process-compare,
+      .diagnostic-grid,
+      .decision-grid,
+      .feature-grid,
+      .trial-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .tree-stage {
+        grid-template-columns: 1fr;
+      }
+
+      .field-pills,
+      .route-track,
+      .winner-card,
+      .winner-evidence {
+        grid-template-columns: 1fr;
+      }
+
+      .matrix {
+        grid-template-columns: 1fr;
+      }
+
+      .dimension {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-metric {
+        grid-template-columns: 76px 1fr;
+      }
+
+      .bar-row {
+        grid-template-columns: 112px 1fr 62px;
+      }
+
+      .chart {
+        height: 300px;
+      }
+
+      .artifact-frame.cart,
+      .artifact-frame.drilldown,
+      .artifact-frame.phase1b,
+      .artifact-frame.recommendations {
+        height: 640px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="story-nav" aria-label="Story pages">
+      <a href="#round1-page">Page 1 / Round 1 conclusion</a>
+      <a href="#round2-page">Page 2 / Round 2 proposal</a>
+    </nav>
+
+    <section id="round1-page" class="story-page">
+      <div class="page-marker">Page 1 / Round 1</div>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Model tuning evidence</div>
+          <h1>Model tuning has hit a plateau.</h1>
+          <p>
+            Round 1 is a self-contained conclusion: within the current 23-feature DCNv2 input set,
+            architecture and HP changes no longer move validation loss in a meaningful way. The next lever
+            is not another wide search over the same signal; it is new feature signal.
+          </p>
+        </div>
+        <aside class="hero-aside" aria-label="Round 1 key evidence">
+          <div class="hero-metric">
+            <strong>0.39%</strong>
+            <span>final validation-loss spread across healthy 20-epoch no-clip runs</span>
+          </div>
+          <div class="hero-metric">
+            <strong>epoch 12</strong>
+            <span>T004 gradient norm reaches near-zero and stays collapsed</span>
+          </div>
+          <div class="hero-metric">
+            <strong>1 ~= 3</strong>
+            <span>cross layer depth gives no meaningful lift: T009 and T004 tie</span>
+          </div>
+          <div class="hero-metric">
+            <strong>decision</strong>
+            <span>stop HP-only tuning and move to feature discovery</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="grid">
+      <article class="panel large">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Scene 1. Validation Loss Settles Into The Same Plateau</h2>
+            <div class="panel-subtitle">The descent differs by trial, but healthy runs converge to the same narrow band.</div>
+          </div>
+          <div class="badge">log scale</div>
+        </div>
+        <svg id="lossChart" class="chart tall" role="img" aria-label="Validation loss curves"></svg>
+        <div id="lossLegend" class="legend"></div>
+      </article>
+
+      <aside class="panel side">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Evidence Readout</h2>
+            <div class="panel-subtitle">Round 1 observed facts: capacity, late training, and gradient behavior.</div>
+          </div>
+        </div>
+        <div class="callout-list">
+          <div class="callout" style="--accent: var(--teal)">
+            <strong>Capacity is not the blocker.</strong>
+            <span>Wide, small, cross=1, cross=3, cross=5, emb=16, and emb=32 land in the same validation band when training is healthy.</span>
+          </div>
+          <div class="callout" style="--accent: var(--amber)">
+            <strong>Late epochs barely move.</strong>
+            <span>T004 validation loss changes from 1.1565399e-5 to 1.1565354e-5 from epoch 16 to 20, about 0.0004% relative improvement.</span>
+          </div>
+          <div class="callout" style="--accent: var(--rose)">
+            <strong>Gradient is effectively gone.</strong>
+            <span>T004 gradient norm falls to 1.57e-8 by epoch 12 and then stays at zero in later epochs.</span>
+          </div>
+        </div>
+      </aside>
+
+      <article class="panel full" id="round2-validation-chain">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Scene 2. HP Changes Do Not Move Loss</h2>
+            <div class="panel-subtitle">Final validation losses stay clustered across width, cross-depth, embedding, and learning-rate variants.</div>
+          </div>
+          <div class="badge">final validation loss</div>
+        </div>
+        <svg id="scatterChart" class="chart" role="img" aria-label="Final validation loss by trial"></svg>
+        <div class="trial-strip" id="trialStrip"></div>
+      </article>
+
+      <article class="panel full">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Round 1 Conclusion</h2>
+            <div class="panel-subtitle">This is the standalone decision from the HP sweep.</div>
+          </div>
+          <div class="badge">decision</div>
+        </div>
+        <div class="decision-grid">
+          <div class="decision" style="--accent: var(--teal)">
+            <span>evidence</span>
+            <strong>Different HP axes converge to the same band.</strong>
+            <p>Network width, cross depth, embedding size, and learning-rate variants do not produce a durable validation-loss improvement once training is healthy.</p>
+          </div>
+          <div class="decision" style="--accent: var(--amber)">
+            <span>interpretation</span>
+            <strong>The current feature set is the bottleneck.</strong>
+            <p>The loss plateau plus near-zero gradients says the model has largely exhausted the learnable signal available in the current 23 features.</p>
+          </div>
+          <div class="decision" style="--accent: var(--rose)">
+            <span>status</span>
+            <strong>HP-only tuning has limited remaining upside.</strong>
+            <p>The remaining improvement is unlikely to come from another HP-only sweep because tested architecture and optimization axes already converge to the same validation-loss band.</p>
+          </div>
+        </div>
+      </article>
+      </section>
+    </section>
+
+    <section id="round2-page" class="story-page">
+      <div class="page-marker">Page 2 / Round 2</div>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Feature gap proposal</div>
+          <h1>High-error dimensions define the feature search.</h1>
+          <p>
+            Round 2 starts from the Round 1 bottleneck and asks where the missing signal lives.
+            Phase 1A localizes the top drill-down pocket. Phase 1B now focuses on that one segment:
+            appopen, US, admob, android. The goal is to find wide-table fields that split this pocket into
+            more actionable subgroups.
+          </p>
+        </div>
+        <aside class="hero-aside" aria-label="Round 2 proposal evidence">
+          <div class="hero-metric">
+            <strong>0.000360</strong>
+            <span>global MAE baseline for residual-pocket comparisons</span>
+          </div>
+          <div class="hero-metric">
+            <strong>23.2x</strong>
+            <span>Stage2 high-price subset MAE versus global baseline</span>
+          </div>
+          <div class="hero-metric">
+            <strong>33.8x</strong>
+            <span>appopen -> US -> admob -> android drill-down pocket</span>
+          </div>
+          <div class="hero-metric">
+            <strong>proposal</strong>
+            <span>explore new features inside high-error dimensions</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="grid">
+
+      <article class="panel full">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Old Pipeline vs New Feature Search</h2>
+            <div class="panel-subtitle">Round 2 proposes a cheaper screening loop before full model integration: use residual pockets, wide-table raw fields, and distribution evidence first.</div>
+          </div>
+          <div class="badge">process shift</div>
+        </div>
+        <div class="process-compare">
+          <div class="process-column old">
+            <div class="process-heading">
+              <div>
+                <div class="process-label">old flow</div>
+                <div class="process-title">Validate after full training</div>
+              </div>
+              <div class="process-speed">slow loop</div>
+            </div>
+            <div class="process-steps">
+              <div class="process-step">
+                <div class="step-dot">1</div>
+                <div class="step-copy">
+                  <strong>Pick a candidate feature</strong>
+                  <span>Usually based on intuition or one-off analysis.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">2</div>
+                <div class="step-copy">
+                  <strong>Add it to the feature pipeline</strong>
+                  <span>Define, backfill, encode, and wire the field into training.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">3</div>
+                <div class="step-copy">
+                  <strong>Retrain model</strong>
+                  <span>Run the full training loop before the feature has been cheaply screened.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">4</div>
+                <div class="step-copy">
+                  <strong>Validate lift result</strong>
+                  <span>If there is no lift, only now do we learn that this feature was not the missing signal the model needed.</span>
+                </div>
+              </div>
+            </div>
+            <div class="process-outcome">
+              Problem: high cost before evidence.
+              <span>Too many weak candidates can consume full training cycles.</span>
+            </div>
+          </div>
+
+          <div class="compare-vs">vs</div>
+
+          <div class="process-column new">
+            <div class="process-heading">
+              <div>
+                <div class="process-label">new flow</div>
+                <div class="process-title">Screen before model integration</div>
+              </div>
+              <div class="process-speed">fast screen</div>
+            </div>
+            <div class="process-steps">
+              <div class="process-step">
+                <div class="step-dot">1</div>
+                <div class="step-copy">
+                  <strong>Trigger residual diagnostics</strong>
+                  <span>When the current model stops improving, automatically analyze residuals to find high-error pockets for feature search.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">2</div>
+                <div class="step-copy">
+                  <strong>Scan wide-table raw fields</strong>
+                  <span>AI proposes field families from schema: device, ad unit, timeout, price shape, floor lifecycle, and supply economics.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">3</div>
+                <div class="step-copy">
+                  <strong>Check raw distributions</strong>
+                  <span>Rank coverage, missingness, bucket concentration, KL/PSI-style shift, and subgroup separation.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">4</div>
+                <div class="step-copy">
+                  <strong>Promote only strong signals</strong>
+                  <span>Only fields with visible distribution evidence move forward.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">5</div>
+                <div class="step-copy">
+                  <strong>Build auto aggregate features</strong>
+                  <span>Convert the selected raw field into aggregate candidates with the standard auto aggregation pipeline.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">6</div>
+                <div class="step-copy">
+                  <strong>Retrain model</strong>
+                  <span>Run the same model-training loop, but only after the candidate has passed the distribution screen.</span>
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-dot">7</div>
+                <div class="step-copy">
+                  <strong>Validate lift result</strong>
+                  <span>Use validation metrics to confirm whether the screened feature adds model-usable signal.</span>
+                </div>
+              </div>
+            </div>
+            <div class="process-outcome">
+              Proposal: low-cost evidence before training.
+              <span>The model pipeline is used after candidates already look plausible.</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel full">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Lightweight Validation Chain</h2>
+            <div class="panel-subtitle">Use wide-table raw data as a cheap screening layer before paying the cost of full feature integration and model retraining.</div>
+          </div>
+          <div class="badge">fast screen</div>
+        </div>
+        <div class="diagnostic-grid">
+          <a class="diagnostic is-active" style="--accent: var(--teal)" href="#round2-stage-viewer" data-slide="0">
+            <div class="status">input</div>
+            <strong>Start from high-error segments</strong>
+            <span>Use the residual tree and drill-down segments as filters. They decide where feature search begins, not the full population.</span>
+          </a>
+          <a class="diagnostic" style="--accent: var(--amber)" href="#round2-stage-viewer" data-slide="1">
+            <div class="status">schema</div>
+            <strong>Read wide-table raw fields</strong>
+            <span>Candidate fields come from available raw columns: device model, ad unit, timeout, floor lifecycle, auction price shape, and supply economics.</span>
+          </a>
+          <a class="diagnostic" style="--accent: var(--cyan)" href="#round2-stage-viewer" data-slide="2">
+            <div class="status">screen</div>
+            <strong>Validate with distributions</strong>
+            <span>Before model training, rank fields by raw-data evidence: segment lift, missingness, concentration, distribution shift, and ability to split high-error traffic into stable subgroups.</span>
+          </a>
+          <a class="diagnostic" style="--accent: var(--rose)" href="#round2-stage-viewer" data-slide="3">
+            <div class="status">proposal</div>
+            <strong>Propose aggregate pipeline needs</strong>
+            <span>Signals that pass the lightweight screen become data-backed new feature requests: richer aggregate features with clear segment evidence.</span>
+          </a>
+        </div>
+      </article>
+
+      <div class="round2-stage-viewer" id="round2-stage-viewer" aria-label="Round 2 evidence slides">
+        <div class="round2-stage-track" id="round2StageTrack">
+          <div class="round2-stage-slide" id="round2SlideInput"></div>
+          <div class="round2-stage-slide" id="round2SlideSchema"></div>
+          <div class="round2-stage-slide" id="round2SlideDistribution"></div>
+          <div class="round2-stage-slide" id="round2SlideProposal"></div>
+        </div>
+      </div>
+
+      <article class="panel half" id="phase1a-cart-tree">
+        <div class="artifact-wrap">
+          <iframe
+            class="artifact-frame cart"
+            src="pages/cart_residual_tree.html"
+            title="Phase1A CART residual tree detail"
+            loading="lazy"></iframe>
+        </div>
+      </article>
+
+      <article class="panel half" id="phase1a-drilldown">
+        <div class="artifact-wrap">
+          <iframe
+            class="artifact-frame drilldown"
+            src="pages/multidim_drilldown.html"
+            title="Phase1A multidimensional drill-down detail"
+            loading="lazy"></iframe>
+        </div>
+      </article>
+
+      <article class="panel full" id="phase1b-distribution">
+        <div class="artifact-wrap">
+          <iframe
+            id="phase1bFrame"
+            class="artifact-frame phase1b"
+            src="pages/phase1b_trino_findings.html"
+            title="Phase1B Trino distribution findings"
+            loading="lazy"></iframe>
+        </div>
+      </article>
+
+      <article class="panel full" id="feature-search-map">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Feature Search Map</h2>
+            <div class="panel-subtitle">Phase 1A finds where the model is wrong; Phase 1B shows which raw and aggregate signals separate those pockets. This map turns that evidence into feature proposals.</div>
+          </div>
+          <div class="badge">2 winners</div>
+        </div>
+        <div class="leaderboard-map">
+          <div class="candidate-pool" id="feature-schema">
+            <div class="map-kicker">candidate universe</div>
+            <div class="map-title">Wide Table Signals -> Aggregate Features</div>
+            <div class="candidate-section">
+              <div class="candidate-section-title">Wide table raw fields</div>
+              <div class="candidate-cloud">
+                <div class="candidate-chip">device make</div>
+                <div class="candidate-chip">device model</div>
+                <div class="candidate-chip">android OS major</div>
+                <div class="candidate-chip">ad unit</div>
+                <div class="candidate-chip">auction timeout</div>
+                <div class="candidate-chip">floor lifecycle</div>
+                <div class="candidate-chip">supply economics</div>
+                <div class="candidate-chip">bid spread</div>
+                <div class="candidate-chip">DSP count</div>
+              </div>
+            </div>
+            <div class="candidate-section">
+              <div class="candidate-section-title">Aggregate candidates</div>
+              <div class="candidate-cloud">
+                <div class="candidate-chip">price avg</div>
+                <div class="candidate-chip">price var/std</div>
+                <div class="candidate-chip">p25 / p75 / p90</div>
+                <div class="candidate-chip">price by placement</div>
+                <div class="candidate-chip">existing: price by device id</div>
+                <div class="candidate-chip">rollup: price by device make/tier</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="selection-filter">
+            <div class="map-kicker">selection filter</div>
+            <div class="map-title">Why these candidates survived</div>
+            <div class="filter-list">
+              <div class="filter-item" style="--accent: var(--teal)">
+                <strong>Residual anchor</strong>
+                <span>Phase 1A says error is concentrated in high-price and appopen pockets.</span>
+              </div>
+              <div class="filter-item" style="--accent: var(--amber)">
+                <strong>Distribution separation</strong>
+                <span>Phase 1B raw data shows visible shifts before adding features to the model.</span>
+              </div>
+              <div class="filter-item" style="--accent: var(--cyan)">
+                <strong>Engineering cost</strong>
+                <span>Prefer existing aggregates or low-cost rollups before new medium-cost pipelines.</span>
+              </div>
+              <div class="filter-item" style="--accent: var(--rose)">
+                <strong>Model-usable signal</strong>
+                <span>The field should explain missing price shape or device-tier price level.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="winner-board" id="feature-proposals">
+            <div class="map-kicker">selected dimensions</div>
+            <div class="map-title">Final Round 2 feature proposal</div>
+
+            <div class="winner-card" style="--accent: var(--teal)">
+              <div class="winner-rank">
+                <div class="rank-badge">rank 1</div>
+                <div class="winner-dimension">Price volatility shape</div>
+                <div class="winner-cost">Current avg price is useful, but high-price traffic needs distribution shape, not only one smoothed average.</div>
+              </div>
+              <div class="winner-detail">
+                <div class="winner-feature">var_hbedsp_highest_price_{placement_type}7d + p25/p75/p90_hbedsp_highest_price_7d</div>
+                <div class="winner-evidence">
+                  <div class="evidence-stat">
+                    <strong>66.0</strong>
+                    <span>target std vs controls 44.0 / 50.6</span>
+                  </div>
+                  <div class="evidence-stat">
+                    <strong>2.7x</strong>
+                    <span>target IQR width vs iOS control</span>
+                  </div>
+                  <div class="evidence-stat">
+                    <strong>shape</strong>
+                    <span>avg is the strongest price level signal, but cannot represent right-tail volatility</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="winner-card" style="--accent: var(--amber)">
+              <div class="winner-rank">
+                <div class="rank-badge">rank 2</div>
+                <div class="winner-dimension">Device tier price level</div>
+                <div class="winner-cost">Use the existing device-level aggregate axis as the low-cost entry point, then roll up to device make or tier if needed.</div>
+              </div>
+              <div class="winner-detail">
+                <div class="winner-feature">avg_hbedsp_highest_price_by_device_make_7d</div>
+                <div class="winner-evidence">
+                  <div class="evidence-stat">
+                    <strong>1.47x</strong>
+                    <span>flagship vs budget p90 gap</span>
+                  </div>
+                  <div class="evidence-stat">
+                    <strong>1.41x</strong>
+                    <span>flagship vs budget mean gap</span>
+                  </div>
+                  <div class="evidence-stat">
+                    <strong>tail</strong>
+                    <span>device tier changes high-price tail, not baseline p25</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="deferred-row">
+              <div class="deferred-chip">device_make categorical: follow-up</div>
+              <div class="deferred-chip">android_osv_major: proxy</div>
+              <div class="deferred-chip">device_model_bucket: higher cardinality</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <div class="footer-note">
+      Suggested narrative: Round 1 did not fail. It completed the optimization search for the current signal set.
+      Round 2 then combines Phase 1A Stage2 CART and multidim drill-down with Phase 1B feature-gap checks to
+      propose a scoped candidate set under high-error dimensions: price distribution, revenue/request history,
+      appopen supply/OS context, and floor-positioning ratios. Phase 1C is left out until its interpretation is
+      reliable; the next proof step is model-side ablation plus holdout or offline simulation.
+    </div>
+    </section>
+  </main>
+
+  <script>
+    const colors = {
+      t004: "#009d87",
+      t009: "#b66d00",
+      t008: "#087db3",
+      t003: "#7357d7",
+      t007: "#c85b22",
+      t006: "#d83a61",
+      t000: "#7a8191",
+      t001: "#6d9f1a",
+      t002: "#4f596b",
+      t005: "#2f3745"
+    };
+
+    const selectedTrials = [
+      {
+        id: "T004",
+        color: colors.t004,
+        note: "best, wide arch",
+        val: [1360835.3626583545,482359.92159222875,2313.017552091056,3636.905398817394,205.69634100093919,484.61800027813894,9.863176059000697,0.02986992706005711,0.0031562146921041596,1.1625926026402569e-05,1.1576819152441591e-05,1.156866872688922e-05,1.1579282455662616e-05,1.1591254805616124e-05,1.1569054458541247e-05,1.1565398525932112e-05,1.1594997789794576e-05,1.1572048334049127e-05,1.1570729061185484e-05,1.156535414139335e-05],
+        grad: [3027.018377497713,110.40770607416158,13.526102690168218,2.616333210935194,0.4476317340712073,0.10093203381658056,0.03291265155698365,0.0033179108928093415,0.001287578531741977,0.00022589233155464328,2.1936222255151937e-05,1.5740638443389884e-08,0,0,0,0,0,0,0,0]
+      },
+      {
+        id: "T009",
+        color: colors.t009,
+        note: "cross=1",
+        val: [27.302603583150603,16.38216147978613,9.877617954964043,5.940023899078369,3.6173178018480234,2.38137144325701,1.601834166025579,1.0637325905339605,0.5101808823325151,0.18486082648328964,0.0971067039208422,0.04421669549493458,0.01645658625545007,0.004489731592562331,0.00013061320819667728,1.1793567673293626e-05,1.1565980309140859e-05,1.1587082933425087e-05,1.1567830842515204e-05,1.1567772546566811e-05],
+        grad: [8.081310968233904,0.5532833511788331,0.21881331195027945,0.09901940911888467,0.054888771029852415,0.03986422602091548,0.031659849167845255,0.024385127323439573,0.019618277702407302,0.014483886884697927,0.010674998253735885,0.00802046768600746,0.00557996118896379,0.003381053330178143,0.0015490864858455718,0.0003879981912339528,5.049403598941604e-06,5.040876137806581e-14,0,0]
+      },
+      {
+        id: "T008",
+        color: colors.t008,
+        note: "emb=32",
+        val: [10452517056.132534,45167715.796049796,2119.05126346986,2788.2673968098647,6.196821198187357,839.506350008697,7.465819688778726e-05,1.1865702105508834e-05,1.1565625432770807e-05,1.1568646863213161e-05,1.1589204998337426e-05,1.1565701544829973e-05,1.1572714069000954e-05,1.157065926978901e-05,1.1565967900943235e-05,1.1567210081518406e-05,1.1566447053242987e-05,1.156946767857794e-05,1.1595310027323295e-05,1.1573435251918021e-05],
+        grad: [852.6279958513904,37.190307961183734,2.953162124979592,0.4378418642166788,0.10148676500740737,0.0016226712502261378,0.00040662870928881716,0.0001495350100867239,7.331336524841279e-07,1.920709318806735e-13,0,0,0,0,0,0,0,0,0,0]
+      },
+      {
+        id: "T003",
+        color: colors.t003,
+        note: "small arch",
+        val: [1879303.532608781,4744402.428788761,11804.592286029963,1758.6112144875867,59.71907105913923,9.154254054974437,1.9688266139698418,0.2886817362388036,0.008288020765883105,0.00029667287446931764,1.179561223551731e-05,1.1571867539603137e-05,1.1566501599792495e-05,1.1580606912088085e-05,1.1577317770183098e-05,1.1573675079300696e-05,1.1582364327398386e-05,1.1565402187101638e-05,1.1566141556774146e-05,1.1587813723693649e-05],
+        grad: [2883.835295445728,198.56130074247815,26.000324215524415,3.8395767525280684,0.5580692038672623,0.11498775023892095,0.03270397045079722,0.00719543781335024,0.0022011245897527983,0.0005934834104045826,0.0002451593983948566,0.0001389623618505052,1.0429498455065927e-05,2.179090761272951e-15,0,0,0,0,0,0]
+      },
+      {
+        id: "T007",
+        color: colors.t007,
+        note: "12ep control",
+        val: [3181582939.828623,379004153.33335906,24700.886639009954,14824.10069218735,1123.7126557439383,81.09536414241498,1723.4742470185267,0.2990542620054783,0.24676035337649088,25.334303653758408,0.0015311325917563537,1.1967217799403056e-05],
+        grad: [2713.2662269816105,207.35266979432507,29.93796326776445,4.543211416276269,0.6462741862506263,0.10482030520463652,0.17808414556669452,0.018159522208815528,0.07938709262818285,0.0037790517704221053,0.0009283956807828897,9.845427654436721e-06]
+      },
+      {
+        id: "T006",
+        color: colors.t006,
+        note: "clip=1 underfit",
+        val: [7390414.733934648,445415.7207752688,82841.04042692906,9690.701180651144,5734.904303443456,2250.359853284247,196.22677666363296,2.9860296977078256,1.110979703245475,0.06141849444200169,0.006381412865194075,3.230528397965202e-05],
+        grad: [9380.402181612131,782.2465964886816,151.93790835159336,21.305812915808513,4.222385432686171,0.6868042855828331,0.553710132785619,0.09380284769200063,0.030573446351820032,0.009363811091960843,0.00308008163457584,0.0010281383658116757]
+      }
+    ];
+
+    const finalTrials = [
+      {id:"T000", finalVal:1.2295969199300956e-05, bestVal:1.1568466004251634e-05, color:colors.t000, note:"lr=1e-3"},
+      {id:"T001", finalVal:1.1610691769051383e-05, bestVal:1.15667848566515e-05, color:colors.t001, note:"baseline"},
+      {id:"T002", finalVal:1.1601978201502446e-05, bestVal:1.1568072493478929e-05, color:colors.t002, note:"lr=3e-3"},
+      {id:"T003", finalVal:1.1587813723693649e-05, bestVal:1.1565402187101638e-05, color:colors.t003, note:"small"},
+      {id:"T004", finalVal:1.156535414139335e-05, bestVal:1.156535414139335e-05, color:colors.t004, note:"best"},
+      {id:"T005", finalVal:1.1582794179424206e-05, bestVal:1.157503135734626e-05, color:colors.t005, note:"cross=5"},
+      {id:"T006", finalVal:3.230528397965202e-05, bestVal:3.230528397965202e-05, color:colors.t006, note:"clip=1"},
+      {id:"T007", finalVal:1.1967217799403056e-05, bestVal:1.1967217799403056e-05, color:colors.t007, note:"12 epochs"},
+      {id:"T008", finalVal:1.1573435251918021e-05, bestVal:1.1565625432770807e-05, color:colors.t008, note:"emb=32"},
+      {id:"T009", finalVal:1.1567772546566811e-05, bestVal:1.1565980309140859e-05, color:colors.t009, note:"cross=1"}
+    ];
+
+    const segments = [
+      {label:"appopen -> US -> admob -> android", n:203, mae:0.012180, ratio:33.81, color:"var(--rose)"},
+      {label:"appopen -> US -> admob -> video", n:395, mae:0.010469, ratio:29.06, color:"var(--amber)"},
+      {label:"appopen -> US -> android -> video", n:365, mae:0.010243, ratio:28.44, color:"var(--cyan)"},
+      {label:"appopen -> max -> iOS -> sdk=max", n:333, mae:0.005767, ratio:16.01, color:"var(--teal)"},
+      {label:"supply=rovio -> video", n:234, mae:0.003487, ratio:9.68, color:"var(--violet)"}
+    ];
+
+    function formatSci(v) {
+      if (v === 0) return "0";
+      if (Math.abs(v) < 0.001 || Math.abs(v) >= 1000) return v.toExponential(2);
+      return v.toPrecision(3);
+    }
+
+    function makeSvg(tag, attrs = {}) {
+      const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
+      return el;
+    }
+
+    function drawLegend(targetId, series) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = "";
+      series.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "legend-item";
+        row.innerHTML = `<span class="swatch" style="--color:${item.color}"></span><span>${item.id} / ${item.note || ""}</span>`;
+        target.appendChild(row);
+      });
+    }
+
+    function drawLineChart(config) {
+      const svg = document.getElementById(config.id);
+      svg.innerHTML = "";
+      const width = 940;
+      const height = config.height || 360;
+      const pad = {top: 22, right: 24, bottom: 44, left: 76};
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+      const all = config.series.flatMap((s) => s.values).filter((v) => Number.isFinite(v));
+      const positives = all.filter((v) => v > 0);
+      const minPositive = Math.min(...positives);
+      const rawMin = config.yMin ?? Math.min(...all);
+      const rawMax = config.yMax ?? Math.max(...all);
+      const xMin = config.xMin ?? 1;
+      const xMax = config.xMax ?? Math.max(...config.series.map((s) => (s.startEpoch || 1) + s.values.length - 1));
+
+      const yToPx = (value) => {
+        let t;
+        if (config.yMode === "log") {
+          const low = config.yMin ?? minPositive / 10;
+          const high = config.yMax ?? rawMax * 1.6;
+          const safe = value > 0 ? value : low;
+          const logLow = Math.log10(low);
+          const logHigh = Math.log10(high);
+          t = (Math.log10(safe) - logLow) / (logHigh - logLow);
+        } else {
+          t = (value - rawMin) / (rawMax - rawMin);
+        }
+        return height - pad.bottom - t * (height - pad.top - pad.bottom);
+      };
+
+      const xToPx = (epoch) => {
+        return pad.left + ((epoch - xMin) / (xMax - xMin)) * (width - pad.left - pad.right);
+      };
+
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.top + i * ((height - pad.top - pad.bottom) / 4);
+        svg.appendChild(makeSvg("line", {x1: pad.left, y1: y, x2: width - pad.right, y2: y, class: "grid-line"}));
+        let labelVal;
+        if (config.yMode === "log") {
+          const low = config.yMin ?? minPositive / 10;
+          const high = config.yMax ?? rawMax * 1.6;
+          const p = 1 - i / 4;
+          labelVal = 10 ** (Math.log10(low) + p * (Math.log10(high) - Math.log10(low)));
+        } else {
+          labelVal = rawMin + (1 - i / 4) * (rawMax - rawMin);
+        }
+        const text = makeSvg("text", {x: 14, y: y + 4});
+        text.textContent = formatSci(labelVal);
+        svg.appendChild(text);
+      }
+
+      const tickCount = 5;
+      for (let i = 0; i <= tickCount; i++) {
+        const epoch = Math.round(xMin + i * ((xMax - xMin) / tickCount));
+        const x = xToPx(epoch);
+        svg.appendChild(makeSvg("line", {x1: x, y1: pad.top, x2: x, y2: height - pad.bottom, class: "grid-line"}));
+        const text = makeSvg("text", {x: x - 14, y: height - 14});
+        text.textContent = `ep${epoch}`;
+        svg.appendChild(text);
+      }
+
+      svg.appendChild(makeSvg("line", {x1: pad.left, y1: height - pad.bottom, x2: width - pad.right, y2: height - pad.bottom, class: "axis"}));
+      svg.appendChild(makeSvg("line", {x1: pad.left, y1: pad.top, x2: pad.left, y2: height - pad.bottom, class: "axis"}));
+
+      if (config.floorLine) {
+        const y = yToPx(config.floorLine.value);
+        svg.appendChild(makeSvg("line", {x1: pad.left, y1: y, x2: width - pad.right, y2: y, class: "floor-line"}));
+        const text = makeSvg("text", {x: width - pad.right - 136, y: y - 8});
+        text.textContent = config.floorLine.label;
+        text.setAttribute("fill", "#b66d00");
+        svg.appendChild(text);
+      }
+
+      config.series.forEach((series, seriesIndex) => {
+        const points = series.values.map((v, idx) => [xToPx((series.startEpoch || 1) + idx), yToPx(v), v, (series.startEpoch || 1) + idx]);
+        const pathData = points.map((p, idx) => `${idx === 0 ? "M" : "L"} ${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(" ");
+        const path = makeSvg("path", {d: pathData, class: "series-line", stroke: series.color, opacity: series.opacity || 1});
+        svg.appendChild(path);
+        const len = Math.ceil(path.getTotalLength ? path.getTotalLength() : 1000);
+        path.style.strokeDasharray = len;
+        path.style.setProperty("--path-len", len);
+        path.style.animationDelay = `${seriesIndex * 80}ms`;
+
+        points.forEach((p, idx) => {
+          if (idx % (config.pointEvery || 2) !== 0 && idx !== points.length - 1) return;
+          const c = makeSvg("circle", {cx: p[0], cy: p[1], r: 4.2, fill: series.color, class: "series-point", opacity: series.opacity || 1});
+          const title = makeSvg("title");
+          title.textContent = `${series.id} epoch ${p[3]}: ${formatSci(p[2])}`;
+          c.appendChild(title);
+          svg.appendChild(c);
+        });
+      });
+    }
+
+    function drawScatter() {
+      const svg = document.getElementById("scatterChart");
+      svg.innerHTML = "";
+      const width = 1180;
+      const height = 360;
+      const pad = {top: 30, right: 34, bottom: 52, left: 86};
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+      const healthy = finalTrials.filter((t) => !["T006", "T007", "T000"].includes(t.id));
+      const yMin = 1.1559e-05;
+      const yMax = 1.1620e-05;
+      const yToPx = (v) => {
+        const clamped = Math.max(yMin, Math.min(yMax, v));
+        return height - pad.bottom - ((clamped - yMin) / (yMax - yMin)) * (height - pad.top - pad.bottom);
+      };
+      const xToPx = (idx) => pad.left + idx * ((width - pad.left - pad.right) / (finalTrials.length - 1));
+
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.top + i * ((height - pad.top - pad.bottom) / 4);
+        svg.appendChild(makeSvg("line", {x1: pad.left, y1: y, x2: width - pad.right, y2: y, class: "grid-line"}));
+        const val = yMin + (1 - i / 4) * (yMax - yMin);
+        const text = makeSvg("text", {x: 16, y: y + 4});
+        text.textContent = formatSci(val);
+        svg.appendChild(text);
+      }
+
+      const best = Math.min(...healthy.map((t) => t.finalVal));
+      const healthyMax = Math.max(...healthy.map((t) => t.finalVal));
+      const yBest = yToPx(best);
+      const yHealthyMax = yToPx(healthyMax);
+      svg.appendChild(makeSvg("rect", {
+        x: pad.left,
+        y: yHealthyMax,
+        width: width - pad.left - pad.right,
+        height: yBest - yHealthyMax,
+        fill: "rgba(0, 157, 135, .08)",
+        stroke: "rgba(0, 157, 135, .18)"
+      }));
+      svg.appendChild(makeSvg("line", {x1: pad.left, y1: yBest, x2: width - pad.right, y2: yBest, class: "floor-line"}));
+      const floorText = makeSvg("text", {x: width - 222, y: yBest - 8});
+      floorText.textContent = "best plateau: T004 1.156535e-5";
+      svg.appendChild(floorText);
+
+      finalTrials.forEach((trial, idx) => {
+        const x = xToPx(idx);
+        const rawY = yToPx(trial.finalVal);
+        const capped = trial.finalVal > yMax;
+        const y = capped ? pad.top + 10 : rawY;
+        svg.appendChild(makeSvg("line", {x1: x, y1: pad.top, x2: x, y2: height - pad.bottom, class: "grid-line"}));
+        const c = makeSvg("circle", {
+          cx: x,
+          cy: y,
+          r: trial.id === "T004" ? 8 : 6,
+          fill: trial.color,
+          class: "series-point",
+          opacity: capped ? .7 : 1
+        });
+        const title = makeSvg("title");
+        title.textContent = `${trial.id}: final ${formatSci(trial.finalVal)}, best ${formatSci(trial.bestVal)}, ${trial.note}`;
+        c.appendChild(title);
+        svg.appendChild(c);
+        if (capped) {
+          const cap = makeSvg("text", {x: x - 18, y: y - 13});
+          cap.textContent = "above";
+          svg.appendChild(cap);
+        }
+        const label = makeSvg("text", {x: x - 15, y: height - 18});
+        label.textContent = trial.id;
+        svg.appendChild(label);
+      });
+    }
+
+    function renderTrialStrip() {
+      const strip = document.getElementById("trialStrip");
+      finalTrials.forEach((trial) => {
+        const card = document.createElement("div");
+        card.className = `trial-card ${trial.id === "T004" ? "best" : ""} ${["T006","T007"].includes(trial.id) ? "control" : ""}`;
+        card.innerHTML = `
+          <div class="trial-id">${trial.id}</div>
+          <div class="trial-val" style="color:${trial.color}">${formatSci(trial.finalVal)}</div>
+          <div class="trial-note">${trial.note}</div>
+        `;
+        strip.appendChild(card);
+      });
+    }
+
+    function renderSegments() {
+      const bars = document.getElementById("segmentBars");
+      if (!bars) return;
+      const maxRatio = Math.max(...segments.map((segment) => segment.ratio));
+      segments.forEach((segment) => {
+        const width = (segment.ratio / maxRatio) * 100;
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `
+          <div class="bar-label" title="${segment.label}">${segment.label}</div>
+          <div class="bar-track"><div class="bar-fill" style="--w:${width}%; --accent:${segment.color}"></div></div>
+          <div class="bar-value">${segment.ratio.toFixed(1)}x / n=${segment.n.toLocaleString()}</div>
+        `;
+        bars.appendChild(row);
+      });
+    }
+
+    function setupRound2Stage() {
+      const inputSlide = document.getElementById("round2SlideInput");
+      const schemaSlide = document.getElementById("round2SlideSchema");
+      const distributionSlide = document.getElementById("round2SlideDistribution");
+      const proposalSlide = document.getElementById("round2SlideProposal");
+      const cart = document.getElementById("phase1a-cart-tree");
+      const drilldown = document.getElementById("phase1a-drilldown");
+      const featureMap = document.getElementById("feature-search-map");
+      const distribution = document.getElementById("phase1b-distribution");
+
+      if (inputSlide && cart && drilldown) {
+        inputSlide.append(cart, drilldown);
+      }
+      if (schemaSlide && featureMap) {
+        schemaSlide.append(featureMap);
+      }
+      if (distributionSlide && distribution) {
+        distributionSlide.append(distribution);
+      }
+      if (proposalSlide) {
+        const proposal = document.createElement("article");
+        proposal.className = "panel full";
+        proposal.id = "phase1b-recommendation-slide";
+        proposal.innerHTML = `
+          <div class="artifact-wrap">
+            <iframe
+              class="artifact-frame recommendations"
+              src="pages/phase1b_feature_recommendations.html"
+              title="Phase1B feature recommendation needs"
+              loading="lazy"></iframe>
+          </div>
+        `;
+        proposalSlide.appendChild(proposal);
+      }
+    }
+
+    function wireDiagnosticNavigation() {
+      const track = document.getElementById("round2StageTrack");
+      const links = Array.from(document.querySelectorAll("[data-slide]"));
+      if (!track || !links.length) return;
+
+      const goToSlide = (index) => {
+        track.style.transform = `translateX(-${index * 100}%)`;
+        links.forEach((link) => {
+          link.classList.toggle("is-active", Number(link.dataset.slide) === index);
+        });
+      };
+
+      links.forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          const index = Number(link.dataset.slide || 0);
+          goToSlide(index);
+        });
+      });
+
+      goToSlide(0);
+    }
+
+    const lossSeries = selectedTrials.map((t) => ({id: t.id, color: t.color, note: t.note, values: t.val, opacity: ["T006", "T007"].includes(t.id) ? .68 : 1}));
+    drawLineChart({
+      id: "lossChart",
+      height: 420,
+      series: lossSeries,
+      yMode: "log",
+      yMin: 8e-06,
+      floorLine: {value: 1.156535414139335e-05, label: "T004 plateau"}
+    });
+    drawLegend("lossLegend", lossSeries);
+
+    drawScatter();
+    renderTrialStrip();
+    renderSegments();
+    setupRound2Stage();
+    wireDiagnosticNavigation();
+  </script>
+</body>
+</html>

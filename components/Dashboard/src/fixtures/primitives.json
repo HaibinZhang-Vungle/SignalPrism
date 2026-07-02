@@ -1,0 +1,19 @@
+[
+  { "primitiveId": "hbn_settlement_price_sum_7d", "capabilityId": "hbn_settlement_price", "strategy": "numeric_distribution", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "hbn_settlement_price_count_7d", "capabilityId": "hbn_settlement_price", "strategy": "numeric_distribution", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "hbn_settlement_price_sum_sq_7d", "capabilityId": "hbn_settlement_price", "strategy": "numeric_distribution", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "hbn_settlement_price_min_7d", "capabilityId": "hbn_settlement_price", "strategy": "numeric_distribution", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "hbn_settlement_price_max_7d", "capabilityId": "hbn_settlement_price", "strategy": "numeric_distribution", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "hbn_settlement_price_ddsketch_7d", "capabilityId": "hbn_settlement_price", "strategy": "numeric_distribution", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "settlement_price_sum_1d", "capabilityId": "hbn_settlement_price", "strategy": "numeric_sum_count", "dimensionFamily": "non_device_context_v1", "window": "1d" },
+  { "primitiveId": "settlement_price_count_1d", "capabilityId": "hbn_settlement_price", "strategy": "numeric_sum_count", "dimensionFamily": "non_device_context_v1", "window": "1d" },
+  { "primitiveId": "hbn_bid_price_sum_7d", "capabilityId": "hbn_bid_price", "strategy": "numeric_sum_count", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "hbn_bid_price_count_7d", "capabilityId": "hbn_bid_price", "strategy": "numeric_sum_count", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "delivery_count_7d", "capabilityId": "delivery_count", "strategy": "count_event", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "delivery_count_1d", "capabilityId": "delivery_count", "strategy": "count_event", "dimensionFamily": "non_device_context_v1", "window": "1d" },
+  { "primitiveId": "tpat_event_start_count_sum_7d", "capabilityId": "tpat_event_start_count", "strategy": "numeric_sum_count", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "mediation_floor_sum_7d", "capabilityId": "mediation_floor", "strategy": "numeric_sum_count", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "mediation_floor_count_7d", "capabilityId": "mediation_floor", "strategy": "numeric_sum_count", "dimensionFamily": "non_device_context_v1", "window": "7d" },
+  { "primitiveId": "sr_pbtw_sum_1d", "capabilityId": "sr_pbtw", "strategy": "numeric_sum_count", "dimensionFamily": "non_device_context_v1", "window": "1d" },
+  { "primitiveId": "sr_pbtw_sum_7d", "capabilityId": "sr_pbtw", "strategy": "numeric_distribution", "dimensionFamily": "non_device_context_v1", "window": "7d" }
+]
