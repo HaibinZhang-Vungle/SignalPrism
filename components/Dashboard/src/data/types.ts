@@ -173,6 +173,36 @@ export interface DimensionFamily {
   notes?: string[]
 }
 
+/**
+ * An existing aggregate feature from the aggregation table schema (§5 metric catalog).
+ * Distribution metrics expand to 5 columns; count metrics are a single column.
+ */
+export interface AggregateMetric {
+  metricId: string
+  kind: 'distribution' | 'count'
+  generatedColumns: string[]
+  dataType: string
+  source: string
+  notes?: string
+  /** Label-like / point-in-time sensitive — must not be used naively as a feature input. */
+  labelLike?: boolean
+}
+
+/** A reviewed hourly aggregation table (§1) with its dimension columns (§3/§4). */
+export interface AggregateTable {
+  tableId: string
+  dimensionFamily: DimensionFamilyId
+  purpose: string
+  primaryKey: string
+  dimensionColumns: string[]
+}
+
+/** The aggregate-feature catalog browsed by the Feature Registry. */
+export interface AggregateFeatureCatalog {
+  tables: AggregateTable[]
+  metrics: AggregateMetric[]
+}
+
 /** A materialized primitive column produced by an aggregation spec (TRD §7.3.2). */
 export interface Primitive {
   primitiveId: string
