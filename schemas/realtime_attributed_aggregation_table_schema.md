@@ -20,8 +20,8 @@ columns in §5, but use different dimension columns.
 
 | table | dimension_family | purpose | primary dimension key |
 |---|---|---|---|
-| `ml_shadow.realtime_attributed_device_level_hly` | `device_level_v1` | Device / user history features and KVRocks export candidates. | `device_id` |
-| `ml_shadow.realtime_attributed_non_device_context_hly` | `non_device_context_v1` | Supply, inventory, geo, privacy/cohort, and experiment context without device identity. | `context_dim_id` |
+| `ml_shadow_feature.realtime_attributed_device_level_hly` | `device_level_v1` | Device / user history features and KVRocks export candidates. | `device_id` |
+| `ml_shadow_feature.realtime_attributed_non_device_context_hly` | `non_device_context_v1` | Supply, inventory, geo, privacy/cohort, and experiment context without device identity. | `context_dim_id` |
 
 Both tables are hourly:
 
