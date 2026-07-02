@@ -66,7 +66,7 @@ object SparkMain extends BoilerplateSparkMain {
             $hbSelect
           FROM $jaegerTable j
           LEFT JOIN $hbTable h
-            ON j.event_id = h.event_id AND j.imp_id <=> h.imp_id
+            ON j.event_id = h.event_id
           WHERE j.source_event_time >= '$s' AND j.source_event_time < '$t'
         """
       logExplain(sql, s"join $jaegerTable with $hbTable")
@@ -84,7 +84,7 @@ object SparkMain extends BoilerplateSparkMain {
         reportStatsMetric(s"$appName.attribution_hit_rate", (hr.getAs[Long]("hit") * 1000 / total))
       }
 
-      mergeToIcebergTable(outputTable, wide, lookbackDays, mergeKeysAllowNull = Array("imp_id"))
+      appendToIcebergTable(outputTable, wide)
       reportStatsMetric(s"$appName.write.seconds", (System.currentTimeMillis() - startMillis) / 1000)
     }
   }

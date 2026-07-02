@@ -56,18 +56,27 @@ object SparkMain extends BoilerplateSparkMain {
     UDFUtil.registerMongoIdToTimestamp(spark)
   }
 
+  // Collect every resolvable dotted path in a schema (descends into structs and array<struct>
+  // elements), so we can project only the col_map sources that actually exist in the input.
+  private def resolvablePaths(dt: org.apache.spark.sql.types.DataType, prefix: String): Set[String] = {
+    import org.apache.spark.sql.types.{StructType, ArrayType}
+    dt match {
+      case st: StructType => st.fields.flatMap { f =>
+          val p = if (prefix.isEmpty) f.name else prefix + "." + f.name
+          resolvablePaths(f.dataType, p) + p
+        }.toSet
+      case ArrayType(el, _) => resolvablePaths(el, prefix)
+      case _ => Set.empty[String]
+    }
+  }
+
   // scalastyle:off
   def process(next: DateTime, tempTable: String): Unit = {
     val startMillis = System.currentTimeMillis()
 
-    // source-expr -> target, e.g. "serve_result.bid_floor" -> "jgr_bid_floor",
-    // "rtb_conn.account_id" -> "jgr_rtb_account_id", "device.make" -> "jgr_dev_make".
-    // NB: jgr_winner_account_id is NOT in this map (it shares source expr rtb_conn.account_id
-    // with jgr_rtb_account_id); it is emitted directly in the SELECT below.
-    val columnMap = getColsMapInJson("col_maps/jaeger_transaction_wide.json")
-    val colTransSpec = columnMap.map { case (k, v) => s"$k AS $v" }.mkString(",\n")
-
-    val transformSql =
+    // Explode to (event_id, imp_id) grain with the winning RTB connection, then materialize so we
+    // can inspect its schema before projecting.
+    val cteSql =
       s"""
         WITH served AS (
             SELECT *,
@@ -91,26 +100,38 @@ object SparkMain extends BoilerplateSparkMain {
               FROM served_placement
              WHERE serve_result.winner_id IS NOT NULL
                AND serve_result.placement_reference_id = placement_.reference_id
-        ),
-        served_winner AS (
-            SELECT *,
-                   format_id(serve_result.ad_event_id) AS event_id,
-                   serve_result.imp_id                 AS imp_id,
-                   timestamp                           AS source_event_time
-              FROM served_rtb
-             WHERE serve_result.winner_id = rtb_conn.id
         )
+        SELECT *,
+               format_id(serve_result.ad_event_id) AS event_id,
+               serve_result.imp_id                 AS imp_id,
+               timestamp                           AS source_event_time
+          FROM served_rtb
+         WHERE serve_result.winner_id = rtb_conn.id
+      """
+    logExplain(cteSql, s"jaeger ingestion from coba2 $topic")
+    spark.sql(cteSql).createOrReplaceTempView("_jaeger_winner")
+
+    // The schema md lists some jaeger fields not present in the actual parquet, so project ONLY
+    // the col_map sources that resolve against the exploded schema; append null-fills the rest.
+    // jgr_winner_account_id is emitted directly (shares source expr rtb_conn.account_id with
+    // jgr_rtb_account_id, so it is excluded from the col_map).
+    val paths = resolvablePaths(spark.table("_jaeger_winner").schema, "")
+    val colTransSpec = getColsMapInJson("col_maps/jaeger_transaction_wide.json").toSeq
+      .filter { case (src, _) => paths.contains(src) }
+      .map { case (src, tgt) => s"$src AS $tgt" }
+      .mkString(",\n  ")
+
+    val out = spark.sql(
+      s"""
         SELECT event_id,
                imp_id,
                rtb_conn.account_id AS jgr_winner_account_id,
                $colTransSpec
-          FROM served_winner
+          FROM _jaeger_winner
          WHERE event_id IS NOT NULL
-      """
-    logExplain(transformSql, s"jaeger ingestion from coba2 $topic")
-    val out = spark.sql(transformSql).dropDuplicates("event_id", "imp_id")
+      """).dropDuplicates("event_id", "imp_id")
 
-    mergeToIcebergTable(outputTable, out, lookbackDays, mergeKeysAllowNull = Array("imp_id"))
+    appendToIcebergTable(outputTable, out)
     reportStatsMetric(s"$appName.write.seconds", (System.currentTimeMillis() - startMillis) / 1000)
   }
   // scalastyle:on

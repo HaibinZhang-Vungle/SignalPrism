@@ -25,7 +25,7 @@ def test_extends_boilerplate_and_uses_required_machinery():
     # jgr_winner_account_id is special-cased (shares source expr with jgr_rtb_account_id),
     # emitted directly rather than via the col_map.
     assert "rtb_conn.account_id AS jgr_winner_account_id" in s
-    assert "mergeToIcebergTable" in s
+    assert "appendToIcebergTable" in s
 
 def test_no_adhoc_udf_registration():
     s = _read()

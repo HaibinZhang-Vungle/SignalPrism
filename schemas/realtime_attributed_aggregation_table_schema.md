@@ -59,12 +59,19 @@ in `non_device_context_v1`.
 
 Grain:
 - One row per `(event_time, ingest_time, hashid, device_id, device dimensions...)`.
-- `device_id` is sourced from `jgr_lo_id`.
-- Rows with null `jgr_lo_id` should be dropped unless an approved anonymous-device policy exists.
+- `device_id` is `normalize_device_id(jgr_dev_normalized_id)` — the SDK normalized id, keyed
+  the same way as lena's device-feature pipelines.
+- Rows with null normalized `device_id` are dropped (`normalize_device_id(...) IS NOT NULL`).
+
+> **Note (device key = normalized_id, not lo_id):** the intended `jgr_lo_id` is not populated
+> upstream (observed 0% non-null), so `device_id` is sourced from `jgr_dev_normalized_id`
+> (observed 100% populated) and normalized via `normalize_device_id`, matching lena `dev_id`.
+> Switch back to `jgr_lo_id` here and in `codegen/agg_schema_catalog._DERIVED_DIM_EXPR` /
+> `agg_generate._DROP_NULL` if/when upstream populates `lo_id`.
 
 | column | type | source / derivation | role | notes |
 |---|---|---|---|---|
-| `device_id` | STRING | `jgr_lo_id` | primary_dimension | Hashed, non-reversible device identifier. |
+| `device_id` | STRING | `normalize_device_id(jgr_dev_normalized_id)` | primary_dimension | Normalized device identifier (SDK normalized id; `jgr_lo_id` empty upstream). |
 | `device_dim_id` | STRING | `sha256(device_id)` | surrogate_key | Stable join/export key. |
 | `dev_id_source` | STRING | `jgr_dev_id_source` | dimension | Device-id source. |
 | `dev_platform` | STRING | normalized `jgr_dev_os` | dimension | Lowercase platform, e.g. `ios`, `android`. |
@@ -136,9 +143,9 @@ Excluded from this dimension family:
 | `pub_app_object_id` | STRING | `hbn_pub_app_object_id` | Primary publisher app dimension. |
 | `pub_app_id` | STRING | `hbn_pub_app_id` | Publisher app store id. |
 | `pub_app_bundle_id` | STRING | `hbn_pub_app_bundle_id` | Publisher app bundle / package. |
-| `pub_genre_bucket` | STRING | bucketed `hbn_pub_genre` | Multi-value field; use sorted bucket or MAP primitive. |
+| `pub_genre_bucket` | STRING | sorted-join of `hbn_pub_genre` (array) | Multi-value field reduced to a stable scalar key (`lower(array_join(array_sort(...), ','))`). |
 | `app_bundle` | STRING | `jgr_app_bundle` | Exchange-independent app bundle. |
-| `app_iab_tier1` | STRING | tier-1 rollup from `jgr_app_cat` | Multi-value IAB category rollup. |
+| `app_iab_tier1` | STRING | tier-1 rollup from `jgr_app_cat` (array) | Multi-value IAB category rollup: strip each code before `-`, dedupe, sort, join. |
 | `app_object_id` | STRING | `jgr_app_object_id` | Jaeger app object id. |
 | `app_hb_partner` | STRING | `jgr_app_hb_partner` | Third-party HB partner. |
 | `app_version_major` | STRING | parse major from `jgr_app_ver` | Keep raw versions out of default keys. |

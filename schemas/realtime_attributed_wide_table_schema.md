@@ -157,11 +157,12 @@ Domains follow the Capability Map grouping in TRD §7.10.1.
 
 ### 5.3 Device
 
-Authoritative source: Jaeger (post-resolution at ADX). HB device columns are deduped out per §3.1; the single device identity is `jgr_lo_id`.
+Authoritative source: Jaeger (post-resolution at ADX). HB device columns are deduped out per §3.1. The intended identity is `jgr_lo_id`, but it is not yet populated upstream (observed 0% non-null); the populated device identity used for aggregation is `jgr_dev_normalized_id` (the SDK normalized id), matching lena's `dev_id` convention.
 
 | column | type | source | semantic_type | null | feat | description |
 |---|---|---|---|---|---|---|
-| `jgr_lo_id` | STRING | jaeger.lo_id | id | not_observed | key | Hashed, non-reversible device identifier. |
+| `jgr_lo_id` | STRING | jaeger.lo_id | id | not_observed | key | Hashed, non-reversible device identifier. Not yet populated upstream. |
+| `jgr_dev_normalized_id` | STRING | jaeger.device.ext.normalized_id | id | not_observed | key | SDK normalized device id (observed 100% populated). Primary device identity for aggregation while `jgr_lo_id` is empty; normalized via `normalize_device_id` (trim/lowercase, nil-UUID→null) when used as the device key. Matches lena `dev_id`. |
 | `jgr_dev_make` | STRING | jaeger.device.make | device_attr | not_observed | feature_after_encode | Device maker, e.g. Apple. |
 | `jgr_dev_model` | STRING | jaeger.device.model | device_attr | not_observed | feature_after_encode | Device model. **Bucket to top-N (`dev_model_bucket`) before use** — raw cardinality too high (TRD §7.8). |
 | `jgr_dev_os` | STRING | jaeger.device.os | device_attr | not_observed | dim | OS, e.g. iOS/android. `dev_platform` source. |

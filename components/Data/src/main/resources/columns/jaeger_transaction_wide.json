@@ -34,6 +34,7 @@
   "jgr_publisher_payout_type",
   "jgr_ad_unit_id",
   "jgr_lo_id",
+  "jgr_dev_normalized_id",
   "jgr_dev_make",
   "jgr_dev_model",
   "jgr_dev_os",

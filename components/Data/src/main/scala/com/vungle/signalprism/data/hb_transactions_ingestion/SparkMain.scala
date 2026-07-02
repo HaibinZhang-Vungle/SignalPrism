@@ -8,8 +8,8 @@ import org.joda.time.format.DateTimeFormat
 /**
  * Consume coba2.hb_transactions (the full-payload coba2 landing of the hb-transactions topic,
  * produced upstream by coba/ingestion2). Event-id sample, keep the served/winning bid per
- * (event_id, bidrequest_imp_id) via row_number, project all hb-sourced wide-table columns,
- * and write ml_shadow.hb_transactions_wide_staging. Modeled on hbp/auctions_served_ingestion.
+ * event_id via row_number (hb has no impression-id column), project all hb-sourced wide-table
+ * columns, and write ml_shadow.hb_transactions_wide_staging. Modeled on hbp/auctions_served_ingestion.
  */
 object SparkMain extends BoilerplateSparkMain {
   private val NS = "spark.app.signalprism.data.hb_transactions_ingestion"
@@ -42,28 +42,33 @@ object SparkMain extends BoilerplateSparkMain {
   lazy val lookbackDays    = args(s"$NS.merge.lookback.days").toInt
   lazy val SAMPLE_RATE     = args(s"$NS.sample_rate").toDouble
 
-  lazy val projection = getColsMapInJson("col_maps/hb_transactions_wide.json")
-    .map { case (k, v) => s"$k AS $v" }.mkString(",\n  ")
-
   // scalastyle:off
   def process(next: DateTime, tempTable: String): Unit = {
     val startMillis = System.currentTimeMillis()
-    // NB: hbn_timestamp comes from the col_map ($projection maps `timestamp` -> `hbn_timestamp`),
-    // so it must NOT be emitted again here, or the output would have a duplicate column.
+    // hb-transactions has NO impression-id column (bidrequest_imp_id absent in the landed parquet),
+    // so imp_id is NULL on the hb side and comes from jaeger after the join; dedup per event_id.
+    // The schema md lists some hb fields that are not present in the actual parquet, so project ONLY
+    // the col_map sources that exist in the input; appendToIcebergTable null-fills the rest.
+    // (hbn_timestamp comes from the col_map: `timestamp` -> `hbn_timestamp`; do not re-emit it.)
+    val avail = spark.table(tempTable).columns.toSet
+    val projection = getColsMapInJson("col_maps/hb_transactions_wide.json").toSeq
+      .filter { case (src, _) => avail.contains(src) }
+      .map { case (src, tgt) => s"$src AS $tgt" }
+      .mkString(",\n  ")
     val merged = spark.sql(
       s"""
-        SELECT event_id, bidrequest_imp_id AS imp_id, $projection
+        SELECT event_id, CAST(NULL AS string) AS imp_id, $projection
         FROM (
           SELECT *,
                  row_number() OVER (
-                   PARTITION BY event_id, bidrequest_imp_id ORDER BY timestamp
+                   PARTITION BY event_id ORDER BY timestamp
                  ) AS _rn
           FROM $tempTable
           WHERE in_user_sample(sha1(event_id), $SAMPLE_RATE)
         )
         WHERE _rn = 1
       """)
-    mergeToIcebergTable(outputTable, merged, lookbackDays, mergeKeysAllowNull = Array("imp_id"))
+    appendToIcebergTable(outputTable, merged)
     reportStatsMetric(s"$appName.write.seconds", (System.currentTimeMillis() - startMillis) / 1000)
   }
   // scalastyle:on
