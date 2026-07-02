@@ -94,6 +94,12 @@ If the aggregate table contains multiple device dimensions beyond `device_id`,
 derive those dimensions from the wide-table enrichment and include them in the
 join. Do not join on raw `device_id` when `lo_id` is present.
 
+> **Note (device key updated 2026-07-02):** the aggregate `device_level_v1.device_id` is now
+> `normalize_device_id(jgr_dev_normalized_id)` (not `jgr_lo_id`, which is empty upstream). The
+> `gminor_attributed_join` job therefore joins on **`device_dim_id`** derived from the wide bridge
+> using the same `agg_specs` recipe as the aggregation job — GMinor's own `device_id`/`lo_id` are
+> carried as columns, not used as the join key. See design spec 2026-07-02-gminor-attributed-join.
+
 ### 4.3 Non-Device Context Join
 
 Use this path for inventory/supply/context history features.
@@ -138,4 +144,8 @@ to an overly broad or incorrect aggregate key.
 - At least one of `lo_id` or `device_id` is required for device-level aggregate joins.
 - `features`, `predictions`, and `tags` must be parseable according to `feature_schema_version` and project-specific decoders before feature extraction.
 - Aggregate feature joins must use historical rows only: `aggregate.event_time < source_event_time`.
+- **Point-in-time uses strict prior hour:** the implementation joins with
+  `aggregate.event_time < date_trunc('hour', source_event_time)` (prior hour only), which supersedes
+  the `< source_event_time` shown in the §4.2/§4.3 inline examples (that would admit the same hour,
+  whose aggregate can contain at/after-event data).
 
