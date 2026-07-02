@@ -5,6 +5,7 @@ import com.vungle.signalprism.data.agg.KeySpec
 import com.vungle.signalprism.data.gminor_attributed_join.GminorConfig._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import org.apache.hadoop.fs.Path
 
 /**
  * Wide-table label/outcome columns surfaced as lbl_* on the gminor_attributed_training row.
@@ -73,7 +74,7 @@ object SparkMain extends BoilerplateSparkMain {
   // scalastyle:off
   def process(next: DateTime, tempTable: String): Unit = {
     val startMillis = System.currentTimeMillis()
-    val s = next.minusHours(1).toString("yyyy-MM-dd HH:mm:ss")   // window handled by withCoba2TempViewInRange
+    val s = next.minusHours(1).toString("yyyy-MM-dd HH:mm:ss")   // window enforced on parsed timestamp below
     val t = next.toString("yyyy-MM-dd HH:mm:ss")
 
     // 1) sampled gminor, event grain, parsed time
@@ -88,6 +89,7 @@ object SparkMain extends BoilerplateSparkMain {
              device_id, lo_id, features, predictions
         FROM $tempTable
        WHERE in_user_sample(sha1(event_id), $sampleRate) AND event_id IS NOT NULL
+         AND $TS >= '$s' AND $TS < '$t'
     """).createOrReplaceTempView("_gminor")
 
     // 2) wide bridge -> both surrogate keys (KeySpec, same as agg) + labels, event grain.
@@ -170,6 +172,21 @@ object SparkMain extends BoilerplateSparkMain {
   }
   // scalastyle:on
 
+  // GMinor lands MULTI-AZ: <s3Dir>/<topic>/dt=/hr=/mn=/az=<zone>/part-*.parquet, with _SUCCESS at
+  // the az level. lena's withCoba2TempViewInRange checks _SUCCESS at the mn level and cannot read
+  // this layout (it skips every partition), so read the hour partitions directly:
+  // recursiveFileLookup picks up all mn/az subdirs and ignores partition inference. The time window
+  // is enforced in process() on the parsed timestamp, so reading the boundary hour is harmless.
+  private def readGminorInRange(start: DateTime, till: DateTime): Option[org.apache.spark.sql.DataFrame] = {
+    val base = gminorS3.stripSuffix("/")
+    val hourPaths = getDayHoursInRange(start, till).map { case (d, h) => s"$base/$gminorTopic/dt=$d/hr=$h/" }
+    val hconf = spark.sparkContext.hadoopConfiguration
+    val existing = hourPaths.filter { p => val fp = new Path(p); fp.getFileSystem(hconf).exists(fp) }
+    existing.foreach(p => _logger.warn(s"gminor multi-az read: $p"))
+    if (existing.isEmpty) None
+    else Some(spark.read.option("recursiveFileLookup", "true").parquet(existing: _*))
+  }
+
   def run: Unit = {
     UDFUtil.registerCommonUDF(spark)
     UDFUtil.registerInUserSample(spark)
@@ -182,10 +199,14 @@ object SparkMain extends BoilerplateSparkMain {
     val tillMinute = finalTill.toString("mm")
     for ((nextStart, nextTill) <- hourlyPeriodsForCurrentBatchMinute(tillDay, tillHour, tillMinute)) {
       assert(isTimeBeforeNow(nextTill))
-      withCoba2TempViewInRange(gminorS3, gminorTopic, nextStart, nextTill, "_gminor_src") {
-        case (tempTable, _) => process(nextTill, tempTable)
+      readGminorInRange(nextStart, nextTill) match {
+        case Some(df) =>
+          df.createOrReplaceTempView("_gminor_src")
+          process(nextTill, "_gminor_src")
+          if (isNotBackfill) recordProgressMinute(nextTill)
+        case None =>
+          _logger.warn(s"No gminor data for [$nextStart, $nextTill), skip")
       }
-      if (isNotBackfill) recordProgressMinute(nextTill)
     }
     reportStatsMetric(s"$appName.success", 1)
   }
