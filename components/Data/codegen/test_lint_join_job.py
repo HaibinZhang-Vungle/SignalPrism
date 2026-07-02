@@ -13,11 +13,10 @@ def test_join_contract():
     assert "object SparkMain extends BoilerplateSparkMain" in s
     assert "LEFT JOIN" in s
     assert "j.event_id = h.event_id" in s
-    assert "j.imp_id <=> h.imp_id" in s   # null-safe equality (lena notifications_attribution idiom)
+    # hb has no impression-id column, so the join is on event_id only; imp_id comes from jaeger.
     # Hit-rate metric per schema §2.3.
     assert "attribution_hit_rate" in s
     assert "reportStatsMetric" in s
-    assert "mergeToIcebergTable" in s
-    assert 'mergeKeysAllowNull = Array("imp_id")' in s
+    assert "appendToIcebergTable" in s
     # Two-upstream watermark gating (pattern from notifications_attribution).
     assert "checkoutProgress" in s

@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS hive_stg.ml_shadow.realtime_attributed_event_wide (
     jgr_publisher_payout_type string,
     jgr_ad_unit_id string,
     jgr_lo_id string,
+    jgr_dev_normalized_id string,
     jgr_dev_make string,
     jgr_dev_model string,
     jgr_dev_os string,

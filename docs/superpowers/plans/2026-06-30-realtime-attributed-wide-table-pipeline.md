@@ -315,6 +315,7 @@ def source_expr(col, staging: str) -> str:
     raw = raw.replace("placement_serve_results[].", "serve_result.")
     raw = raw.replace("placements[].", "placement_.")
     raw = raw.replace("[].", ".")  # any remaining nested array element access
+    raw = raw.replace("[]", "")    # array-type notation on leaf cols (pub_genre[] -> pub_genre)
     return raw
 ```
 
@@ -1110,7 +1111,7 @@ def test_hb_job_contract():
     assert "in_user_sample(sha1(event_id)" in s
     # Keep only the served/winning bid via row_number dedup.
     assert "row_number() OVER" in s
-    assert "PARTITION BY event_id, bidrequest_imp_id" in s
+    assert "PARTITION BY event_id" in s  # hb has no impression-id column; dedup per event_id
     assert "getColsMapInJson" in s
     assert "col_maps/hb_transactions_wide.json" in s
     assert "mergeToIcebergTable" in s or "appendToIcebergTable" in s
@@ -1180,11 +1181,11 @@ object SparkMain extends BoilerplateSparkMain {
     // so it must NOT be emitted again here, or the output would have a duplicate column.
     val merged = spark.sql(
       s"""
-        SELECT event_id, bidrequest_imp_id AS imp_id, $projection
+        SELECT event_id, CAST(NULL AS string) AS imp_id, $projection
         FROM (
           SELECT *,
                  row_number() OVER (
-                   PARTITION BY event_id, bidrequest_imp_id ORDER BY timestamp
+                   PARTITION BY event_id ORDER BY timestamp
                  ) AS _rn
           FROM $tempTable
           WHERE in_user_sample(sha1(event_id), $SAMPLE_RATE)
@@ -1265,7 +1266,7 @@ def test_join_contract():
     assert "object SparkMain extends BoilerplateSparkMain" in s
     assert "LEFT JOIN" in s
     assert "j.event_id = h.event_id" in s
-    assert "j.imp_id <=> h.imp_id" in s   # null-safe equality (lena notifications_attribution idiom)
+    # hb has no impression-id column, so the join is on event_id only; imp_id comes from jaeger.
     # Hit-rate metric per schema §2.3.
     assert "attribution_hit_rate" in s
     assert "reportStatsMetric" in s
@@ -1352,7 +1353,7 @@ object SparkMain extends BoilerplateSparkMain {
             $hbSelect
           FROM $jaegerTable j
           LEFT JOIN $hbTable h
-            ON j.event_id = h.event_id AND j.imp_id <=> h.imp_id
+            ON j.event_id = h.event_id
           WHERE j.source_event_time >= '$s' AND j.source_event_time < '$t'
         """
       logExplain(sql, s"join $jaegerTable with $hbTable")

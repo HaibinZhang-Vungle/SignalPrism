@@ -38,3 +38,14 @@ def test_source_expr_winning_rtbconnection():
     assert source_expr(BY["jgr_rtb_is_internal"], "jaeger") == "rtb_conn.is_internal"
     # derived winner account id
     assert source_expr(BY["jgr_winner_account_id"], "jaeger") == "rtb_conn.account_id"
+
+def test_source_expr_strips_array_notation():
+    # array-valued leaf columns must NOT keep the schema-md `[]` notation
+    assert source_expr(BY["hbn_pub_genre"], "hb") == "pub_genre"
+    assert source_expr(BY["hbn_adv_genre"], "hb") == "adv_genre"
+    assert source_expr(BY["jgr_app_cat"], "jaeger") == "app.cat"
+    assert source_expr(BY["jgr_winning_bid_adomain"], "jaeger") == "serve_result.winning_bid.adomain"
+    assert source_expr(BY["jgr_tpat_video_start"], "jaeger") == "serve_result.tpat.video_start"
+    for c in parse_catalog(MD):
+        for st in ("jaeger", "hb"):
+            assert "[]" not in source_expr(c, st), (c.name, st)
