@@ -113,12 +113,16 @@ object SparkMain extends BoilerplateSparkMain {
           SELECT event_id,
                  $dimProj,
                  ${LABEL_COLS.mkString(", ")}
-            FROM $wideTable
-           WHERE source_event_time >= '$s' AND source_event_time < '$t'
-          QUALIFY row_number() OVER (
-                    PARTITION BY event_id
-                    ORDER BY (CASE WHEN jgr_no_serv_reason = 0 THEN 0 ELSE 1 END) ASC, imp_id ASC
-                  ) = 1
+            FROM (
+              SELECT *,
+                     row_number() OVER (
+                       PARTITION BY event_id
+                       ORDER BY (CASE WHEN jgr_no_serv_reason = 0 THEN 0 ELSE 1 END) ASC, imp_id ASC
+                     ) AS _imp_rn
+                FROM $wideTable
+               WHERE source_event_time >= '$s' AND source_event_time < '$t'
+            )
+           WHERE _imp_rn = 1
         )
     """).createOrReplaceTempView("_wide_keyed")
 
@@ -138,26 +142,22 @@ object SparkMain extends BoilerplateSparkMain {
     // keeps the single latest surviving snapshot; = 1 also keeps the lone null row on a miss.
     def pitStage(inView: String, aggTable: String, keyCol: String, prefix: String, outView: String): Unit = {
       val metricSel = prefixedMetricSelect(prefix).mkString(",\n             ")
+      // No QUALIFY / no `SELECT * EXCEPT` (neither is supported by open-source Spark 3.5): materialize
+      // the windowed join with a plain row_number() and drop the helper column via the DataFrame API.
       spark.sql(s"""
-        WITH _joined AS (
-          SELECT k.*,
-                 a.$keyCol AS ${prefix}_matched_key,
-                 a.event_time AS ${prefix}agg_event_time,
-                 $metricSel,
-                 row_number() OVER (
-                   PARTITION BY k.event_id ORDER BY a.event_time DESC
-                 ) AS _rn
-            FROM $inView k
-            LEFT JOIN $aggTable a
-              ON a.$keyCol = k.$keyCol
-             AND a.event_time <  k.event_hour
-             AND a.event_time >= k.event_hour - INTERVAL '$lookbackH' HOUR
-        )
-        SELECT * EXCEPT (_rn, ${prefix}_matched_key),
-               (${prefix}_matched_key IS NOT NULL) AS ${prefix}agg_hit
-          FROM _joined
-         WHERE _rn = 1
-      """).createOrReplaceTempView(outView)
+        SELECT k.*,
+               $metricSel,
+               a.event_time AS ${prefix}agg_event_time,
+               (a.$keyCol IS NOT NULL) AS ${prefix}agg_hit,
+               row_number() OVER (
+                 PARTITION BY k.event_id ORDER BY a.event_time DESC NULLS LAST
+               ) AS _rn
+          FROM $inView k
+          LEFT JOIN $aggTable a
+            ON a.$keyCol = k.$keyCol
+           AND a.event_time <  k.event_hour
+           AND a.event_time >= k.event_hour - INTERVAL '$lookbackH' HOUR
+      """).where("_rn = 1").drop("_rn").createOrReplaceTempView(outView)
     }
 
     // Chain device -> context: context stage reads the device stage's output.
