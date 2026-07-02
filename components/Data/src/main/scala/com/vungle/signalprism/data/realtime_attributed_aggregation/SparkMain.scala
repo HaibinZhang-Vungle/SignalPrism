@@ -1,6 +1,7 @@
 package com.vungle.signalprism.data.realtime_attributed_aggregation
 
 import com.vungle.lena.{BoilerplateSparkMain, UDFUtil}
+import com.vungle.signalprism.data.agg.KeySpec
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.json4s.{JValue, JObject, JArray, JString, JNull, JNothing}
@@ -58,30 +59,10 @@ object SparkMain extends BoilerplateSparkMain {
     case other            => other.values.toString
   }
 
-  lazy val spec        = parseObj(s"agg_specs/$family.json")
   lazy val metricCat   = parseObj("agg_specs/metric_catalog.json")
-  lazy val primaryKey  = str(obj(spec("primary_key"))("name"))
-  lazy val dropNullSrc = str(spec.getOrElse("drop_null_source", JNull))
-  lazy val dims        = arr(spec("dimensions")).map(obj)
 
-  // normalized, still-nullable stored dimension expression
-  private def dimExpr(d: Map[String, JValue]): String = {
-    val name = str(d("name")); val src = str(d("source_col")); val norm = str(d("norm"))
-    val e = norm match {
-      case _ if src == null       => "CAST(NULL AS STRING)"
-      case "parse_major"          => s"split($src, '\\\\.')[0]"
-      case "coalesce"             => s"coalesce($src, ${str(d("fallback_col"))})"
-      case "normalize" | "bucket" => s"lower(trim($src))"  // bucket: top-N deferred → normalized passthrough
-      case "expr"                 => src
-      case _                      => src
-    }
-    s"$e AS $name"
-  }
-
-  // key concat coalesces every dim to '__unknown__' (contract §2)
-  private def keyConcatArg(d: Map[String, JValue]): String =
-    s"coalesce(CAST(${str(d("name"))} AS STRING), '__unknown__')"
-
+  // dimension + surrogate-key SQL is spec-driven via the shared KeySpec object (contract §2),
+  // so this job and gminor_attributed_join build byte-identical device_dim_id/context_dim_id keys.
   private def computedMetricSelects: Seq[String] = {
     val dist = arr(metricCat("distribution")).map(obj)
       .filter(m => str(m("kind")) == "computed")
@@ -110,10 +91,11 @@ object SparkMain extends BoilerplateSparkMain {
     val s = start.toString("yyyy-MM-dd HH:mm:ss")
     val t = till.toString("yyyy-MM-dd HH:mm:ss")
 
-    val dimStored  = dims.map(dimExpr).mkString(",\n    ")
-    val dimNames   = dims.map(d => str(d("name")))
-    val keyArgs    = dims.map(keyConcatArg).mkString(", ")
-    val dropClause = if (dropNullSrc != null) s"AND $dropNullSrc IS NOT NULL" else ""
+    val dimStored     = KeySpec.dimProjections(family).mkString(",\n    ")
+    val dimNames      = KeySpec.dimNames(family)
+    val surrogateExpr = KeySpec.surrogateExpr(family)
+    val dropNullSrc   = KeySpec.dropNullSource(family)
+    val dropClause    = if (dropNullSrc != null) s"AND $dropNullSrc IS NOT NULL" else ""
 
     // Single scan: normalized dims + hour bucket alongside the raw metric base columns (`*`),
     // so dims and metric sources coexist for the outer GROUP BY.
@@ -137,8 +119,8 @@ object SparkMain extends BoilerplateSparkMain {
         SELECT
           event_time,
           date_format(event_time, 'yyyy-MM-dd-HH') AS ingest_time,
-          substr(sha2(concat_ws('|', $keyArgs), 256), 1, 2) AS hashid,
-          sha2(concat_ws('|', $keyArgs), 256) AS $primaryKey,
+          substr($surrogateExpr, 1, 2) AS hashid,
+          $surrogateExpr AS ${KeySpec.primaryKeyName(family)},
           ${dimNames.mkString(",\n          ")},
           $metricSel,
           count(*) AS source_event_count,
