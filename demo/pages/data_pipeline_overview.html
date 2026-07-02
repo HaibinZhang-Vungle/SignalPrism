@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" data-palette="#3169d8,#b77700,#0c9488,#c54a4a">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SignalPrism — Data Pipeline Work to Date</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface-2: #f0f4f8;
+      --ink: #182536;
+      --muted: #5e6b7a;
+      --line: #d9e0e8;
+      --blue: #3169d8;
+      --teal: #0c9488;
+      --green: #1d8a55;
+      --amber: #b77700;
+      --red: #c54a4a;
+      --violet: #7657d8;
+      --blue-ink: #24509f;
+      --teal-ink: #0a6f66;
+      --amber-ink: #855800;
+      --red-ink: #9a3838;
+      --cyan-bg: #e8f7f6;
+      --blue-bg: #ebf2ff;
+      --amber-bg: #fff7e8;
+      --green-bg: #eaf7ef;
+      --violet-bg: #f1edff;
+      --red-bg: #fff0f0;
+      --mono: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+      --shadow: 0 18px 46px rgba(24, 37, 54, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.48;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* topbar */
+    .topbar { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(217, 224, 232, 0.92);
+      background: rgba(246, 247, 251, 0.92); backdrop-filter: blur(12px); }
+    .topbar-inner { max-width: 1240px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 18px; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 240px; font-weight: 780; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 8px;
+      background:
+        linear-gradient(110deg, transparent 0 38%, rgba(255, 255, 255, 0.9) 39% 45%, transparent 46%),
+        conic-gradient(from 18deg, #f05d5e, #f2c94c, #27c071, #2ec9e6, #496fd8, #8a63df, #f05d5e);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 10px 22px rgba(49, 105, 216, 0.18); }
+    .nav { margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .nav a { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.62); color: var(--muted); font-size: 13px; font-weight: 680; }
+    .nav a:hover { color: var(--blue); border-color: var(--blue); }
+
+    /* hero */
+    .hero { position: relative; min-height: 460px; display: grid; align-items: end; overflow: hidden;
+      background: #f4f5f7; border-bottom: 1px solid var(--line); }
+    .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .hero::after { content: ""; position: absolute; inset: 0;
+      background:
+        linear-gradient(90deg, rgba(246, 247, 251, 0.94) 0%, rgba(246, 247, 251, 0.72) 34%, rgba(246, 247, 251, 0.18) 70%, rgba(246, 247, 251, 0.08) 100%),
+        linear-gradient(0deg, rgba(246, 247, 251, 0.96) 0%, rgba(246, 247, 251, 0.1) 52%); }
+    .hero-inner { position: relative; z-index: 1; width: min(1240px, 100%); margin: 0 auto; padding: 88px 24px 34px; }
+    .kicker { color: var(--teal); font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 760px; margin-bottom: 14px; color: #102033; font-size: clamp(34px, 5.4vw, 62px); line-height: 0.98; }
+    .hero-copy { max-width: 680px; color: #314254; font-size: 18px; font-weight: 520; }
+    .hero-copy code { font-family: var(--mono); font-size: 15px; background: rgba(255,255,255,0.6); padding: 1px 6px; border-radius: 5px; }
+    .spectrum-rule { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); width: min(680px, 100%);
+      height: 8px; margin-top: 22px; border-radius: 999px; overflow: hidden; box-shadow: 0 12px 28px rgba(24, 37, 54, 0.12); }
+    .spectrum-rule i:nth-child(1) { background: #ef5559; }
+    .spectrum-rule i:nth-child(2) { background: #f2994a; }
+    .spectrum-rule i:nth-child(3) { background: #f2c94c; }
+    .spectrum-rule i:nth-child(4) { background: #27ae60; }
+    .spectrum-rule i:nth-child(5) { background: #2dcae4; }
+    .spectrum-rule i:nth-child(6) { background: #3169d8; }
+    .spectrum-rule i:nth-child(7) { background: #8a63df; }
+
+    main { max-width: 1240px; margin: 0 auto; padding: 26px 24px 52px; display: grid; gap: 22px; }
+    section { scroll-margin-top: 82px; }
+
+    /* summary strip */
+    .summary-strip { display: grid; grid-template-columns: 1.22fr repeat(3, minmax(0, 0.72fr)); gap: 12px; margin-top: -50px; position: relative; z-index: 2; }
+    .summary-card, .panel, .metric, .note { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: 0 10px 24px rgba(24, 37, 54, 0.06); }
+    .summary-card { padding: 18px; min-height: 118px; }
+    .summary-card strong { display: block; margin-bottom: 6px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .summary-card b { display: block; color: var(--ink); font-size: 30px; line-height: 1.05; }
+    .summary-card p { margin: 8px 0 0; color: var(--muted); font-size: 13.5px; }
+
+    /* panels */
+    .panel { padding: 22px; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .panel-head h2 { margin-bottom: 6px; font-size: 23px; }
+    .panel-head p { max-width: 820px; margin: 0; color: var(--muted); }
+    .tag { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 999px; padding: 7px 10px; background: var(--surface-2); color: var(--muted); font-size: 12px; font-weight: 750; }
+
+    /* architecture stages */
+    .architecture { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+    .stage { position: relative; padding: 14px; min-height: 172px; display: flex; flex-direction: column; gap: 9px;
+      border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .stage:not(:last-child)::after { content: "\2192"; position: absolute; right: -12px; top: 26px; width: 12px; color: var(--muted); font-weight: 800; }
+    .stage-index { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; }
+    .stage:nth-child(1) .stage-index { background: var(--violet); }
+    .stage:nth-child(2) .stage-index { background: var(--amber); }
+    .stage:nth-child(3) .stage-index { background: var(--blue); }
+    .stage:nth-child(4) .stage-index { background: var(--teal); }
+    .stage:nth-child(5) .stage-index { background: var(--green); }
+    .stage h3 { margin: 0; font-size: 15px; line-height: 1.25; }
+    .stage p { margin: 0; color: var(--muted); font-size: 12.5px; }
+    .stage code { font-family: var(--mono); font-size: 11px; color: var(--blue-ink); }
+
+    .join-note { margin-top: 14px; }
+
+    .note { padding: 14px; background: var(--surface-2); }
+    .note h3 { margin-bottom: 6px; font-size: 15px; }
+    .note p { margin-bottom: 0; color: var(--muted); font-size: 13px; }
+    .note code { font-family: var(--mono); font-size: 11px; color: var(--blue-ink); }
+
+    /* metric grid */
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .metric { padding: 15px; }
+    .metric strong { display: block; margin-bottom: 6px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .metric b { display: block; color: var(--ink); font-size: 26px; line-height: 1.1; }
+    .metric p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .metric:nth-child(1) { background: var(--blue-bg); }
+    .metric:nth-child(2) { background: var(--cyan-bg); }
+    .metric:nth-child(3) { background: var(--amber-bg); }
+    .metric:nth-child(4) { background: var(--violet-bg); }
+
+    /* tables */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    table { width: 100%; min-width: 720px; border-collapse: collapse; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--surface-2); color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+    td { color: var(--muted); font-size: 13.5px; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    tr:last-child td { border-bottom: 0; }
+    td strong { color: var(--ink); font-weight: 760; }
+    .row-highlight td { background: #f7fbff; }
+    .mono { font-family: var(--mono); font-size: 12px; color: var(--blue-ink); }
+    .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+    .pill.b { background: var(--blue-bg); color: var(--blue-ink); }
+    .pill.a { background: var(--amber-bg); color: var(--amber-ink); }
+    .pill.t { background: var(--cyan-bg); color: var(--teal-ink); }
+    .pill.g { background: var(--surface-2); color: var(--muted); }
+
+    /* two-col chart layouts */
+    .two-col { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 18px; align-items: start; }
+    .chart-card { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 16px 18px; }
+    .chart-card h3 { margin: 0 0 3px; font-size: 15px; }
+    .chart-card .csub { font-size: 12.5px; color: var(--muted); margin-bottom: 12px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .legend .sw { display: inline-flex; align-items: center; gap: 6px; }
+    .legend .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .barrow:hover .bar-hit { fill: rgba(24,37,54,.04); }
+
+    /* findings */
+    .finding { border-left: 3px solid var(--blue); background: var(--surface-2); border-radius: 0 8px 8px 0; padding: 11px 14px; margin-bottom: 10px; }
+    .finding .fl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--blue-ink); margin-bottom: 4px; }
+    .finding .ft { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .finding.amber { border-left-color: var(--amber); } .finding.amber .fl { color: var(--amber-ink); }
+    .finding.teal { border-left-color: var(--teal); } .finding.teal .fl { color: var(--teal-ink); }
+    .finding.red { border-left-color: var(--red); } .finding.red .fl { color: var(--red-ink); }
+    .finding strong { color: var(--ink); }
+    .finding code { font-family: var(--mono); font-size: 11px; color: var(--blue-ink); }
+
+    /* pain points */
+    .pain { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; margin-bottom: 12px; }
+    .pain-head { display: flex; align-items: center; gap: 11px; padding: 12px 16px; background: var(--red-bg); border-bottom: 1px solid var(--line); }
+    .pain.sec .pain-head { background: var(--amber-bg); }
+    .pain-num { flex: none; width: 24px; height: 24px; border-radius: 7px; background: var(--red); color: #fff; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .pain.sec .pain-num { background: var(--amber); }
+    .pain-title { font-size: 15px; font-weight: 760; }
+    .pain-freq { margin-left: auto; }
+    .pain-body { display: grid; grid-template-columns: 1fr 1fr; }
+    .pain-cell { padding: 14px 16px; font-size: 13px; line-height: 1.55; color: var(--muted); }
+    .pain-cell + .pain-cell { border-left: 1px solid var(--line); }
+    .pain-cell .lbl { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+    .pain-cell.prob .lbl { color: var(--red-ink); }
+    .pain-cell.fix .lbl { color: var(--teal-ink); }
+    .pain-cell strong { color: var(--ink); }
+    .pain-cell code { font-family: var(--mono); font-size: 11.5px; color: var(--blue-ink); }
+    .pain-cell ul { margin: 5px 0 0; padding-left: 16px; }
+    .pain-cell li { margin-bottom: 4px; }
+
+    .footer { padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer code { font-family: var(--mono); font-size: 11px; }
+    .footer-links { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .footer-links a { color: var(--blue-ink); font-weight: 650; }
+    .footer-links a:hover { text-decoration: underline; }
+    .status-ok { color: var(--teal-ink); font-weight: 700; }
+
+    @media (max-width: 1100px) {
+      .summary-strip, .architecture, .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stage:not(:last-child)::after { content: ""; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .topbar-inner { align-items: flex-start; flex-direction: column; padding: 12px 16px; }
+      .nav { margin-left: 0; justify-content: flex-start; }
+      .hero-inner { padding: 78px 16px 28px; }
+      main { padding: 20px 16px 42px; }
+      .summary-strip, .architecture, .metric-grid { grid-template-columns: 1fr; }
+      .panel { padding: 18px; }
+      .panel-head { display: block; }
+      .tag { display: inline-block; margin-top: 10px; }
+      .pain-body { grid-template-columns: 1fr; }
+      .pain-cell + .pain-cell { border-left: 0; border-top: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body id="top">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top" aria-label="SignalPrism data pipeline">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>SignalPrism · Data Pipeline</span>
+      </a>
+      <nav class="nav" aria-label="Page sections">
+        <a href="#jobs">Pipeline</a>
+        <a href="#tables">Tables</a>
+        <a href="#findings">Findings</a>
+        <a href="#kvdb">KVDB</a>
+        <a href="#next">Round 2</a>
+        <a href="#pain">Pain points</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <img src="assets/signalprism_prism_spectrum.png" alt="White signal beam entering a glass prism and exiting as separated color spectra" />
+    <div class="hero-inner">
+      <p class="kicker">Realtime Attributed Wide Table</p>
+      <h1>Data Pipeline — Work to Date</h1>
+      <p class="hero-copy">
+        A schema-driven batch pipeline that turns the raw coba2 Kafka landings into a directly consumable,
+        impression-grain wide table (<code>ml_shadow.realtime_attributed_event_wide</code>) — the golden dataset
+        the realtime attribution POC is graded against, and the feature source for the MLOps workbench.
+      </p>
+      <div class="spectrum-rule" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+  </section>
+
+  <main>
+    <!-- ============ SUMMARY / KPIs ============ -->
+    <section class="summary-strip" aria-label="Pipeline summary">
+      <div class="summary-card">
+        <strong>What we built</strong>
+        <b>4 Spark jobs</b>
+        <p>lena-style Scala ingestion + join jobs, each extending <code style="font-family:var(--mono);font-size:12px">BoilerplateSparkMain</code>.</p>
+      </div>
+      <div class="summary-card">
+        <strong>Schema fields</strong>
+        <b>211</b>
+        <p>Each carries the capability metadata the scanner ingests.</p>
+      </div>
+      <div class="summary-card">
+        <strong>DDL targets</strong>
+        <b>5</b>
+        <p>2 staging · 1 wide · 2 hourly dimension rollups.</p>
+      </div>
+      <div class="summary-card">
+        <strong>Target segment</strong>
+        <b>3.0M imps</b>
+        <p>Analyzed in a single 4h sample (<code style="font-family:var(--mono);font-size:12px">dt=2026-06-28</code>).</p>
+      </div>
+    </section>
+
+    <!-- ============ PIPELINE ============ -->
+    <section class="panel" id="jobs">
+      <div class="panel-head">
+        <div>
+          <h2>The pipeline — coba2 landings → wide table</h2>
+          <p>Explode Jaeger placement results to one row per (ad_event_id, imp_id), then LEFT JOIN the served/winning HB bid. The same event-id hash-sample gate runs on both sides so they cover one event-id cohort. Codegen <span class="status-ok">✓ artifacts consistent with schema (validate.py exit 0)</span>.</p>
+        </div>
+        <span class="tag">Signal path</span>
+      </div>
+
+      <div class="architecture">
+        <article class="stage">
+          <span class="stage-index">0</span>
+          <h3>coba2 raw landings</h3>
+          <p><code>coba2.ex_jaeger_transaction</code> + <code>coba2.hb_transactions</code> — full-payload S3, no Kafka consumer.</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">1</span>
+          <h3>jaeger_transaction_ingestion</h3>
+          <p>Explode <code>placement_serve_results[]</code>, project all <code>jgr_*</code> → staging.</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">2</span>
+          <h3>hb_transactions_ingestion</h3>
+          <p>Keep served/winning bid (row_number), project all <code>hbn_*</code> → staging.</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">3</span>
+          <h3>realtime_attributed_wide</h3>
+          <p>LEFT JOIN staging on <code>(event_id, imp_id)</code> → the golden wide table.</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">4</span>
+          <h3>hourly rollups</h3>
+          <p>Roll device-level &amp; non-device context dimension families by hour.</p>
+        </article>
+      </div>
+
+      <article class="note join-note">
+        <h3>Why <code>hbn_*</code> null is a signal, not missing data</h3>
+        <p>The wide table is built from the served/attempted impression grain; the HB bid is joined LEFT. A null <code>hbn_*</code> means "not HB/S2S" — a meaningful category, not a data gap. Overlapping concepts are deduped to a single authoritative source; the dropped copy is not carried as a column.</p>
+      </article>
+    </section>
+
+    <!-- ============ TABLES ============ -->
+    <section class="panel" id="tables">
+      <div class="panel-head">
+        <div>
+          <h2>Tables we materialized</h2>
+          <p>All under <code style="font-family:var(--mono)">ml_shadow</code>. Resource artifacts (columns / col_maps / SQL templates) are generated from the schema md — the single source of truth — and CI-linted.</p>
+        </div>
+        <span class="tag">ml_shadow</span>
+      </div>
+      <div class="table-wrap" role="region" aria-label="Materialized tables" tabindex="0">
+        <table>
+          <thead><tr><th>Table</th><th>Produced by</th><th>Grain</th><th>Prefix / cols</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">jaeger_transaction_wide_staging</td><td><span class="pill a">Job 1</span></td><td>(ad_event_id, imp_id)</td><td class="mono">jgr_*</td><td>Served / attempted impression, exploded</td></tr>
+            <tr><td class="mono">hb_transactions_wide_staging</td><td><span class="pill b">Job 2</span></td><td>(event_id, imp_id)</td><td class="mono">hbn_*</td><td>Winning HB / S2S bid, deduped</td></tr>
+            <tr class="row-highlight"><td class="mono">realtime_attributed_event_wide</td><td><span class="pill t">Job 3</span></td><td>(ad_event_id, imp_id)</td><td><strong>211</strong></td><td><strong>Golden wide table</strong> — POC grade + ML source</td></tr>
+            <tr><td class="mono">realtime_attributed_device_level_hly</td><td><span class="pill t">Job 4</span></td><td>device × hour</td><td class="mono">device_level_v1</td><td>Fixed dimension family rollup</td></tr>
+            <tr><td class="mono">realtime_attributed_non_device_context_hly</td><td><span class="pill t">Job 4</span></td><td>context × hour</td><td class="mono">non_device_context_v1</td><td>Fixed dimension family rollup</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ FINDINGS ============ -->
+    <section class="panel" id="findings">
+      <div class="panel-head">
+        <div>
+          <h2>What the landed data told us — distribution analysis</h2>
+          <p>Target segment <strong>appopen / US / admob / android</strong> (33.8× global MAE on the current model) vs. control cohorts, straight from the wide table.</p>
+        </div>
+        <span class="tag">Phase 1B · Trino</span>
+      </div>
+      <div class="two-col">
+        <div class="chart-card">
+          <h3>Price dispersion — target vs. controls</h3>
+          <div class="csub">Highest-price std &amp; IQR by cohort. Target impressions span a far wider price range than either control.</div>
+          <div class="legend">
+            <span class="sw"><span class="dot" style="background:var(--blue)"></span>std (volatility)</span>
+            <span class="sw"><span class="dot" style="background:var(--amber)"></span>IQR range (p75−p25)</span>
+          </div>
+          <svg viewBox="0 0 460 220" width="100%" role="img" aria-label="Grouped bar chart of std and IQR by cohort">
+            <line x1="120" y1="16" x2="120" y2="188" stroke="var(--line)" stroke-width="1"/>
+            <g font-size="9" fill="var(--muted)" font-family="var(--mono)">
+              <line x1="120" y1="188" x2="452" y2="188" stroke="var(--line)" stroke-width="1"/>
+              <line x1="203" y1="16" x2="203" y2="188" stroke="var(--line)" stroke-width=".5"/>
+              <line x1="286" y1="16" x2="286" y2="188" stroke="var(--line)" stroke-width=".5"/>
+              <line x1="369" y1="16" x2="369" y2="188" stroke="var(--line)" stroke-width=".5"/>
+              <text x="120" y="202" text-anchor="middle">0</text>
+              <text x="203" y="202" text-anchor="middle">20</text>
+              <text x="286" y="202" text-anchor="middle">40</text>
+              <text x="369" y="202" text-anchor="middle">60</text>
+            </g>
+            <g font-size="10.5" fill="var(--ink)">
+              <text x="114" y="42" text-anchor="end" font-weight="700">target</text>
+              <text x="114" y="102" text-anchor="end">ctrl_non_admob</text>
+              <text x="114" y="162" text-anchor="end">ctrl_non_android</text>
+            </g>
+            <g class="barrow">
+              <rect class="bar-hit" x="120" y="24" width="332" height="46" fill="transparent"/>
+              <rect x="120" y="28" width="273.9" height="15" rx="4" fill="var(--blue)"><title>target · std 66.0</title></rect>
+              <text x="399" y="40" font-size="10" font-weight="700" fill="var(--blue-ink)" font-family="var(--mono)">66.0</text>
+              <rect x="120" y="47" width="112.9" height="15" rx="4" fill="var(--amber)"><title>target · IQR 27.2</title></rect>
+              <text x="238" y="59" font-size="10" font-weight="700" fill="var(--amber-ink)" font-family="var(--mono)">27.2</text>
+            </g>
+            <g class="barrow">
+              <rect x="120" y="88" width="210" height="15" rx="4" fill="var(--blue)" opacity=".82"><title>ctrl_non_admob · std 50.6</title></rect>
+              <text x="335" y="100" font-size="10" font-weight="700" fill="var(--blue-ink)" font-family="var(--mono)">50.6</text>
+              <rect x="120" y="107" width="75.1" height="15" rx="4" fill="var(--amber)" opacity=".82"><title>ctrl_non_admob · IQR 18.1</title></rect>
+              <text x="200" y="119" font-size="10" font-weight="700" fill="var(--amber-ink)" font-family="var(--mono)">18.1</text>
+            </g>
+            <g class="barrow">
+              <rect x="120" y="148" width="182.6" height="15" rx="4" fill="var(--blue)" opacity=".64"><title>ctrl_non_android · std 44.0</title></rect>
+              <text x="307" y="160" font-size="10" font-weight="700" fill="var(--blue-ink)" font-family="var(--mono)">44.0</text>
+              <rect x="120" y="167" width="41.1" height="15" rx="4" fill="var(--amber)" opacity=".64"><title>ctrl_non_android · IQR 9.9</title></rect>
+              <text x="166" y="179" font-size="10" font-weight="700" fill="var(--amber-ink)" font-family="var(--mono)">9.9</text>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <div class="finding">
+            <div class="fl">Finding A — distribution shape</div>
+            <div class="ft">Target IQR range <strong>2.7× wider</strong> than ctrl_non_android; std <strong>66 vs 44 (+50%)</strong>. The model fits a single avg ≈ <strong>$31.8</strong> but impressions span <strong>$4–$75+</strong>.</div>
+          </div>
+          <div class="finding amber">
+            <div class="fl">Finding B — percentile problem</div>
+            <div class="ft">Target p90/p50 = <strong>6.0×</strong>. A floor at the 7d avg is simultaneously too high for the $4 tail and too low for the $75 tail.</div>
+          </div>
+          <div class="finding teal">
+            <div class="fl">Finding C — device-tier price structure</div>
+            <div class="ft">Flagship p90 <strong>$97–103</strong> vs budget p90 <strong>$64–70</strong> → <strong>1.47× gap</strong>, stable across every model in a tier. Device tier is most predictive exactly where error is worst.</div>
+          </div>
+          <div class="finding red">
+            <div class="fl">Leakage guard</div>
+            <div class="ft"><code>settlement_price</code>, <code>winning_bid_price</code>, <code>settlement_status</code>, <code>is_realtime</code> — trailing aggregates only, never direct features.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ KVDB ============ -->
+    <section class="panel" id="kvdb">
+      <div class="panel-head">
+        <div>
+          <h2>KVDB sizing — cost of moving the join to the serving layer</h2>
+          <p>Storage, key count &amp; write bandwidth are all <strong>linear in TTL</strong>. The spec fixes TTL at 3h; this is why 7d is out of scope. Basis: <code style="font-family:var(--mono)">hb-transactions</code> (332K/s · 3.08 KB), measured Grafana 2026-07-01.</p>
+        </div>
+        <span class="tag">Full transaction basis</span>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric"><strong>HB txn write rate</strong><b>332K/s</b><p>Closest stream to the KVDB value.</p></div>
+        <div class="metric"><strong>3h storage (current)</strong><b>11.5 TB</b><p>hb-transactions basis, before gate fraction.</p></div>
+        <div class="metric"><strong>Physical write (compacted)</strong><b>~10–70 GB/s</b><p>Must be sharded across many nodes.</p></div>
+        <div class="metric"><strong>7d upper bound</strong><b>1.43 PB</b><p>Ex-Jaeger proxy — why long TTL is out of scope.</p></div>
+      </div>
+
+      <div class="two-col">
+        <div class="chart-card">
+          <h3>Live storage vs. TTL</h3>
+          <div class="csub">RocksDB logical storage (reference/compressed bytes), hb-transactions basis. Log scale — 3h → 7d is a <strong>56×</strong> jump.</div>
+          <div class="legend"><span class="sw"><span class="dot" style="background:var(--teal)"></span>storage (TB, log scale)</span></div>
+          <svg viewBox="0 0 460 210" width="100%" role="img" aria-label="Storage vs TTL bar chart on log scale">
+            <line x1="40" y1="176" x2="452" y2="176" stroke="var(--line)" stroke-width="1"/>
+            <g font-size="9" fill="var(--muted)" font-family="var(--mono)">
+              <line x1="40" y1="150" x2="452" y2="150" stroke="var(--line)" stroke-width=".5"/><text x="36" y="153" text-anchor="end">10 TB</text>
+              <line x1="40" y1="92"  x2="452" y2="92"  stroke="var(--line)" stroke-width=".5"/><text x="36" y="95" text-anchor="end">100 TB</text>
+              <line x1="40" y1="34"  x2="452" y2="34"  stroke="var(--line)" stroke-width=".5"/><text x="36" y="37" text-anchor="end">1 PB</text>
+            </g>
+            <g>
+              <rect x="60"  y="146.5" width="46" height="29.5" rx="4" fill="var(--teal)" opacity=".5"><title>3h · 11.5 TB · 3.59B keys</title></rect>
+              <rect x="128" y="128.5" width="46" height="47.5" rx="4" fill="var(--teal)" opacity=".6"><title>6h · 23.0 TB</title></rect>
+              <rect x="196" y="111.4" width="46" height="64.6" rx="4" fill="var(--teal)" opacity=".68"><title>12h · 45.9 TB</title></rect>
+              <rect x="264" y="94.1"  width="46" height="81.9" rx="4" fill="var(--teal)" opacity=".78"><title>24h · 91.8 TB · 28.7B keys</title></rect>
+              <rect x="332" y="66.5"  width="46" height="109.5" rx="4" fill="var(--teal)" opacity=".88"><title>3d · 275 TB</title></rect>
+              <rect x="400" y="45.1"  width="46" height="130.9" rx="4" fill="var(--teal)"><title>7d · 643 TB · 201B keys</title></rect>
+            </g>
+            <g font-size="9.5" font-weight="700" font-family="var(--mono)" fill="var(--teal-ink)" text-anchor="middle">
+              <text x="83"  y="141">11.5</text><text x="151" y="123">23</text><text x="219" y="106">46</text>
+              <text x="287" y="89">92</text><text x="355" y="61">275</text><text x="423" y="40">643</text>
+            </g>
+            <g font-size="10" fill="var(--ink)" text-anchor="middle">
+              <text x="83" y="192" font-weight="700">3h</text><text x="151" y="192">6h</text><text x="219" y="192">12h</text>
+              <text x="287" y="192">24h</text><text x="355" y="192">3d</text><text x="423" y="192">7d</text>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <div class="table-wrap" role="region" aria-label="KVDB sizing table" tabindex="0">
+            <table style="min-width:0">
+              <thead><tr><th>TTL</th><th class="num">Live keys</th><th class="num">Storage</th></tr></thead>
+              <tbody>
+                <tr class="row-highlight"><td><strong>3h — current</strong></td><td class="num">3.59 B</td><td class="num">≈ 11.5 TB</td></tr>
+                <tr><td>24h</td><td class="num">28.7 B</td><td class="num">≈ 91.8 TB</td></tr>
+                <tr><td>3d</td><td class="num">86.1 B</td><td class="num">≈ 275 TB</td></tr>
+                <tr><td>7d — out of scope</td><td class="num">201 B</td><td class="num">≈ 643 TB</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <article class="note" style="margin-top:14px">
+            <h3>Binding constraint is write throughput, not capacity</h3>
+            <p>~1–2.3 GB/s logical writes at 330–415K SET/s, amplified ~10–30× by leveled compaction ⇒ ~10–70 GB/s physical disk. Biggest lever: store a <strong>projection</strong> (join/debug fields, ~hundreds of bytes) instead of the full ~3 KB message → 5–10× reduction.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ROUND 2 ============ -->
+    <section class="panel" id="next">
+      <div class="panel-head">
+        <div>
+          <h2>Round 2 feature candidates — driven by the findings</h2>
+          <p>Each candidate is tied to the query that validated it. Recommended path: prove P1–P3 on the target segment first.</p>
+        </div>
+        <span class="tag">Feature workbench</span>
+      </div>
+      <div class="table-wrap" role="region" aria-label="Round 2 feature candidates" tabindex="0">
+        <table>
+          <thead><tr><th>Priority</th><th>Candidate feature</th><th>Validation source</th><th>Gap filled</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill b">P1</span></td><td class="mono">var_hbedsp_highest_price_{placement_type}_7d</td><td>Q1 · target std 66 ≫ controls; IQR 2.7× wider</td><td>Price volatility / distribution shape</td></tr>
+            <tr><td><span class="pill a">P2</span></td><td class="mono">avg_hbedsp_highest_price_by_device_make_7d</td><td>Q2 · 1.47× flagship-vs-budget mean gap, stable across tier</td><td>Device-tier price level (continuous)</td></tr>
+            <tr><td><span class="pill t">P3</span></td><td class="mono">device_make (bucketed, top-N)</td><td>Q2 · Samsung vs Motorola gap consistent within tier</td><td>Device-tier embedding</td></tr>
+            <tr><td><span class="pill g">P4</span></td><td class="mono">android_osv_major</td><td>Q2 · implied by tier structure (newer OS ≈ premium)</td><td>Device recency proxy</td></tr>
+            <tr><td><span class="pill g">P5</span></td><td class="mono">p75_hbedsp_highest_price_7d</td><td>Q1 · IQR ratio 2.16, strong right skew</td><td>Quantile floor anchor</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ PAIN POINTS ============ -->
+    <section class="panel" id="pain">
+      <div class="panel-head">
+        <div>
+          <h2>Pain points — where the loop still needs a human</h2>
+          <p>The pipeline is schema-driven and CI-linted, but a few steps still break the autonomous loop. Below: the friction, and the fix we'd propose.</p>
+        </div>
+        <span class="tag">Manual steps</span>
+      </div>
+
+      <div class="pain">
+        <div class="pain-head">
+          <span class="pain-num">1</span>
+          <span class="pain-title">Build, rerun &amp; promotion are hand-driven</span>
+          <span class="pain-freq"><span class="pill" style="background:var(--red-bg);color:var(--red-ink)">manual · every code change + handoff</span></span>
+        </div>
+        <div class="pain-body">
+          <div class="pain-cell prob">
+            <span class="lbl">Pain</span>
+            <ul>
+              <li><strong>JAR build loop</strong> — every Scala edit means push → wait for the GitHub Action to build the assembly JAR → then manually resubmit the SparkApplication. The CI round-trip is the slow part of each iteration, and a human has to babysit the trigger and the rerun; the agent can't close the loop on its own.</li>
+              <li><strong>Promotion into lena</strong> — moving the jobs into the lena tree means manually relocating <code>src/main/scala</code> + <code>src/main/resources</code>, switching the package base to <code>com.vungle.lena.&lt;domain&gt;</code>, and confirming boilerplate helper names before <code>sbt compile</code> — an error-prone, one-off rename.</li>
+            </ul>
+          </div>
+          <div class="pain-cell fix">
+            <span class="lbl">Proposed fix</span>
+            <ul>
+              <li><strong>Close the build loop</strong> — grant a GitHub token so the agent triggers the workflow, polls it to green, and resubmits hands-off; <em>or</em> build the JAR locally (<code>sbt assembly</code>) and push straight to the S3 JAR path the SparkApplication reads, skipping CI for dev iterations.</li>
+              <li><strong>Script the promotion</strong> — a single step (package rewrite + path move + helper-name check) so the lena handoff is one command, not a manual port.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="pain sec">
+        <div class="pain-head">
+          <span class="pain-num">2</span>
+          <span class="pain-title">Fields &amp; enums that can't be auto-synced</span>
+          <span class="pain-freq"><span class="pill" style="background:var(--amber-bg);color:var(--amber-ink)">manual · per schema / enum change</span></span>
+        </div>
+        <div class="pain-body">
+          <div class="pain-cell prob">
+            <span class="lbl">Pain</span>
+            <ul>
+              <li><strong>Fields that can't be auto-mapped</strong> — the codegen maps each schema field to a coba2 source leaf, but can't when the source won't resolve. <code>validate.py</code> already flags <code>serve_result.pd_cpx</code>, <code>ad_podding_multiplier</code>, <code>double_verify_fraud_reason</code>, <code>bidrequest_time</code> as <em>source leaf not in the coba YAMLs</em>. Two modes: <strong>name mismatch</strong> (field name ≠ upstream leaf, no exact match) and <strong>upstream null / absent</strong> (the leaf isn't emitted or is all-null, so there's nothing to map).</li>
+              <li><strong>Enum source-of-truth drift</strong> — <code>enum_ref</code> codes live in schema §9 but their real source is upstream <code>EnumeratedList.md</code> (jaeger / hb-notifications). When upstream adds a code, the schema doesn't know — someone has to notice and hand-sync.</li>
+            </ul>
+          </div>
+          <div class="pain-cell fix">
+            <span class="lbl">Proposed fix</span>
+            <ul>
+              <li><strong>Fuzzy alias + nullability flag</strong> — agent proposes a best-guess alias for near-misses, human confirms once, and the pin lands in the <code>col_map</code> so it's stable thereafter; a per-field expected-nullability flag (an <code>hbn_*</code> null is signal; a <code>jgr_*</code> null usually isn't) so validation only escalates the real gaps.</li>
+              <li><strong>Scheduled enum diff</strong> — diff the upstream <code>EnumeratedList.md</code> against schema §9 and open a PR (or flag the agent) when they diverge — same pattern as the existing kafka-enum sync.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>Signal Prism · <code>feat/realtime-attributed-wide-table</code> · Sources: <code>components/Data</code> (jobs · DDL · codegen), <code>kvdb_resource_estimation.md</code>, Phase-1B Trino distribution analysis. All figures from a single 4h sample or measured Grafana rates — directional, not production baselines.</div>
+      <div class="footer-links">
+        <a href="https://forms.gle/EgDegM5QLvBZ8HRa8">Suggest a feature</a>
+        <span style="color:var(--line)">·</span>
+        <a href="https://liftoffio.slack.com/archives/C08UP9HFBFB">Contact</a>
+        <span style="color:var(--line)">·</span>
+        <span>🚀 Liftoff 2026</span>
+        <span style="color:var(--line)">·</span>
+        <span>🤖 AI-generated with Claude Code</span>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
