@@ -111,18 +111,12 @@ object SparkMain extends BoilerplateSparkMain {
           SELECT event_id,
                  $dimProj,
                  ${LABEL_COLS.mkString(", ")}
-            FROM (
-              SELECT event_id, imp_id,
-                     $dimProj,
-                     ${LABEL_COLS.mkString(", ")},
-                     row_number() OVER (
-                       PARTITION BY event_id
-                       ORDER BY (CASE WHEN jgr_no_serv_reason = 0 THEN 0 ELSE 1 END) ASC, imp_id ASC
-                     ) AS _imp_rn
-                FROM $wideTable
-               WHERE source_event_time >= '$s' AND source_event_time < '$t'
-            )
-           WHERE _imp_rn = 1
+            FROM $wideTable
+           WHERE source_event_time >= '$s' AND source_event_time < '$t'
+          QUALIFY row_number() OVER (
+                    PARTITION BY event_id
+                    ORDER BY (CASE WHEN jgr_no_serv_reason = 0 THEN 0 ELSE 1 END) ASC, imp_id ASC
+                  ) = 1
         )
     """).createOrReplaceTempView("_wide_keyed")
 
